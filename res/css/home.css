@@ -1,0 +1,64 @@
+@import url(/res/css/global.css);
+
+.username-title{
+    font-size: 35px;
+    margin-bottom: 20px;
+    margin: 0;
+}
+.search-wrapper{
+    position: relative;
+}
+.search-wrapper .search-icon{
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    background: none;
+    color: var(--register-placeholder-color);
+    cursor: text;
+    border: none;
+}
+.search{
+    width: 100%;
+    padding: 8px;
+    padding-left: 44px;
+    border: 1px ridge #404040;
+    font-size: 22px;
+    border-radius: 15px;
+    background-color: var(--register-inputs-background);
+    color: var(--main-text-color);
+    margin: 15px 0;
+    transition: 0.1s;
+}
+.search::placeholder{
+    color: var(--register-placeholder-color);
+}
+.search:focus{
+    outline: none;
+}
+.users-list{
+    flex: 1;
+    overflow-y: auto;
+    list-style: none;
+    padding-right: 5px;
+    max-height: 445px;
+}
+@media (max-width: 600px){
+    .username-title{
+        font-size: 26px;
+    }
+    .search-wrapper .search-icon{
+        left: 10px;
+        font-size: 18px;
+    }
+    .search{
+        padding: 8px;
+        padding-left: 34px;
+        font-size: 18px;
+        border-radius: 12px;
+    }
+    .users-list{
+        max-height: 350px;
+    }
+}

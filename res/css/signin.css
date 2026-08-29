@@ -1,0 +1,117 @@
+@import url(/res/css/global.css);
+body{
+    display: flex;
+    justify-content: center;
+}
+.signin-container{
+    width: 90%;
+    max-width: 420px;
+    color: var(--main-text-color);
+}
+.signin-container .logo{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.signin-container .logo img{
+    width: 80%;
+    max-width: 400px;
+}
+.signin-container h1{
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0;
+}
+.signin-container p{
+    font-size: var(--register-inputs-font-size);
+    padding: 0;
+    margin: 10px 0 15px 0;
+}
+.signin-container p a{
+    color: #3b6ef9;
+    text-decoration: none;
+}
+.s-h{
+    font-size: 20px;
+}
+.btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    font-size: 19px;
+    font-weight: 600;
+    margin: 10px 0;
+    padding: 10px 5px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.1s;
+}
+.btn:hover{
+    transform: scale(1.01);
+}
+.btn.submit{
+    background-color: var(--register-btn-background);
+    color: #1a1a1a;
+    white-space: nowrap;
+    margin-top: 16px;
+}
+.btn.submit:hover{
+    background-color: #c5c094;
+}
+.btn.submit:active{
+    background-color: var(--register-btn-background);
+}
+.btn.submit i{
+    margin-left: 8px;
+}
+.btn.google{
+    background-color: #fff;
+    color: #222222;
+}
+.btn.google:hover{
+    background-color: #ddd;
+}
+.btn.google:active{
+    background-color: #fff;
+}
+.btn.google img{
+    width: 22px;
+    height: 22px;
+    margin-right: 15px;
+}
+
+/* RESPONSIVE PART */
+
+@media (max-width: 600px){
+    .signin-container h1{
+        font-size: 25px;
+    }
+    .signin-container p{
+        margin: 8px 0 12px 0;
+    }
+    .input{
+        padding: 10;
+        margin: 6px 0;
+        border-radius: 10px;
+    }
+    .input.password{
+        padding-right: 34px;
+    }
+    .password-wrapper .s-h{
+        right: 4px;
+        font-size: 17px;
+    }
+    .btn{
+        font-size: 18px;
+        margin: 12px 0;
+        padding: 10px 5px;
+        border-radius: 9px;
+    }
+    .btn.google img{
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+}
