@@ -57,15 +57,15 @@ if(!isset($_SESSION['id'])){
             <h1>Change your password:</h1>
             <form action="change_pass.php" method="post" autocomplete="off">
                 <div class="password-wrapper">
-                    <input type="password" name="old_pass" placeholder="Old password" class="input">
+                    <input type="password" name="old_pass" placeholder="Old password" class="input password">
                     <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="password-wrapper">
-                    <input type="password" name="new_pass1" placeholder="New password" class="input">
+                    <input type="password" name="new_pass1" placeholder="New password" class="input password">
                     <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="password-wrapper">
-                    <input type="password" name="new_pass2" placeholder="Confirm new password" class="input">
+                    <input type="password" name="new_pass2" placeholder="Confirm new password" class="input password">
                     <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <button class="btn apply-pass" type="submit">Apply</button>

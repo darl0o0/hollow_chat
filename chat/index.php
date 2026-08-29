@@ -96,6 +96,8 @@ else{
         </div>
     </div>
     <script>
+
+        // Load chat when the page is loaded
         async function chat(){
             var res = await fetch('get_msg.php', {
                 method: "POST",
@@ -108,6 +110,8 @@ else{
             document.querySelector('.inner-field').innerHTML = data;
             field.scrollTop = field.scrollHeight;
         }
+
+        // Mark the last message as read when the page is loaded
         function markChatAsRead(activeUserId){
             socket.emit('mark_as_read', {
                 senderId: activeUserId,
@@ -115,6 +119,7 @@ else{
             });
         }
 
+        // When the other user read's the current user's message
         socket.on('message_marked_read', (data) => {
             const activePartnerId = "<?php echo $rec_id; ?>"
             if(data.readBy === activePartnerId){
@@ -124,6 +129,8 @@ else{
                 });
             }
         });
+
+        // When typing
         let isTyping = false;
         const inputEl = document.querySelector('.send-form input');
         inputEl.addEventListener('input', () => {
@@ -145,6 +152,8 @@ else{
                 });
             }
         });
+
+        // When the other user is typing
         socket.on('typing_back', (data) => {
             if(data.typedBy == "<?php echo $rec_id; ?>" && data.typedTo == currentUserId){
                 if(data.isTyping){
@@ -156,19 +165,32 @@ else{
                 }
             }
         })
-        var field = document.querySelector('.field');
+
+        // Send message
         document.querySelector('.send-form').addEventListener('submit', (e)=>{
             if(document.querySelector('.msg-input').value.length != 0){
+
+                //HTTP Request
                 var url = "send.php";
                 var request = new XMLHttpRequest();
                 request.open('POST', url, true);
                 request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
                 request.send(new FormData(e.target));
+
+                // Make the input empty && scroll to the bottom of the field && isTyping = 0
                 document.querySelector('.msg-input').value = null;
                 document.querySelector('.field').scrollTop = document.querySelector('.field').scrollHeight;
+                isTyping = false;
+                socket.emit('typing', {
+                    typedBy: "<?php echo $id; ?>",
+                    typedTo: "<?php echo $rec_id; ?>",
+                    isTyping: 0
+                });
             }
             e.preventDefault();
         })
+
+        // When the page loads
         window.onload = function(){
             chat().then(() => {
                 markChatAsRead("<?php echo $rec_id; ?>")

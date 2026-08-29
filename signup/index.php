@@ -3,12 +3,9 @@
 session_start();
 include("../connection.php");
 include("../functions.php");
-$isError = "none";
-$error = "";
+$script = '';
 
 if(!isset($_SESSION['id'])){
-
-    //Listening to post request
     if($_SERVER['REQUEST_METHOD'] == "POST"){
 
         //Uploading a profile picture
@@ -25,27 +22,30 @@ if(!isset($_SESSION['id'])){
         $bio = $_POST['bio'];
         $private = $_POST['privacy'];
         $img = $raw_img['name'];
-        $date = date('F Y');
 
-        //Checking credentials
-        if(!empty($username) && !empty($email) && !empty($password)){
-            $query1 = "select * from users where username = '$username'";
-            $query2 = "select * from users where email = '$email'";
-            if(mysqli_num_rows(mysqli_query($con, $query1)) == 0 && mysqli_num_rows(mysqli_query($con, $query2)) == 0){
-                if(empty($img)){
-                    $img = "pfp.jpg";
-                }
-                $id = bin2hex(random_bytes(8));
-                $query = "insert into users (id, username, email, password, bio, img, online, private, date) values ('$id', '$username', '$email', '$password', '$bio', '$img', 1, '$private', '$date')";
-                mysqli_query($con, $query);
-                $_SESSION['id'] = $id;
-                header("Location: /");
-                die;
+        $query1 = "select * from users where username = '$username'";
+        $query2 = "select * from users where email = '$email'";
+
+        if(mysqli_num_rows(mysqli_query($con, $query1)) == 0 && mysqli_num_rows(mysqli_query($con, $query2)) == 0){
+
+            if(empty($img)){
+                $img = "pfp.jpg";
             }
-            else{
-                $isError = "flex";
-                $error = "The provided credentials already exist";
-            }
+
+            $id = bin2hex(random_bytes(8));
+            $date = date('F Y');
+            
+
+            //Create the account and log the user in
+            $query = "insert into users (id, username, email, password, bio, img, online, private, date) values ('$id', '$username', '$email', '$password', '$bio', '$img', 1, '$private', '$date')";
+            mysqli_query($con, $query);
+
+            $_SESSION['id'] = $id;
+            header("Location: /");
+            die;
+        }
+        else{
+            $script = 'error("The provided credentials already exist.")';
         }
     }
 }
@@ -71,9 +71,9 @@ else{
         <div class="br"></div>
         <h1>Sign up</h1>
         <p>Or sign in to your account <a href="/signin">here</a></p>
-        <div class="error" style="display: <?php echo $isError ?>">
+        <div class="error" style="display: none">
             <div class="cooldown-circle"></div>
-            <span class="error-text"><?php echo $error ?></span>
+            <span class="error-text"></span>
         </div>
         <form class="signup-form" method="post" enctype="multipart/form-data">
             <div class="form-step step-1 active-step">
@@ -119,7 +119,7 @@ else{
         </form>
     </div>
     <script>
-        var currentStep = 1;
+        //The error function
         function error(textError){
             document.querySelector('.error').style.display = "flex";
             document.querySelector('.error-text').innerHTML = textError;
@@ -128,13 +128,23 @@ else{
                 document.querySelector('.error-text').innerHTML = '';
             }, 5000);
         }
+
+        //Check if the email is valid
+        function isValidEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email.trim());
+        }
+        
+        //Prevent the user from submitting if they're not in the final step of the inscription
+        var currentStep = 1;
         document.querySelector('.signup-form').addEventListener('submit', (e)=>{
             if(currentStep != 2){
                 e.preventDefault();
                 gotoStep(2);
             }
         });
-        //To click on the drag and drop field instead of the file input
+
+        //The upload field functionality
         document.querySelector(".img-input").addEventListener("click", (e)=>{
             if(document.querySelector('.img-input .fa-x') && document.querySelector('.img-input .fa-x').contains(e.target)){
                 document.querySelector(".img-input").innerHTML = "Choose a profile picture<br>(Optional)<br><i class='fa-solid fa-image'></i>";
@@ -147,37 +157,8 @@ else{
         document.querySelector(".pfp").onchange = function (){
             document.querySelector(".img-input").innerHTML = "<i class='fa-solid fa-x'></i><img src='"+URL.createObjectURL(document.querySelector(".pfp").files[0])+"' style='object-fit: cover;width: 100px;height: 100px;'>";
         }
-        //To toggle between show and hide password
-        var isVisisble1 = false;
-        document.querySelector(".s-h-1").onclick = function (){
-            if(isVisisble1){
-                document.querySelector(".pass-1").type = 'password';
-                document.querySelector(".s-h-1").innerHTML = "<i class='fa fa-eye' aria-hidden='true'></i>"
-                isVisisble1 = false;
-            }
-            else{
-                document.querySelector(".pass-1").type = 'text';
-                document.querySelector(".s-h-1").innerHTML = "<i class='fa fa-eye-slash' aria-hidden='true' style='margin-right: -1px'></i>"
-                isVisisble1 = true;
-            }
-        }
-        var isVisisble2 = false;
-        document.querySelector(".s-h-2").onclick = function (){
-            if(isVisisble2){
-                document.querySelector(".pass-2").type = 'password';
-                document.querySelector(".s-h-2").innerHTML = "<i class='fa fa-eye' aria-hidden='true'></i>"
-                isVisisble2 = false;
-            }
-            else{
-                document.querySelector(".pass-2").type = 'text';
-                document.querySelector(".s-h-2").innerHTML = "<i class='fa fa-eye-slash' aria-hidden='true' style='margin-right: -1px'></i>"
-                isVisisble2 = true;
-            }
-        }
-        function isValidEmail(email) {
-            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return regex.test(email.trim());
-        }
+        
+        //Navigate between step 1 and step 2 && checking the user's provided credentials in the front-end
         function gotoStep(step){
             if(step == 2){
                 const username = document.querySelector('.username').value;
@@ -223,6 +204,35 @@ else{
                 currentStep--;
             }
         }
+
+        // Show/hide password
+        var isVisisble1 = false;
+        document.querySelector(".s-h-1").onclick = function (){
+            if(isVisisble1){
+                document.querySelector(".pass-1").type = 'password';
+                document.querySelector(".s-h-1").innerHTML = "<i class='fa fa-eye' aria-hidden='true'></i>"
+                isVisisble1 = false;
+            }
+            else{
+                document.querySelector(".pass-1").type = 'text';
+                document.querySelector(".s-h-1").innerHTML = "<i class='fa fa-eye-slash' aria-hidden='true' style='margin-right: -1px'></i>"
+                isVisisble1 = true;
+            }
+        }
+        var isVisisble2 = false;
+        document.querySelector(".s-h-2").onclick = function (){
+            if(isVisisble2){
+                document.querySelector(".pass-2").type = 'password';
+                document.querySelector(".s-h-2").innerHTML = "<i class='fa fa-eye' aria-hidden='true'></i>"
+                isVisisble2 = false;
+            }
+            else{
+                document.querySelector(".pass-2").type = 'text';
+                document.querySelector(".s-h-2").innerHTML = "<i class='fa fa-eye-slash' aria-hidden='true' style='margin-right: -1px'></i>"
+                isVisisble2 = true;
+            }
+        }
     </script>
+    <script><?php echo $script ?></script>
 </body>
 </html>

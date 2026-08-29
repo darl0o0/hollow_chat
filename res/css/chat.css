@@ -20,6 +20,8 @@
     width: 60px;
     height: 60px;
 }
+
+/* CHAT FIELD AND MESSAGES STYLING */
 .field{
     flex: 1;
     display: flex;
@@ -120,6 +122,8 @@
     height: 100%;
     border-bottom-right-radius: 20px;
 }
+/* MEDIA QUERIES FOR MOBILES AND TABLETS */
+
 @media (max-width: 600px){
     .main.chat{
         grid-template-areas:

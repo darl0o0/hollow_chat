@@ -1,46 +1,44 @@
 <?php
-
 //Initialization
 session_start();
 include("../connection.php");
 include("../functions.php");
-$isError = "none";
-$error = "";
+$script = '';
+
 if(!isset($_SESSION['id'])){
     if($_SERVER['REQUEST_METHOD'] == "POST"){
 
-        //If there's no session data && the server received a post reqeust:
+        // Credentials
         $email = $_POST['email'];
         $password = $_POST['password'];
-        if(!empty($email) && !empty($password)){
+        
+        $query = "select * from users where email = '$email'";
+        $result = mysqli_query($con, $query);
 
-            //If both email and password inputs are non-empty:
-            $query = "select * from users where email = '$email'";
-            $result = mysqli_query($con, $query);
-            if($result){
-                if($result && mysqli_num_rows($result)>0){
+        if($result){
+            if(mysqli_num_rows($result)>0){
 
-                    //If an account with the provided email exists:
-                    $user_data = mysqli_fetch_assoc($result);
-                    if($user_data['password'] === $password){
+                //If an account with the provided email exists:
+                $user_data = mysqli_fetch_assoc($result);
+                if($user_data['password'] === $password){
 
-                        //If the password for the provided email is correct: update the user's online status to online, create a session array (id) with the value of an automatically generated id and redirect the client to the home page.
-                        $query1 = "update users set online = 1 where email = '$email'";
-                        mysqli_query($con, $query1);
-                        $_SESSION['id'] = $user_data['id'];
-                        header("Location: /");
-                        die;
-                    }
-                    else{
-                        $isError = "block";
-                        $error = "Wrong password";
-                    }
+                    //Log the user in
+                    $query1 = "update users set online = 1 where email = '$email'";
+                    mysqli_query($con, $query1);
+                    $_SESSION['id'] = $user_data['id'];
+                    header("Location: /");
+                    die;
                 }
                 else{
-                    $isError = "block";
-                    $error = "The provided credentials do not exist";
+                    $script = 'error("Wrong password.")';
                 }
             }
+            else{
+                $script = 'error("The provided credentials do not exist.")';
+            }
+        }
+        else{
+            $script = 'error("Oops! Something went wrong.")';
         }
     }
 }
@@ -65,8 +63,11 @@ else{
         <div class="br"></div>
         <h1>Sign in</h1>
         <p>Or create an account <a href="/signup">here</a></p>
-        <div class="error" style="display: <?php echo $isError ?>"><?php echo $error ?></div>
-        <form method="post">
+        <div class="error" style="display: none">
+            <div class="cooldown-circle"></div>
+            <span class="error-text"></span>
+        </div>
+        <form method="post" class="signin-form">
             <input type="email" class="input email" name="email" placeholder="Email" autocomplete="off">
             <div class="password-wrapper">
                 <input type="password" class="input password" name="password" placeholder="Password">
@@ -77,15 +78,37 @@ else{
         <button class="btn google"><img src="/res/assets/google.png"></img>Sign in with Google</button>
     </div>
     <script>
-        document.querySelector('.submit').addEventListener('click', (event)=>{
-            // If the inputs are empty
-            if(eval(document.querySelector('.email').value.length*document.querySelector('.password').value.length) == 0){
-                event.preventDefault();
-                document.querySelector('.error').style.display = "block";
-                document.querySelector('.error').innerHTML = "All inputs are required";
-            }
+        //The error function
+        function error(textError){
+            document.querySelector('.error').style.display = "flex";
+            document.querySelector('.error-text').innerHTML = textError;
+            setTimeout(() => {
+                document.querySelector('.error').style.display = "none";
+                document.querySelector('.error-text').innerHTML = '';
+            }, 5000);
+        }
+
+        //Check if the email is valid
+        function isValidEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email.trim());
+        }
+
+        //Checking the user's provided credentials in the front-end
+        document.querySelector('.signin-form').addEventListener('submit', (e)=>{
+                const email = document.querySelector('.email').value;
+                const pass = document.querySelector('.password').value;
+                if(!email || !pass){
+                    e.preventDefault();
+                    error("All inputs are required.");
+                }
+                else if(!isValidEmail(email)){
+                    e.preventDefault();
+                    error("Please enter a valid email.");
+                }
         })
-        //To toggle between show and hide password
+
+        // Show/hide password
         var isVisisble = false;
         document.querySelector(".s-h").onclick = function (){
             if(isVisisble){
@@ -100,5 +123,6 @@ else{
             }
         }
     </script>
+    <script><?php echo $script ?></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 @import url(/res/css/global.css);
+/* PROFILE'S USER DATA STYLING */
 
 .profile .preview{
     padding: 25px 20px;
@@ -55,6 +56,8 @@
     font-weight: light;
     color: #909182;
 }
+/* PROFILE ACTIONS STYLING */
+
 .profile-actions{
     display: grid;
     grid-template-areas: 
@@ -94,6 +97,8 @@
     border: 1px ridge #464646ff;
     white-space: nowrap;
 }
+/* MEDIA QUERIES FOR MOBILES AND TABLETS */
+
 @media (max-width: 600px){
     .main .logo{
         border-right: 1px ridge #464646ff;

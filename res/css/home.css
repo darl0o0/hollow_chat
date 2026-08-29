@@ -5,6 +5,8 @@
     margin-bottom: 20px;
     margin: 0;
 }
+/* SEARCH BAR AND USERS LIST STYLING */
+
 .search-wrapper{
     position: relative;
 }
@@ -44,6 +46,8 @@
     padding-right: 5px;
     max-height: 445px;
 }
+/* MEDIA QUERIES FOR MOBILES AND TABLETS */
+
 @media (max-width: 600px){
     .username-title{
         font-size: 26px;

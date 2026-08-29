@@ -1,4 +1,5 @@
 <?php
+//Initialization
 include("register/index.php");
 $list_of_users = "";
 if(isset($_SESSION['id'])){
@@ -8,6 +9,7 @@ if(isset($_SESSION['id'])){
     $num_of_users = mysqli_num_rows(mysqli_query($con, $query1));
     $query = "select * from users where not (id = '$id')";
 
+    // List the users
     for($i = 0; $i < $num_of_users-1 ; $i++){
 
         $result = mysqli_fetch_all(mysqli_query($con, $query));
@@ -29,7 +31,7 @@ if(isset($_SESSION['id'])){
     }
 }
 else{
-    header("Location: ./signin");
+    header("Location: /signin");
 }
 ?>
 <!DOCTYPE html>
@@ -40,16 +42,6 @@ else{
     <link rel="shortcut icon" href="/res/assets/logo/hollow_icon_light.png" type="image/x-icon">
     <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/res/css/home.css">
-<script>
-    // Listen for real-time presence changes broadcasted by server.js
-    socket.on('user_status_change', (data) => {
-        const statusDot = document.querySelector(`.u-${data.userId} .online-status`);
-        
-        if (statusDot) {
-            statusDot.style.visibility = data.isOnline ? "visible" : "hidden";
-        }
-    });
-</script>
 </head>
 <body>
     <div class="main">
@@ -65,5 +57,15 @@ else{
             <div class="users-list"><?php echo $list_of_users?></div>
         </div>
     </div>
+    <script>
+        // Listen for real-time presence changes broadcasted by server.js
+        socket.on('user_status_change', (data) => {
+            const statusDot = document.querySelector(`.u-${data.userId} .online-status`);
+            
+            if (statusDot) {
+                statusDot.style.visibility = data.isOnline ? "visible" : "hidden";
+            }
+        });
+    </script>
 </body>
 </html>

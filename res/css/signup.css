@@ -3,6 +3,8 @@ body{
     display: flex;
     justify-content: center;
 }
+/* SIGNUP CONTAINER STYLING */
+
 .signup-container{
     width: 90%;
     max-width: 420px;
@@ -37,48 +39,11 @@ body{
 .active-step{
     display: inline;
 }
-.input{
-    margin: 6px 0;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid #333333;
-    width: 100%;
-    font-size: var(--register-inputs-font-size);
-    background-color: var(--register-inputs-background);
-    color: var(--main-text-color);
-    transition: 0.1s;
-}
-.input::placeholder{
-    color: var(--register-placeholder-color);
-}
-.input:focus{
-    outline: none;
-    border-color: #b2ad7f;
-}
 .passwords-container{
     display: grid;
     grid-template-columns: auto auto;
     gap: 10px;
     margin: 10px 0 20px 0;
-}
-.input.password{
-    padding-right: 40px;
-}
-.password-wrapper{
-    position: relative;
-    width: 100%;
-}
-.password-wrapper .s-h{
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 20px;
-    background: none;
-    color: var(--register-placeholder-color);
-    border: none;
-    cursor: pointer;
-    padding: 6px;
 }
 .bio-pfp-wrapper{
     display: grid;
@@ -149,21 +114,9 @@ body{
     color: #1a1a1a;
     white-space: nowrap;
 }
-.btn.confirm:hover{
-    background-color: #c5c094;
-}
-.btn.confirm:active{
-    background-color: var(--register-btn-background);
-}
 .btn.google{
     background-color: #fff;
     color: #222222;
-}
-.btn.google:hover{
-    background-color: #ddd;
-}
-.btn.google:active{
-    background-color: #fff;
 }
 .btn.google img{
     width: 22px;
@@ -174,11 +127,8 @@ body{
     background-color: #ccc;
     color: #222222;
 }
-.btn.back:hover{
-    background-color: #ddd;
-}
+/* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
-/* RESPONSIVE PART */
 
 @media (max-width: 600px){
     .signup-container h1{

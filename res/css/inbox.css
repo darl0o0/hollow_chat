@@ -60,6 +60,7 @@
     color: #111033;
     background: #eeefcc;
 }
+/* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
 @media (max-width: 600px){
     .btn{
