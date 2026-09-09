@@ -20,12 +20,12 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
 
-  // 1. MODIFIED: User joins a room named after their userId
+  // 1. User joins a room named after their userId
   socket.on('register_user', async (userId) => {
       if (!userId) return;
 
       socket.userId = userId;
-      socket.join(userId); // <--- Join room for multi-tab support
+      socket.join(userId); // Join room for multi-tab support
 
       await db.query('UPDATE users SET online = 1 WHERE id = ?', [userId]);
 
@@ -33,9 +33,16 @@ io.on('connection', (socket) => {
       io.emit('user_status_change', { userId: userId, isOnline: 1 });
   });
 
-  // 2. MODIFIED: Typing indicator sent directly to the recipient's room
+  // 2. Typing indicator sent directly to the recipient's room
   socket.on('typing', (data) => {
     const { typedBy, typedTo, isTyping } = data;
+
+    // Track active typing target on this socket instance
+    if (Number(isTyping) === 1) {
+      socket.activeTypingTo = typedTo;
+    } else {
+      delete socket.activeTypingTo;
+    }
     
     // Sends to all tabs/devices of typedTo
     io.to(typedTo).emit('typing_back', {
@@ -45,7 +52,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 3. MODIFIED: Read receipts sent directly to the sender's room
+  // 3. Read receipts sent directly to the sender's room
   socket.on('mark_as_read', async (data) => {
     const { senderId, receiverId } = data;
 
@@ -63,9 +70,18 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 4. MODIFIED: Offline status updated only when ALL tabs of this user close
+  // 4. Handle Disconnect (Page Reload / Tab Close)
   socket.on('disconnect', async () => {
       const userId = socket.userId;
+
+      // SAFETY FIX: If this socket was mid-typing when reloaded, reset recipient's typing status immediately
+      if (socket.activeTypingTo) {
+        io.to(socket.activeTypingTo).emit('typing_back', {
+          typedBy: userId,
+          typedTo: socket.activeTypingTo,
+          isTyping: 0
+        });
+      }
 
       if (userId) {
           // Check if user still has other tabs open in their room
@@ -80,7 +96,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// 5. MODIFIED: Emit directly to room IDs instead of checking userSockets object
+// 5. Emit directly to room IDs instead of checking userSockets object
 app.post('/broadcast', (req, res) => {
   const { sid, rid, message, isRead } = req.body;
 

@@ -1,21 +1,13 @@
 <?php
-include("../register/index.php");
-
-$isError = "none";
-$error = "";
-
-if(!isset($_SESSION['id'])){
-    header("Location: ./signin");
-}
+//Initialization
+include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Hollow Chat</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/res/assets/logo/hollow_icon_light.png" type="image/x-icon">
-    <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/res/css/settings.css">
+    <link rel="stylesheet" href="/src/css/settings.css">
+    <script src="/src/js/ui-helpers.js"></script>
 </head>
 <body>
     <div class="main settings">
@@ -24,35 +16,36 @@ if(!isset($_SESSION['id'])){
             <span class="header-title">Settings</span>
             <div class="account section">
                 <div class="title-sep-wrapper">
-                    <span class="section-title">Account settings</span>
-                    <div class="section-sep"></div>
+                    <span class="title">Account settings</span>
+                    <div class="sep"></div>
                 </div>
-                <div class="error" style="display: <?php echo $isError; ?>"><?php echo "$error"; ?></div>
-                <form action="update.php" method="post">
+                <div class="alert" style="display: none">
+                    <div class="cooldown-circle"></div>
+                    <span class="alert-text"></span>
+                </div>
+                <form method="post" class="update-form">
                     <input type="username" class="input username" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15" value="<?php echo $user_data['username'];?>">
                     <input type="email" class="input email" name="email" placeholder="Email" value="<?php echo $user_data['email'];?>">
                     <div class="btn-wrapper">
-                        <button type="submit" class="btn submit">Apply</button>
-                        <button type="button" class="btn change">Change password</button>
+                        <button type="submit" class="btn primary-btn submit">Apply</button>
+                        <button type="button" class="btn secondary-btn change">Change password</button>
                     </div>
                 </form>
-                <form action="delete.php" method="post">
-                    <button type="submit" class="btn delete">Delete account</button>
-                </form>
+                <button class="btn delete">Delete account</button>
             </div>
             <div class="appearance section">
                 <div class="title-sep-wrapper">
-                    <span class="section-title">Appearance settings</span>
-                    <div class="section-sep"></div>
+                    <span class="title">Appearance settings</span>
+                    <div class="sep"></div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="change-section">
+    <div class="change-model model">
         <div class="background"></div>
         <div class="form-container">
             <div class="logo">
-                <img src="/res/assets/logo/light_logo.png">
+                <img src="/src/assets/logo/light_logo.png">
             </div>
             <h1>Change your password:</h1>
             <form action="change_pass.php" method="post" autocomplete="off">
@@ -68,56 +61,121 @@ if(!isset($_SESSION['id'])){
                     <input type="password" name="new_pass2" placeholder="Confirm new password" class="input password">
                     <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
-                <button class="btn apply-pass" type="submit">Apply</button>
-                <button class="btn cancel-pass" type="button">Cancel</button>
+                <button class="btn primary-btn" type="submit">Apply</button>
+                <button class="btn secondary-btn" type="button">Cancel</button>
+            </form>
+        </div>
+    </div>
+    <div class="delete-model model">
+        <div class="background"></div>
+        <div class="form-container">
+            <div class="logo">
+                <img src="/src/assets/logo/light_logo.png">
+            </div>
+            <h1>Delete your account:</h1>
+            <div class="model-alert" style="display: none">
+                <div class="cooldown-circle"></div>
+                <span class="alert-text"></span>
+            </div>
+            <form method="post" autocomplete="off" class="delete-form">
+                <input type="email" class="input delete-email" name="email" placeholder="Email" autocomplete="off">
+                <div class="password-wrapper">
+                    <input type="password" name="password" placeholder="Password" class="input password delete-password">
+                    <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
+                </div>
+                <div class="checkbox">
+                    <input type="checkbox" class="agree" name="agree" required>
+                    <label for="agree">I unserstand that my account will be permanently deleted</label>
+                </div>
+                <button class="btn delete" type="submit"><i class="fa-solid fa-trash"></i>Delete Account</button>
+                <button class="btn secondary-btn" type="button">Cancel</button>
             </form>
         </div>
     </div>
     <script>
 
-        // To toggle between show and hide password
-        var isVisisble = false;
-        document.querySelector(".s-h").onclick = function (){
-            if(isVisisble){
-                document.querySelector(".password").type = 'password';
-                document.querySelector(".s-h").innerHTML = "<i class='fa fa-eye' aria-hidden='true'></i>"
-                isVisisble = false;
-            }
-            else{
-                document.querySelector(".password").type = 'text';
-                document.querySelector(".s-h").innerHTML = "<i class='fa fa-eye-slash' aria-hidden='true' style='margin-right: -1px'></i>"
-                isVisisble = true;
-            }
-        }
+        // Show the on-screen models
         document.querySelector(".change").onclick = function (){
-            document.querySelector(".change-section").style.visibility = "visible";
+            document.querySelector(".change-model").style.visibility = "visible";
             document.querySelector(".main").style.filter = "blur(3px)";
         }
+        document.querySelector(".delete").onclick = function (){
+            document.querySelector(".delete-model").style.visibility = "visible";
+            document.querySelector(".main").style.filter = "blur(3px)";
+        }
+        
+        // Hide the on-screen models
         function hideModel(){
-            document.querySelector(".change-section").style.visibility = "hidden";
+            document.querySelectorAll(".model").forEach(model => {
+                model.style.visibility = "hidden";
+            })
             document.querySelector(".main").style.filter = "none";
         }
-        document.querySelector(".background").onclick = hideModel;
-        document.querySelector(".cancel-pass").onclick = hideModel;
+        document.querySelectorAll(".background").forEach(hideEvent => {
+            hideEvent.onclick = hideModel;
+        });
+        document.querySelectorAll(".model .secondary-btn").forEach(hideEvent => {
+            hideEvent.onclick = hideModel;
+        });
         document.addEventListener('keydown', (e) =>{
             if(e.keyCode === 27){
                 hideModel();
             }
         });
-        document.querySelector(".submit").addEventListener('click', (e)=>{
-            if(eval(document.querySelector(".username").value.length*document.querySelector(".email").value.length) == 0){
-                e.preventDefault();
-                document.querySelector('.error').style.display = "block";
-                document.querySelector('.error').innerHTML = "All inputs are required.";
-            }
-            else{
-                if(document.querySelector(".username").value == "<?php echo $user_data['username'];?>" && document.querySelector(".email").value == "<?php echo $user_data['email'];?>"){
-                    e.preventDefault();
-                    document.querySelector('.error').style.display = "block";
-                    document.querySelector('.error').innerHTML = "Cannot use the current credentials.";
+
+        //Update form
+        document.querySelector(".update-form").addEventListener('submit', async function(e){
+            e.preventDefault();
+            const username = document.querySelector('.username').value;
+            const email = document.querySelector('.email').value;
+            if(username && email){
+                if(username != "<?php echo $user_data['username'];?>" || email != "<?php echo $user_data['email'];?>"){
+                    const formData = new FormData(e.target);
+                    
+                    //HTTP Request
+                    const res = await UI.sendPost('update.php', formData);
+                    const jsonRes = JSON.parse(res);
+                    if(jsonRes.status == 'ok'){
+                        UI.alert(true, jsonRes.message, 3);
+                    }
+                    else if(jsonRes.status == 'error'){
+                        UI.alert(false, jsonRes.message, null);
+                    }
+                }
+                else{
+                    UI.alert(false, "Cannot use the current credentials.", null);
                 }
             }
+            else{
+                UI.alert(false, "All inputs are required.", null);
+            }
         })
+
+        // Delete account form
+        document.querySelector('.delete-form').addEventListener('submit', async function(e){
+            e.preventDefault();
+            const email = document.querySelector('.delete-email').value;
+            const password = document.querySelector('.delete-password').value;
+            if(email && password){
+                const formData = new FormData(e.target);
+                
+                //HTTP Request
+                const res = await UI.sendPost('delete.php', formData);
+                const jsonRes = JSON.parse(res);
+                if(jsonRes.status == 'ok'){
+                    UI.alert(true, jsonRes.message, 4, true);
+                    setTimeout(() => {
+                        window.location.replace('/signin');
+                    }, 4000);
+                }
+                else if(jsonRes.status == 'error'){
+                    UI.alert(false, jsonRes.message, null, true);
+                }
+            }
+            else{
+                UI.alert(false, "All inputs are required.", null, true);
+            }
+        });
     </script>
 </body>
 </html>

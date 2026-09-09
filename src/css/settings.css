@@ -1,0 +1,48 @@
+@import url(/src/css/global.css);
+.settings-action{
+    background-color: rgba(125, 125, 125, 0.15);
+}
+
+.settings{
+    transition: 0.2s;
+}
+
+/* SETTINGS FORM AND BUTTONS */
+
+.preview form{
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+.btn-wrapper{
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+}
+.btn.submit{
+    width: 60%;
+}
+.btn.delete{
+    width: 100%;
+    color: #faf5f0;
+    background-color: #c43c3c;
+    border: none;
+}
+
+/* ON-SCREEN MODEL */
+
+.delete-model .checkbox{
+    margin-top: 10px;
+    max-width: 340px;
+    input{
+        transform: scale(1.4);
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    label{
+        color: var(--main-text-color);
+        font-size: 19px;
+        line-height: 1.5;
+        overflow-wrap: break-word;
+    }
+}

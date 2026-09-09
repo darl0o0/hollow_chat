@@ -1,6 +1,6 @@
 <?php
 //Initialization
-include("../register/index.php");
+include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
 
 $list_of_chats = "";
 $list_of_friends = "";
@@ -10,184 +10,187 @@ $sub_label_style = array(['#a8a8a8', '#d5d6c3'], ['400', 'bolder']);
 $is_unread_msg = '';
 $id = $user_data['id'];
 
-if(isset($_SESSION['id'])){
+//List of conversations
+$user2_chat = "";
+$chats_query = "select * from conversations where (user1 = '$id' or user2 = '$id')";
+$chat_row = mysqli_fetch_all(mysqli_query($con, $chats_query));
+$num_of_chats = mysqli_num_rows(mysqli_query($con, $chats_query));
 
-    //Listing conversations
-    $user2_chat = "";
-    $chats_query = "select * from conversations where (user1 = '$id' or user2 = '$id')";
-    $chat_row = mysqli_fetch_all(mysqli_query($con, $chats_query));
-    $num_of_chats = mysqli_num_rows(mysqli_query($con, $chats_query));
+if($num_of_chats > 0){
 
-    if($num_of_chats > 0){
+    // Listing conversations
+    for($i = 0; $i < $num_of_chats ; $i++){
 
-        // Listing conversations
-        for($i = 0; $i < $num_of_chats ; $i++){
-
-            // Define the other user's id
-            $user2_chat = ($chat_row[$i][0] == $id)? $chat_row[$i][1] : $chat_row[$i][0];
-            $query = "select * from users where id = '$user2_chat'";
-            $chat = mysqli_fetch_all(mysqli_query($con, $query));
-            
-            // Select the last message for the current conversation
-            $query_last_msg = "select * from messages where (sid = '$id' and rid = '$user2_chat') or (sid = '$user2_chat' and rid = '$id') order by created_at desc limit 1";
-
-            // Make last message "You: msg" or "msg"
-            $last_msg = (mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][0] == $id)? "You: ".mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][2] : mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][2];
-
-            $sub_label_color = '';
-            $sub_label_weight = '';
-            if(mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][1] == $id && mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][3] == '0'){
-
-                // Make the last message bold if its not read
-                $sub_label_color = $sub_label_style[0][1];
-                $sub_label_weight = $sub_label_style[1][1];
-                $is_unread_msg = 'visible';
-            }
-            else{
-
-                // Make the last message light if its read
-                $sub_label_color = $sub_label_style[0][0];
-                $sub_label_weight = $sub_label_style[1][0];
-                $is_unread_msg = 'hidden';
-            }
-            $isOnline = $chat[0][6] ? 'visible' : 'hidden';
-            
-            //List conversations
-            $list_of_chats .= "
-            <div class='user-card u-$user2_chat'>
-                <a href='/chat?r=$user2_chat' class='profile-link'></a>
-                    <div class='pfp'>
-                        <img class='pfp-img' src='/res/assets/pfps/".$chat[0][5]."'>
-                        <div class='online-status' style='visibility: $isOnline'></div>
-                    </div>
-                    <div class='label-wrapper'>
-                        <div class='username-label'>".$chat[0][1]."</div>
-                        <span class='sub-label' style='color:$sub_label_color; font-weight: $sub_label_weight'>$last_msg</span>
-                    </div>
-                <div class='btn-wrapper'>
-                <div class='unread-msg' style='visibility: $is_unread_msg'>1</div>
-                <button class='btn'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
-                </div>
-            </div>
-            ";
-        }
-    }
-    else{
-        $list_of_chats = "<span class='nothing-here'>Nothing here.</span>";
-    }
-
-    //Listing friends
-    $user2_friend = "";
-    $friends_query = "select * from friends where (user1 = '$id' or user2 = '$id') and status = 'done'";
-    $friend_row = mysqli_fetch_all(mysqli_query($con, $friends_query));
-
-    //The number to show next to the section's title
-    $num_of_friends = mysqli_num_rows(mysqli_query($con, $friends_query));
-    $friends_num = ($num_of_friends > 0)? (' ('.$num_of_friends.')'): '';
-
-    if($num_of_friends > 0){
-
-        // Listing friends
-        for($i = 0; $i < $num_of_friends ; $i++){
-
-            // Define the other user's id
-            $user2_friend = ($friend_row[$i][0] == $id)? $friend_row[$i][1] : $friend_row[$i][0];
-            $query = "select * from users where id = '$user2_friend'";
-            $friend = mysqli_fetch_all(mysqli_query($con, $query));
-            
-            // Bio and online status
-            $bio = (strlen($friend[0][4])>0)? $friend[0][4] : 'No Bio.';
-            $isOnline = $friend[0][6] ? 'visible' : 'hidden';
-
-            //List friends
-            $list_of_friends .= "
-            <div class='user-card u-$user2_friend'>
-                <a href='/profile?u=$user2_friend' class='profile-link'></a>
-                    <div class='pfp'>
-                        <img class='pfp-img' src='/res/assets/pfps/".$friend[0][5]."'>
-                    </div>
-                    <div class='label-wrapper'>
-                        <div class='username-label'>".$friend[0][1]."</div>
-                        <span class='sub-label'>$bio</span>
-                    </div>
-                <div class='btn-wrapper'>
-                <a href='/chat?r=$user2_friend' class='btn'><i class='fa fa-comment' aria-hidden='true'></i></a>
-                <button class='btn'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
-                </div>
-            </div>
-            ";
-        }
-    }
-    else{
-        $list_of_friends = "<span class='nothing-here'>Nothing here.</span>";
-    }
-
-    //Listing requests
-    $user2_request = "";
-    $requests_query = "select * from friends where user2 = '$id' and status = 'waiting'";
-    $request_row = mysqli_fetch_all(mysqli_query($con, $requests_query));
-
-    
-    //The number to show next to the section's title
-    $num_of_requests = mysqli_num_rows(mysqli_query($con, $requests_query));
-    $requests_num = ($num_of_requests > 0)? (' ('.$num_of_requests.')'): '';
-
-    if($num_of_requests > 0){
+        // Define the other user's id
+        $user2_chat = ($chat_row[$i][0] == $id)? $chat_row[$i][1] : $chat_row[$i][0];
+        $query = "select * from users where id = '$user2_chat'";
+        $chat = mysqli_fetch_all(mysqli_query($con, $query));
         
-        // Listing requests
-        for($i = 0; $i < $num_of_requests ; $i++){
-            
-            // Define the other user's id
-            $user2_request = $request_row[$i][0];
-            $query = "select * from users where id = '$user2_request'";
-            $request = mysqli_fetch_all(mysqli_query($con, $query));
+        // Select the last message for the current conversation
+        $query_last_msg = "select * from messages where (sid = '$id' and rid = '$user2_chat') or (sid = '$user2_chat' and rid = '$id') order by created_at desc limit 1";
 
-            // Bio
-            $bio = (strlen($request[$i][4])>0)? $request[$i][4] : 'No Bio.';
+        // Make last message "You: msg" or "msg"
+        $last_msg = (mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][0] == $id)? "You: ".mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][2] : mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][2];
 
-            //List requests
-            $list_of_requests .= "
-            <div class='user-card u-$user2_request'>
-                <a href='/profile?u=$user2_request' class='profile-link'></a>
+        $sub_label_color = '';
+        $sub_label_weight = '';
+        if(mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][1] == $id && mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0][3] == '0'){
+
+            // Make the last message bold if its not read
+            $sub_label_color = $sub_label_style[0][1];
+            $sub_label_weight = $sub_label_style[1][1];
+            $is_unread_msg = 'visible';
+        }
+        else{
+
+            // Make the last message light if its read
+            $sub_label_color = $sub_label_style[0][0];
+            $sub_label_weight = $sub_label_style[1][0];
+            $is_unread_msg = 'hidden';
+        }
+
+        // If user was deleted
+        if(mysqli_num_rows(mysqli_query($con, $query)) > 0){
+            $isOnline = $chat[0][6] ? 'visible' : 'hidden';
+            $img = $chat[0][5];
+            $username = $chat[0][1];
+        }
+        else{
+            $isOnline = 'hidden';
+            $img = 'pfp.jpg';
+            $username = 'User not found';
+        }
+        
+        //List conversations
+        $list_of_chats .= "
+        <div class='user-card u-$user2_chat'>
+            <a href='/chat?r=$user2_chat' class='profile-link'></a>
                 <div class='pfp'>
-                    <img class='pfp-img' src='/res/assets/pfps/".$request[0][5]."'>
+                    <img class='pfp-img' src='/src/assets/pfps/$img'>
+                    <div class='online-status' style='visibility: $isOnline'></div>
                 </div>
                 <div class='label-wrapper'>
-                    <div class='username-label'>".$request[0][1]."</div>
-                    <span class='sub-label'>$bio</span>
+                    <div class='username-label'>$username</div>
+                    <span class='sub-label' style='color:$sub_label_color; font-weight: $sub_label_weight'>$last_msg</span>
                 </div>
-                <div class='btn-wrapper'>
-                    <form method='post' action='/profile/friend_action.php'>
-                        <input type='hidden' name='user2_id' value='$user2_request'>
-                        <input type='hidden' name='from' value='fr'>
-                        <button name='action' value='2' class='btn'><i class='fa fa-check' aria-hidden='true'></i></button>
-                    </form>
-                    <form method='post' action='/profile/friend_action.php'>
-                        <input type='hidden' name='user2_id' value='$user2_request'>
-                        <input type='hidden' name='from' value='fr'>
-                        <button name='action' value='1' class='btn'><i class='fa fa-times' aria-hidden='true'></i></button>
-                    </form>
-                </div>
+            <div class='btn-wrapper'>
+            <div class='unread-msg' style='visibility: $is_unread_msg'>1</div>
+            <button class='btn'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
             </div>
-            ";
-        }
-    }
-    else{
-        $list_of_requests = "<span class='nothing-here'>Nothing here.</span>";
+        </div>
+        ";
     }
 }
 else{
-    header("Location: /signin");
+    $list_of_chats = "<span class='nothing-here'>Nothing here.</span>";
 }
+
+//List of friends
+$user2_friend = "";
+$friends_query = "select * from friends where (user1 = '$id' or user2 = '$id') and status = 'done'";
+$friend_row = mysqli_fetch_all(mysqli_query($con, $friends_query));
+
+//The number to show next to the section's title
+$num_of_friends = mysqli_num_rows(mysqli_query($con, $friends_query));
+$friends_num = ($num_of_friends > 0)? (' ('.$num_of_friends.')'): '';
+
+if($num_of_friends > 0){
+
+    // Listing friends
+    for($i = 0; $i < $num_of_friends ; $i++){
+
+        // Define the other user's id
+        $user2_friend = ($friend_row[$i][0] == $id)? $friend_row[$i][1] : $friend_row[$i][0];
+        $query = "select * from users where id = '$user2_friend'";
+        $friend = mysqli_fetch_all(mysqli_query($con, $query));
+        
+        // Bio and online status
+        $bio = (strlen($friend[0][4])>0)? $friend[0][4] : 'No Bio.';
+        $isOnline = $friend[0][6] ? 'visible' : 'hidden';
+
+        //List friends
+        $list_of_friends .= "
+        <div class='user-card u-$user2_friend'>
+            <a href='/profile?u=$user2_friend' class='profile-link'></a>
+                <div class='pfp'>
+                    <img class='pfp-img' src='/src/assets/pfps/".$friend[0][5]."'>
+                </div>
+                <div class='label-wrapper'>
+                    <div class='username-label'>".$friend[0][1]."</div>
+                    <span class='sub-label'>$bio</span>
+                </div>
+            <div class='btn-wrapper'>
+            <a href='/chat?r=$user2_friend' class='btn'><i class='fa fa-comment' aria-hidden='true'></i></a>
+            <button class='btn'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
+            </div>
+        </div>
+        ";
+    }
+}
+else{
+    $list_of_friends = "<span class='nothing-here'>Nothing here.</span>";
+}
+
+//List of requests
+$user2_request = "";
+$requests_query = "select * from friends where user2 = '$id' and status = 'waiting'";
+$request_row = mysqli_fetch_all(mysqli_query($con, $requests_query));
+
+
+//The number to show next to the section's title
+$num_of_requests = mysqli_num_rows(mysqli_query($con, $requests_query));
+$requests_num = ($num_of_requests > 0)? (' ('.$num_of_requests.')'): '';
+
+if($num_of_requests > 0){
+    
+    // Listing requests
+    for($i = 0; $i < $num_of_requests ; $i++){
+        
+        // Define the other user's id
+        $user2_request = $request_row[$i][0];
+        $query = "select * from users where id = '$user2_request'";
+        $request = mysqli_fetch_all(mysqli_query($con, $query));
+
+        // Bio
+        $bio = (strlen($request[$i][4])>0)? $request[$i][4] : 'No Bio.';
+
+        //List requests
+        $list_of_requests .= "
+        <div class='user-card u-$user2_request'>
+            <a href='/profile?u=$user2_request' class='profile-link'></a>
+            <div class='pfp'>
+                <img class='pfp-img' src='/src/assets/pfps/".$request[0][5]."'>
+            </div>
+            <div class='label-wrapper'>
+                <div class='username-label'>".$request[0][1]."</div>
+                <span class='sub-label'>$bio</span>
+            </div>
+            <div class='btn-wrapper'>
+                <form method='post' action='/profile/friend_action.php'>
+                    <input type='hidden' name='user2_id' value='$user2_request'>
+                    <input type='hidden' name='from' value='fr'>
+                    <button name='action' value='2' class='btn'><i class='fa fa-check' aria-hidden='true'></i></button>
+                </form>
+                <form method='post' action='/profile/friend_action.php'>
+                    <input type='hidden' name='user2_id' value='$user2_request'>
+                    <input type='hidden' name='from' value='fr'>
+                    <button name='action' value='1' class='btn'><i class='fa fa-times' aria-hidden='true'></i></button>
+                </form>
+            </div>
+        </div>
+        ";
+    }
+}
+else{
+    $list_of_requests = "<span class='nothing-here'>Nothing here.</span>";
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/src/css/inbox.css">
     <title>Hollow Chat</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/res/assets/logo/hollow_icon_light.png" type="image/x-icon">
-    <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/res/css/inbox.css">
 </head>
 <body>
     <div class="main inbox">
@@ -196,8 +199,8 @@ else{
             <span class="header-title">Inbox</span>
             <div class="section chat">
                 <div class="title-sep-wrapper">
-                    <span class="section-title">Messages</span>
-                    <div class="section-sep"></div>
+                    <span class="title">Messages</span>
+                    <div class="sep"></div>
                 </div>
                 <div class="list">
                     <?php echo $list_of_chats ?>
@@ -205,8 +208,8 @@ else{
             </div>
             <div class="section friends">
                 <div class="title-sep-wrapper">
-                    <span class="section-title">Friends<?php echo $friends_num ?></span>
-                    <div class="section-sep"></div>
+                    <span class="title">Friends<?php echo $friends_num ?></span>
+                    <div class="sep"></div>
                 </div>
                 <div class="list">
                     <?php echo $list_of_friends ?>
@@ -214,8 +217,8 @@ else{
             </div>
             <div class="section requests">
                 <div class="title-sep-wrapper">
-                    <span class="section-title">Requests<?php echo $requests_num ?></span>
-                    <div class="section-sep"></div>
+                    <span class="title">Requests<?php echo $requests_num ?></span>
+                    <div class="sep"></div>
                 </div>
                 <div class="list">
                     <?php echo $list_of_requests ?>

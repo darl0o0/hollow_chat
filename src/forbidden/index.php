@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Forbidden Page</title>
-    <link rel="shortcut icon" href="../assets/logo/hollow_icon_light.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/src/assets/logo/hollow_icon_light.png" type="image/x-icon">
     <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..600');
@@ -81,7 +81,7 @@
     <div class="background"></div>
     <div class="container">
         <div class="logo">
-            <img src="../assets/logo/light_logo_forbidden.png">
+            <img src="/src/assets/logo/light_logo_forbidden.png">
         </div>
         <div class="br"></div>
         <h1>Looks like you reached a forbidden page!</h1>

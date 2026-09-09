@@ -1,77 +1,54 @@
 <?php
-include("../register/index.php");
-if(isset($_GET['u'])){
-    $friend_action = '';
-    $action;
-    $user1 = $user_data['id'];
+
+//Initialization
+include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
+$mainDisplay = 'flex';
+$not_found = '';
+$isMyProfile = '';
+
+if(!isset($_GET['u'])){
+    $mainDisplay = 'none';
+    $not_found = 'User not found';
+}
+else{
+
     $user2 = $_GET['u'];
-
-    $profile_id = $_GET['u'];
-    $query = "select * from users where id = '$profile_id'";
-    $result = mysqli_fetch_all(mysqli_query($con, $query));
-
-    $isOnline = $result[0][6]? '#e9e4c8' : 'none';
-    $isOnlineLabel = $result[0][6]? 'Online' : 'Offline';
-    $bio = (strlen($result[0][4])>0)? $result[0][4] : 'No Bio.';
-    $privacy = ($result[0][7] == '0')? 'Public' : 'Private';
-
-    $query1 = "select * from friends where (user1 = '$user1' and user2 = '$user2') or (user1 = '$user2' and user2 = '$user1')";
-    $num = mysqli_num_rows(mysqli_query($con, $query1));
-
-    if($num == 0){
-        $action = 0;
-        $friend_action = '<i class="fa fa-user-plus" aria-hidden="true"></i>Add Friend';
+    $query = "select * from users where id = '$user2'";
+    
+    if(mysqli_num_rows(mysqli_query($con, $query)) == 0){
+        $mainDisplay = 'none';
+        $display1 = 'none';
+        $not_found = 'User not found';
     }
     else{
-        if(mysqli_fetch_all(mysqli_query($con, $query1))[0][2] == 'waiting'){
-            if(mysqli_fetch_all(mysqli_query($con, $query1))[0][1] == $id){
-                $action = 2;
-                $friend_action = '<i class="fa fa-check" aria-hidden="true"></i> Accept Request';
-            }
-            else{
-                $action = 1;
-                $friend_action = '<i class="fa fa-user-times" aria-hidden="true"></i>Cancel Request';
-            }
-        }
-        elseif(mysqli_fetch_all(mysqli_query($con, $query1))[0][2] == 'done'){
-            $action = 1;
-            $friend_action = '<i class="fa fa-user-times" aria-hidden="true"></i>Remove Friend';
-        }
+        $result = mysqli_fetch_all(mysqli_query($con, $query));
+    
+        // Online status, bio and account privacy
+        $isOnlineBackground = $result[0][6]? '#e9e4c8' : 'none';
+        $isOnlineBorder = $result[0][6]? '2px solid #e9e4c8' : '2px ridge #464646';
+        $isOnlineLabel = $result[0][6]? 'Online' : 'Offline';
+        $bio = (strlen($result[0][4])>0)? $result[0][4] : 'No Bio.';
+        $privacy = ($result[0][7] == '0')? 'Public' : 'Private';
     }
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/src/css/profile.css">
     <title>Hollow Chat</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/res/assets/logo/hollow_icon_light.png" type="image/x-icon">
-    <link rel="stylesheet" href="/style.css">
-    <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/res/css/profile.css">
-    <script>
-        socket.on('user_status_change', (data) => {
-            const statusDot = document.querySelector(".is-online");
-            const statusLabel = document.querySelector(".is-online-label");
-            if(data.userId == "<?php echo $profile_id; ?>"){
-                statusDot.style.background = data.isOnline ? "#e9e4c8" : "none";
-                statusLabel.innerHTML = data.isOnline ? "Online" : "Offline";
-            }
-        });
-    </script>
-<style>
-</style>
 </head>
 <body>
     <div class="main profile">
         <?php echo $panel ?>
         <div class="preview">
-            <div class="profile-wrapper">
+            <h1 class="not-found"><?php echo $not_found ?></h1>
+            <div style="display: <?php echo $mainDisplay ?>" class="profile-wrapper">
                 <div class="profile-card">
-                    <img src="/res/assets/pfps/<?php echo $result[0][5] ?>" alt="">
+                    <img src="/src/assets/pfps/<?php echo $result[0][5] ?>" alt="">
                     <span class="username-label"><?php echo $result[0][1] ?></span>
                     <div class="online-status">
-                        <div class="is-online" style="background: <?php echo $isOnline ?>"></div>
+                        <div class="is-online" style="background: <?php echo $isOnlineBackground ?>; border: <?php echo $isOnlineBorder ?>"></div>
                         <span class="is-online-label"><?php echo $isOnlineLabel ?></span>
                     </div>
                 </div>
@@ -90,16 +67,98 @@ if(isset($_GET['u'])){
                     </div>
                 </div>
             </div>
-            <div class="profile-actions">
-                <a href="/chat?r=<?php echo $result[0][0] ?>" class="goto-chat profile-action-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
-                <form action="friend_action.php" method="post">
-                    <input type="hidden" name="user2_id" value="<?php echo $result[0][0] ?>">
-                    <input type="hidden" name="from" value="pr">
-                    <input type="hidden" name="action" value="<?php echo $action ?>">
-                    <button type="submit" class="friend-action profile-action-btn"><?php echo $friend_action ?></button>
-                </form>
-            </div>
+                <div style="display: <?php echo $mainDisplay ?>" class="profile-actions">
+                    <?php
+                    if($_GET['u'] == $id){
+                        echo '
+                            <button class="btn primary-btn share-profile">
+                            <i class="fa-solid fa-share"></i>
+                            Share profile
+                            </button>
+                            <button class="btn secondary-btn"><i class="fa-solid fa-circle-info"></i>About</button>
+                        ';
+                        $isMyProfile = 'rgba(125, 125, 125, 0.15)';
+                    }
+                    else{
+                        echo '
+                            <a href="/chat?r='.$user2.'" class="btn primary-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
+                            <form  
+                            action="friend_action.php" 
+                            method="post" 
+                            class="friend-action">
+                                <input type="hidden" name="user2" value="'. $user2.'">
+                                <input type="hidden" name="action">
+                                <button type="submit" class="btn secondary-btn profile-action-btn"></button>
+                            </form>
+                        ';
+                        $isMyProfile = 'none';
+                    }
+                    ?>
+                </div>
         </div>
     </div>
+    <script>
+        // Listen for real-time presence changes broadcasted by server.js
+        socket.on('user_status_change', (data) => {
+            const statusDot = document.querySelector(".is-online");
+            const statusLabel = document.querySelector(".is-online-label");
+            if(data.userId == "<?php echo $user2; ?>"){
+                statusDot.style.background = data.isOnline ? "#e9e4c8" : "none";
+                statusDot.style.border = data.isOnline ? "2px solid #e9e4c8" : "2px ridge #464646";
+                statusLabel.innerHTML = data.isOnline ? "Online" : "Offline";
+            }
+        });
+
+        // A function that defines the state between two users
+        async function defineState(){
+            const res = await UI.sendPost('define_state.php', {user2: '<?php echo $user2 ?>'});
+            const actionInput = document.querySelector('[name="action"]');
+            actionInput.value = JSON.parse(res)[0];
+            profileActionBtn.innerHTML = JSON.parse(res)[1];
+        }
+
+        // Send strict post request instead of casual request
+        const profileActionBtn = document.querySelector('.profile-action-btn');
+        const friendActionForm = document.querySelector('.friend-action');
+
+        if(friendActionForm){
+            friendActionForm.addEventListener('submit', async function(e){
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const res = await UI.sendPost('friend_action.php', formData);
+                defineState();
+            });
+        }
+
+        // Copy profile link
+        function copyProfileLink(){
+            const profileUrl = window.location.href;
+            navigator.clipboard.writeText(profileUrl).then(() => {
+                const btn = document.querySelector('.share-profile');
+                btn.innerHTML = 'Profile link copied!';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-share"></i>Share profile';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy', err);
+            });
+        }
+
+        const shareProfileBtn = document.querySelector('.share-profile');
+        if(shareProfileBtn)
+        shareProfileBtn.addEventListener('click', ()=>{
+            copyProfileLink();
+        });
+
+        window.onload = async function(){
+            if(friendActionForm)
+            defineState();
+        }
+    </script>
+    <style>
+        .profile-action{
+            background-color: <?php echo $isMyProfile ?>;
+        }
+    </style>
 </body>
 </html>

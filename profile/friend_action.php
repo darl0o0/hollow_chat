@@ -1,11 +1,20 @@
 <?php
+
+//Initialization
 session_start();
-include("../connection.php");
-include("../functions.php");
+include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
+include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 $user_data = check_login($con);
+requireStrictPost();
+
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
     $user1 = $user_data['id'];
-    $user2 = $_POST['user2_id'];
+    $user2 = $_POST['user2'];
+
+    // Execute the action received from the profile page
+    // 0 = send friend request
+    // 1 = cancel or decline request
+    // 2 = accept request
     switch($_POST['action']){
         case "0":
             $query = "insert into friends (user1, user2, status) values ('$user1', '$user2', 'waiting')";
@@ -18,10 +27,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         break;
     }
     mysqli_query($con, $query);
-    if($_POST['from'] == 'pr'){
-        header("Location: ./?u="."$user2");
-    }
-    else{
-        header("Location: ../inbox");
-    }
+
+    // Redirect back to where the action came from
+    // if($_POST['from'] == 'pr'){
+    //     header("Location: /profile?u="."$user2");
+    // }
+    // else{
+    //     header("Location: /inbox");
+    // }
 }

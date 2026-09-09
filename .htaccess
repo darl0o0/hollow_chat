@@ -1,0 +1,6 @@
+RewriteEngine On
+RewriteBase /
+
+# Strip index.php from any directory and redirect to the clean web URL
+RewriteCond %{THE_REQUEST} \s/(.*?)/?index\.php[\s?] [NC]
+RewriteRule ^(.*)index\.php$ /%1/ [R=301,L]
