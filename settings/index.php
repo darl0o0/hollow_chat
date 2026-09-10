@@ -7,7 +7,6 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
 <head>
     <title>Hollow Chat</title>
     <link rel="stylesheet" href="/src/css/settings.css">
-    <script src="/src/js/ui-helpers.js"></script>
 </head>
 <body>
     <div class="main settings">
@@ -27,7 +26,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                     <input type="username" class="input username" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15" value="<?php echo $user_data['username'];?>">
                     <input type="email" class="input email" name="email" placeholder="Email" value="<?php echo $user_data['email'];?>">
                     <div class="btn-wrapper">
-                        <button type="submit" class="btn primary-btn submit">Apply</button>
+                        <button type="submit" class="btn primary-btn submit">Apply<i class="fa-solid fa-check"></i></button>
                         <button type="button" class="btn secondary-btn change">Change password</button>
                     </div>
                 </form>
@@ -61,8 +60,10 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                     <input type="password" name="new_pass2" placeholder="Confirm new password" class="input password">
                     <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
-                <button class="btn primary-btn" type="submit">Apply</button>
-                <button class="btn secondary-btn" type="button">Cancel</button>
+                <div class="btn-wrapper">
+                    <button class="btn primary-btn" type="submit">Apply</button>
+                    <button class="btn secondary-btn" type="button">Cancel</button>
+                </div>
             </form>
         </div>
     </div>
@@ -77,7 +78,8 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                 <div class="cooldown-circle"></div>
                 <span class="alert-text"></span>
             </div>
-            <form method="post" autocomplete="off" class="delete-form">
+            <form method="post" autocomplete="off" class="delete-form"
+            novalidate>
                 <input type="email" class="input delete-email" name="email" placeholder="Email" autocomplete="off">
                 <div class="password-wrapper">
                     <input type="password" name="password" placeholder="Password" class="input password delete-password">
@@ -87,8 +89,10 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                     <input type="checkbox" class="agree" name="agree" required>
                     <label for="agree">I unserstand that my account will be permanently deleted</label>
                 </div>
-                <button class="btn delete" type="submit"><i class="fa-solid fa-trash"></i>Delete Account</button>
-                <button class="btn secondary-btn" type="button">Cancel</button>
+                <div class="btn-wrapper">
+                    <button class="btn delete" type="submit"><i class="fa-solid fa-trash"></i>Delete Account</button>
+                    <button class="btn secondary-btn" type="button">Cancel</button>
+                </div>
             </form>
         </div>
     </div>

@@ -73,9 +73,9 @@ if($num_of_chats > 0){
                     <div class='username-label'>$username</div>
                     <span class='sub-label' style='color:$sub_label_color; font-weight: $sub_label_weight'>$last_msg</span>
                 </div>
-            <div class='btn-wrapper'>
-            <div class='unread-msg' style='visibility: $is_unread_msg'>1</div>
-            <button class='btn'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
+            <div class='btn-wrapper-inbox'>
+                <div class='unread-msg' style='visibility: $is_unread_msg'>1</div>
+                <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
             </div>
         </div>
         ";
@@ -119,9 +119,9 @@ if($num_of_friends > 0){
                     <div class='username-label'>".$friend[0][1]."</div>
                     <span class='sub-label'>$bio</span>
                 </div>
-            <div class='btn-wrapper'>
-            <a href='/chat?r=$user2_friend' class='btn'><i class='fa fa-comment' aria-hidden='true'></i></a>
-            <button class='btn'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
+            <div class='btn-wrapper-inbox'>
+                <a href='/chat?r=$user2_friend' class='btn-inbox'><i class='fa fa-comment' aria-hidden='true'></i></a>
+                <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
             </div>
         </div>
         ";
@@ -165,16 +165,16 @@ if($num_of_requests > 0){
                 <div class='username-label'>".$request[0][1]."</div>
                 <span class='sub-label'>$bio</span>
             </div>
-            <div class='btn-wrapper'>
+            <div class='btn-wrapper-inbox'>
                 <form method='post' action='/profile/friend_action.php'>
                     <input type='hidden' name='user2_id' value='$user2_request'>
                     <input type='hidden' name='from' value='fr'>
-                    <button name='action' value='2' class='btn'><i class='fa fa-check' aria-hidden='true'></i></button>
+                    <button name='action' value='2' class='btn-inbox'><i class='fa fa-check' aria-hidden='true'></i></button>
                 </form>
                 <form method='post' action='/profile/friend_action.php'>
                     <input type='hidden' name='user2_id' value='$user2_request'>
                     <input type='hidden' name='from' value='fr'>
-                    <button name='action' value='1' class='btn'><i class='fa fa-times' aria-hidden='true'></i></button>
+                    <button name='action' value='1' class='btn-inbox'><i class='fa fa-times' aria-hidden='true'></i></button>
                 </form>
             </div>
         </div>

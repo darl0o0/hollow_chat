@@ -4,6 +4,7 @@
     padding: 0;
 }
 .profile-header{
+    display: flex;
     align-items: center;
     cursor: pointer;
     text-decoration: none;
@@ -145,20 +146,6 @@
             border-right: 1px ridge #464646ff;
             img{
                 width: 100%;
-            }
-        }
-        .profile-header{
-            .pfp{
-                img{
-                    width: 55px;
-                    height: 55px;
-                }
-                .online-status{
-                    margin: 0;
-                    width: 22px;
-                    height: 22px;
-                    border: 3px #101010 solid;
-                }
             }
         }
         .desktop-header{

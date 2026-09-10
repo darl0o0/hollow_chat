@@ -37,7 +37,11 @@ function checkHeadersCSRF(){
         exit(json_encode(['status' => 'error', 'message' => 'Direct access forbidden']));
     }
     
-    $clientToken = $headers['X-CSRF-TOKEN'] ?? $_POST['csrf_token'] ?? '';
+    $clientToken = $headers['X-CSRF-TOKEN'] 
+            ?? $headers['x-csrf-token'] 
+            ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
+            ?? $_POST['csrf_token'] 
+            ?? '';
 
     if (empty($clientToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $clientToken)) {
         http_response_code(403);

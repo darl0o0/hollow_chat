@@ -101,6 +101,7 @@ else{
             <div class="register-logo">
                 <img src="/src/assets/logo/light_logo.png">
             </div>
+            <div class="brv"></div>
             <div class="title-or-wrapper">
                 <h1>Sign up</h1>
                 <p>Or sign in to your account <a href="/signin">here</a></p>

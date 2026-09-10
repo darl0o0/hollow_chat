@@ -1,12 +1,12 @@
 :root{
     --main-text-color: #e9e4c8;
-    --register-inputs-font-size: 19px;
+    --main-font-size: 19px;
+    --btn-font-size: 17px;
     --register-inputs-background: #151515;
     --register-placeholder-color: #666666;
     --inputs-btns-border-radius: 14px;
     --register-btn-background: #b2ad7f;
     --main-online-status-color: #fdffe1;
-    --responsive-width: 600px;
 }
 
 /* UNIVERSAL FOR ALL THE PAGES */
@@ -17,8 +17,13 @@
     font-family: "Roboto", sans-serif;
 }
 body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: #0f0f0f;
-    padding: 10px;
+    padding: 30px;
+    margin: 0;
+    height: 100%;
 }
 
 /* ERROR */
@@ -27,10 +32,10 @@ body{
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 14px;
+    padding: 12px;
     margin: 12px 0 8px 0;
     border-radius: var(--inputs-btns-border-radius);
-    font-size: var(--register-inputs-font-size);
+    font-size: var(--main-font-size);
     width: 100%;
     .alert-text{
         max-width: 300px;
@@ -67,6 +72,13 @@ body{
     background-color: #2a2a2a;
     margin: 6px 0 10px 0;
 }
+.brv{
+    display: flex;
+    width: 1px;
+    align-self: stretch;
+    border-right: 1px ridge #464646ff;
+    margin: 0 10px;
+}
 
 /* INPUTS */
 
@@ -76,7 +88,7 @@ body{
     border-radius: var(--inputs-btns-border-radius);
     border: 1px solid #333333;
     width: 100%;
-    font-size: var(--register-inputs-font-size);
+    font-size: var(--main-font-size);
     background-color: var(--register-inputs-background);
     color: var(--main-text-color);
     transition: 0.1s;
@@ -120,7 +132,7 @@ body{
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--register-inputs-font-size);
+    font-size: var(--btn-font-size);
     font-weight: 600;
     border-radius: var(--inputs-btns-border-radius);
     text-decoration: none;
@@ -129,10 +141,8 @@ body{
     transition: 0.1s;
     width: 100%;
     margin-bottom: 15px;
-    padding: 12px;
-    i, img{
-        margin: 0 10px;
-    }
+    padding: 10px;
+    gap: 8px;
     img{
         width: 20px;
         height: 20px;
@@ -168,13 +178,11 @@ body{
         justify-content: center;
         align-items: center;
         width: 100%;
-        gap: 4%;
+        gap: 5px;
         margin-bottom: 20px;
     }
     .register-logo{
-        border-right: 1px ridge #464646ff;
         padding: 0;
-        padding-right: 3%;
         width: min-content;
         height: min-content;
         width: 45%;
@@ -188,12 +196,12 @@ body{
         justify-content: center;
         flex-direction: column;
         h1{
-            font-size: 29px;
+            font-size: 28px;
             font-weight: 700;
             margin: 0;
         }
         p{
-            font-size: 17px;
+            font-size: 16px;
             margin-top: 8px;
             padding: 0;
             white-space: nowrap;
@@ -209,32 +217,35 @@ body{
 
 .main{
     display: grid;
+    align-self: center;
     grid-template-areas: 
         "header preview"
         "menu preview";
-    grid-template-columns: 30vw auto;
+    grid-template-columns: auto minmax(280px, 500px);
     grid-template-rows: auto minmax(0, 1fr) auto;
     color: var(--main-text-color);
     border: 1px ridge #464646ff;
     border-radius: 20px;
-    width: 100%;
+    width: fit-content;
     height: 100%;
     overflow: hidden;
     overflow-y: auto;
+
     /* HOLLOW CHAT LOGO */
 
     .logo{
         display: flex;
         justify-content: center;
-        align-items: center;
-        padding: 15px;
+        padding: 10px;
+        width: 100%;
         border-bottom: 1px ridge #464646ff;
         border-right: 1px ridge #464646ff;
         grid-area: header;
     }
     .logo img{
         width: 100%;
-        max-width: 300px;
+        max-width: 150px;
+        height: auto;
     }
 
     /* ACTION PANEL */
@@ -242,7 +253,7 @@ body{
     .panel{
         display: flex;
         flex-direction: column;
-        padding: 20px 10px 6px 10px;
+        padding: 10px 6px 6px 6px;
         background: #0f0f0f;
         border-right: 1px ridge #464646ff;
         grid-area: menu;
@@ -253,7 +264,7 @@ body{
         }
         .panel-action{
             width: 100%;
-            font-size: 25px;
+            font-size: var(--main-font-size);
             font-weight: 400;
             color: var(--main-text-color);
             padding: 12px;
@@ -270,9 +281,13 @@ body{
                 margin-right: 10px;
             }
             img{
-                width: 42px;
-                height: 42px;
+                object-fit: cover;
+                width: 38px;
+                height: 38px;
                 border-radius: 50%;
+            }
+            .label-wrapper{
+                margin-left: 2px;
             }
         }
         .panel-action:hover{
@@ -287,11 +302,11 @@ body{
             flex-direction: row;
             margin-top: auto;
             border-radius: 15px;
-            font-size: 22px;
+            font-size: var(--main-font-size);
             padding: 10px;
             padding-left: 8px;
             img{
-                margin-right: 10px;
+                margin-right: 8px;
             }
         }
         .goto-profile-mobile{
@@ -310,11 +325,11 @@ body{
         grid-area: preview;
         overflow-y: auto;
         .header-title{
-            font-size: 38px;
+            font-size: 28px;
             margin: 0;
         }
         .section{
-            margin-top: 22px;
+            margin-top: 15px;
             margin-bottom: 5px;
             .title-sep-wrapper{
                 width: 100%;
@@ -322,7 +337,7 @@ body{
                 flex-direction: row;
                 align-items: center;
                 margin-bottom: 14px;
-                font-size: 19px;
+                font-size: 18px;
                 .title{
                     white-space: nowrap;
                     margin-right: 10px;
@@ -342,7 +357,7 @@ body{
     display: flex;
     align-items: center;
     color: var(--main-text-color);
-    padding: 10px;
+    padding: 11px 13px;
     padding-right: 8px;
     position: relative;
     border-radius: var(--inputs-btns-border-radius);
@@ -362,8 +377,8 @@ body{
     align-items: flex-end;
     img{
         object-fit: cover;
-        width: 55px;
-        height: 55px;
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
         border: 1.2px ridge #464646ff;
     }
@@ -373,18 +388,20 @@ body{
         background-color: var(--main-online-status-color);
         border: 4px #101010 solid;
         border-radius: 50%;
-        margin-right: -4px;
+        margin-right: -22px;
         transform: translate(-65%, 10%);
     }
 }
 .label-wrapper{
+    margin-left: 12px;
     .username-label{
-        margin-bottom: 1px;
-        font-size: 25px;
+        font-size: var(--main-font-size);
         white-space: nowrap;
     }
     .sub-label{
-        font-size: 16px;
+        display: flex;
+        margin-top: 3px;
+        font-size: 14px;
         color: #a8a8a8;
         white-space: nowrap;
     }
@@ -394,15 +411,15 @@ body{
 
 .model{
     display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
     width: 100%;
     height: 100%;
     top: 0;
     left: 0;
-    align-items: center;
-    justify-content: center;
-    transition: 0.1s;
     visibility: hidden;
+    transition: 0.1s;
     .background{
         position: absolute;
         width: 100%;
@@ -414,7 +431,7 @@ body{
     }
     .form-container{
         background: #131313;
-        padding: 20px 40px;
+        padding: 20px 40px 10px 40px;
         border-radius: 25px;
         border: 1px ridge #464646ff;
         z-index: 1;
@@ -422,13 +439,13 @@ body{
             border-bottom: 1px ridge #464646ff;
             text-align: center;
             img{
-                width: 320px;
+                width: 260px;
                 margin-bottom: 10px;
             }
         }
         h1{
-            font-size: 25px;
-            margin-right: 25px;
+            font-size: 24px;
+            margin: 16px 0 12px 0;
             color: #fdffe1;
             max-width: 320px;
             overflow-wrap: break-word;
@@ -438,11 +455,8 @@ body{
             display: flex;
             flex-direction: column;
         }
-        .btn{
+        .btn-wrapper{
             margin-top: 20px;
-        }
-        .btn:last-child{
-            margin-top: 15px;
         }
     }
 }
@@ -451,7 +465,8 @@ body{
 
 @media (max-width: 600px){
     :root{
-        --register-inputs-font-size: 18px;
+        --main-font-size: 17px;
+        --btn-font-size: 16px;
         --inputs-btns-border-radius: 13px
     }
     .alert, .model-alert{
@@ -473,10 +488,8 @@ body{
     }
     .btn{
         margin-bottom: 12px;
-        padding: 11px;
-        i, img{
-            margin: 0 9px;
-        }
+        padding: 10px;
+        gap: 9px;
     }
     .register-container{
         max-width: 400px;
@@ -508,10 +521,12 @@ body{
         "menu menu"
         ;
         .logo{
-            padding: 6px;
+            padding: 10px 0;
             border-right: none;
+            max-width: none;
             img{
-                width: 80%;
+                width: 100%;
+                max-width: 220px;
             }
         }
         .panel{
@@ -597,7 +612,6 @@ body{
         }
     }
     .label-wrapper{
-        margin-left: -6px;
         .username-label{
             font-size: 24px;
         }

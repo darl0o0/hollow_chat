@@ -201,7 +201,7 @@ else{
         window.onload = async function(){
 
             // Load chat when the page is loaded
-            const htmlResponse = await sendPost('get_msg.php', {rid: "<?php echo $rec_id ?>"});
+            const htmlResponse = await UI.sendPost('get_msg.php', {rid: "<?php echo $rec_id ?>"});
             document.querySelector('.inner-field').innerHTML = htmlResponse;
             field.scrollTop = field.scrollHeight;
 
