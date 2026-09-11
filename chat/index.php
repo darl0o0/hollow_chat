@@ -14,6 +14,9 @@ else{
     $rec_id = $_GET['r'];
     $query = "select * from users where id = '$rec_id'";
 
+    $query_unread_count = "select * from messages where sid = '$rec_id' and rid = '$id' and isRead = '0'";
+    $unread_count = mysqli_num_rows(mysqli_query($con, $query_unread_count));
+
     $query_chat_exists = "select * from conversations where (user1 = '$id' and user2 = '$rec_id') or (user1 = '$rec_id' and user2 = '$id')";
     
     if(mysqli_num_rows(mysqli_query($con, $query)) == 0){
@@ -81,6 +84,7 @@ else{
             </form>
         </div>
     </div>
+    <?php echo $requests_model ?>
     <script>
         // Listen for real-time presence changes broadcasted by server.js
         socket.on('user_status_change', (data) => {
@@ -125,7 +129,8 @@ else{
         function markChatAsRead(activeUserId){
             socket.emit('mark_as_read', {
                 senderId: activeUserId,
-                receiverId: currentUserId
+                receiverId: currentUserId,
+                unreadCount: <?php echo $unread_count ?>
             });
         }
 
@@ -199,14 +204,40 @@ else{
         })
 
         window.onload = async function(){
+            const id = "<?php echo $id ?>";
+            const rid = "<?php echo $rec_id ?>";
 
             // Load chat when the page is loaded
-            const htmlResponse = await UI.sendPost('get_msg.php', {rid: "<?php echo $rec_id ?>"});
-            document.querySelector('.inner-field').innerHTML = htmlResponse;
-            field.scrollTop = field.scrollHeight;
-
-            markChatAsRead("<?php echo $rec_id; ?>")
+            const res = await UI.sendGet('/src/api/messages/', {rid: rid});
+            if(Array.isArray(res.response)){
+                var buffer = '';
+                res.response.forEach(message => {
+                    if(message.sid == id){
+                        const isRead = eval(message.isRead) ? '#e9e4c8' : 'none';
+    
+                        buffer += `
+                            <div class='msg-wrap'>
+                                <div class='isRead unread' style='background: ${isRead};'></div>
+                                <div class='s m'>${message.msg}</div>
+                            </div>
+                        `;
+                    }
+                    else if(message.sid == rid){
+                        buffer += `
+                            <div class='r m'>${message.msg}</div>
+                        `;
+                    }
+                });
+                document.querySelector('.inner-field').innerHTML = buffer;
+                field.scrollTop = field.scrollHeight;
+            }
+            else if(res.response == null){
+                document.querySelector('.inner-field').innerHTML = `
+                    <center>Start chatting now.</center>
+                `;
+            }
         }
+        markChatAsRead("<?php echo $rec_id; ?>");
     </script>
 </body>
 </html>

@@ -58,3 +58,22 @@ function requireStrictPost(){
     }
     checkHeadersCSRF();
 }
+
+// Strict GET Guard
+// Validates custom header AND CSRF token
+function requireStrictGet(){
+    header('Content-Type: application/json; charset=utf-8');
+    
+    if($_SERVER['REQUEST_METHOD'] !== 'GET'){
+        http_response_code(405);
+        die(json_encode(['status' => 'error', 'message' => 'Method Not Allowed']));
+    }
+
+    $headers = getallheaders();
+    $requestHeader = $headers['X-Requested-With'] ?? $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+
+    if ($requestHeader !== 'XMLHttpRequest') {
+        http_response_code(403);
+        exit(json_encode(['status' => 'error', 'message' => 'Direct access forbidden']));
+    }
+}

@@ -9,7 +9,6 @@
 .preview{
     overflow-y: scroll;
     .list{
-        max-height: 180px;
         overflow-y: scroll;
         .nothing-here{
             display: flex;
@@ -59,14 +58,10 @@
     }
     .unread-msg{
         display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 17px;
-        font-weight: 600;
-        width: 25px;
-        height: 25px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
-        margin-right: 6px;
+        margin-right: 10px;
         color: #111033;
         background: #eeefcc;
     }

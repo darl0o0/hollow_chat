@@ -54,19 +54,21 @@ io.on('connection', (socket) => {
 
   // 3. Read receipts sent directly to the sender's room
   socket.on('mark_as_read', async (data) => {
-    const { senderId, receiverId } = data;
+    const { senderId, receiverId, unreadCount } = data;
 
     const query = 'update messages set isRead = 1 where sid = ? and rid = ? and isRead = 0';
     await db.query(query, [senderId, receiverId]);
 
     // Sends to all tabs/devices of the partner
     io.to(senderId).emit('message_marked_read', {
-      readBy: receiverId
+      readBy: receiverId,
+      count: unreadCount
     });
     // Sends to all tabs/devices of the current user
     io.to(receiverId).emit('message_marked_read', {
       readBy: receiverId,
-      readTo: senderId
+      readTo: senderId,
+      count: unreadCount
     });
   });
 

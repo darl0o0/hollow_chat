@@ -40,6 +40,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
             </div>
         </div>
     </div>
+    <?php echo $requests_model ?>
     <div class="change-model model">
         <div class="background"></div>
         <div class="form-container">
@@ -107,24 +108,8 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
             document.querySelector(".delete-model").style.visibility = "visible";
             document.querySelector(".main").style.filter = "blur(3px)";
         }
-        
-        // Hide the on-screen models
-        function hideModel(){
-            document.querySelectorAll(".model").forEach(model => {
-                model.style.visibility = "hidden";
-            })
-            document.querySelector(".main").style.filter = "none";
-        }
-        document.querySelectorAll(".background").forEach(hideEvent => {
-            hideEvent.onclick = hideModel;
-        });
         document.querySelectorAll(".model .secondary-btn").forEach(hideEvent => {
-            hideEvent.onclick = hideModel;
-        });
-        document.addEventListener('keydown', (e) =>{
-            if(e.keyCode === 27){
-                hideModel();
-            }
+            hideEvent.onclick = UI.hideModel;
         });
 
         //Update form

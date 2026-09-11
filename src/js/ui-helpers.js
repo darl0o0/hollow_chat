@@ -68,11 +68,34 @@ const UI = {
     
         return await response.text();
     },
+    
+    // Strict get request
+    sendGet: async function(url, data = {}) {
+        const queryString = new URLSearchParams(data).toString();
+        const fullUrl = queryString ? `${url}?${queryString}` : url;
+    
+        const response = await fetch(fullUrl, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        });
+    
+        return await response.json();
+    },
 
     //Check if the email is valid
     isValidEmail: function(email){
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email.trim());
+    },
+    
+    // Hide the on-screen models
+    hideModel: function(){
+        document.querySelectorAll(".model").forEach(model => {
+            model.style.visibility = "hidden";
+        })
+        document.querySelector(".main").style.filter = "none";
     }
 };
 
@@ -92,18 +115,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Logout
-    if(document.querySelector('.logout-form')){
-        document.querySelector('.logout-form').addEventListener('submit', async function(e){
-            e.preventDefault();
-            const formData = new FormData(e.target);
-    
-            //HTTP Request
-            const res = await UI.sendPost('/logout.php', formData);
-            const jsonRes = JSON.parse(res);
-            if(jsonRes.status == 'ok'){
-                window.location.replace('/signin');
-            }
-        })
-    }
+    document.querySelector('.notifications-action').addEventListener('click', () => {
+        document.querySelector(".requests-model").style.visibility = "visible";
+        document.querySelector(".main").style.filter = "blur(3px)";
+    })
+
+    document.querySelectorAll(".background").forEach(hideEvent => {
+        hideEvent.onclick = UI.hideModel;
+    });
+    document.addEventListener('keydown', (e) =>{
+        if(e.keyCode === 27){
+            UI.hideModel();
+        }
+    });
 });
