@@ -101,7 +101,8 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
             const res = await UI.sendGet('/src/api/conversations');
             const sortedConversations = res.response.sort((a, b) => {
                 return new Date(b.lastMsg.time) - new Date(a.lastMsg.time)
-            })
+            });
+            var buffer = "";
             sortedConversations.forEach(conversation => {
                 const isOnline = eval(conversation.isOnline) ? 'visible' : 'hidden';
                 var username;
@@ -137,7 +138,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                     badgeVsibility = 'hidden';
                 }
 
-                document.querySelector('.list').innerHTML += `
+                buffer += `
                     <div class='user-card u-${conversation.id}'>
                         <a href='/chat?r=${conversation.id}' class='profile-link'></a>
                             <div class='pfp'>
@@ -155,6 +156,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                     </div>
                 `;
             });
+            document.querySelector('.list').innerHTML = buffer;
         }
     </script>
 </body>

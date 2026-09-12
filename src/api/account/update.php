@@ -6,6 +6,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 $user_data = check_login($con);
 requireStrictPost();
+
 if($_SERVER['REQUEST_METHOD'] == "POST"){
 
     $new_username = $_POST['username'];
@@ -25,7 +26,6 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
                 $update_query = "update users set username = '$new_username', email = '$new_email' where id = '$id'";
                 mysqli_query($con, $update_query);
                 echo json_encode(['status' => 'ok', 'message' => 'Profile updated.']);
-                die();
             }
             else{
                 echo json_encode(['status' => 'error', 'message' => 'The provided credentials already exist.']);
@@ -38,4 +38,5 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     else{
         echo json_encode(['status' => 'error', 'message' => 'All inputs are required.']);
     }
+    die();
 }

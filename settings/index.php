@@ -122,13 +122,13 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                     const formData = new FormData(e.target);
                     
                     //HTTP Request
-                    const res = await UI.sendPost('update.php', formData);
-                    const jsonRes = JSON.parse(res);
-                    if(jsonRes.status == 'ok'){
-                        UI.alert(true, jsonRes.message, 3);
+                    const res = await UI.sendPost('/src/api/account/update.php', formData);
+                    if(res.status == 'ok'){
+                        UI.alert(true, res.message, 3);
                     }
-                    else if(jsonRes.status == 'error'){
-                        UI.alert(false, jsonRes.message, null);
+                    else if(res.status == 'error'){
+                        console.log(res.message);
+                        UI.alert(false, res.message, null);
                     }
                 }
                 else{
@@ -149,16 +149,15 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                 const formData = new FormData(e.target);
                 
                 //HTTP Request
-                const res = await UI.sendPost('delete.php', formData);
-                const jsonRes = JSON.parse(res);
-                if(jsonRes.status == 'ok'){
-                    UI.alert(true, jsonRes.message, 4, true);
+                const res = await UI.sendPost('/src/api/account/delete.php', formData);
+                if(res.status == 'ok'){
+                    UI.alert(true, res.message, 4, true);
                     setTimeout(() => {
                         window.location.replace('/signin');
                     }, 4000);
                 }
-                else if(jsonRes.status == 'error'){
-                    UI.alert(false, jsonRes.message, null, true);
+                else if(res.status == 'error'){
+                    UI.alert(false, res.message, null, true);
                 }
             }
             else{

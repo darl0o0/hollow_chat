@@ -37,11 +37,12 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
         // List users
         window.onload = async function(){
             const res = await UI.sendGet('/src/api/users/');
+            var buffer = "";
             res.response.forEach(user => {
                 const bio = user.bio ? user.bio : "No Bio."
                 const isOnline = eval(user.isOnline) ? 'visible' : "hidden"
 
-                document.querySelector('.users-list').innerHTML += `
+                buffer += `
                     <a class='user-card u-${user.id}' href='profile?u=${user.id}'>
                         <div class='pfp'>
                             <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
@@ -54,6 +55,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                     </a>
                 `;
             });
+            document.querySelector('.users-list').innerHTML = buffer;
         }
     </script>
 </body>

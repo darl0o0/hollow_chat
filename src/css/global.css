@@ -1,12 +1,16 @@
 :root{
     --main-text-color: #e9e4c8;
     --main-font-size: 19px;
-    --btn-font-size: 17px;
-    --register-inputs-background: #151515;
-    --register-placeholder-color: #666666;
-    --inputs-btns-border-radius: 14px;
-    --register-btn-background: #b2ad7f;
+
+    --input-font-size: 16px;
+    --input-bg: #151515;
+    --placeholder-color: #666666;
+    --input-btn-border-radius: 14px;
+    --btn-font-size: 16px;
+
+    --light-border: 1px ridge #464646;
     --main-online-status-color: #fdffe1;
+    --badge-color: #e9e4c8;
 }
 
 /* UNIVERSAL FOR ALL THE PAGES */
@@ -34,8 +38,8 @@ body{
     text-align: center;
     padding: 12px;
     margin: 12px 0 8px 0;
-    border-radius: var(--inputs-btns-border-radius);
-    font-size: var(--main-font-size);
+    border-radius: var(--input-btn-border-radius);
+    font-size: var(--input-font-size);
     width: 100%;
     .alert-text{
         max-width: 300px;
@@ -47,8 +51,8 @@ body{
   inherits: false;
 }
 .cooldown-circle{
-  width: 25px;
-  height: 25px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   margin-right: 14px;
   animation-name: sweep;
@@ -69,35 +73,35 @@ body{
 .br{
     width: 100%;
     height: 1px;
-    background-color: #2a2a2a;
+    border-top: var(--light-border);
     margin: 6px 0 10px 0;
 }
 .brv{
     display: flex;
     width: 1px;
     align-self: stretch;
-    border-right: 1px ridge #464646ff;
+    border-right: var(--light-border);
     margin: 0 10px;
 }
 
 /* INPUTS */
 
 .input{
-    margin: 8px 0;
+    margin: 6px 0;
     padding: 12px;
-    border-radius: var(--inputs-btns-border-radius);
+    border-radius: var(--input-btn-border-radius);
     border: 1px solid #333333;
     width: 100%;
-    font-size: var(--main-font-size);
+    font-size: var(--input-font-size);
     color: var(--main-text-color);
-    background-color: var(--register-inputs-background);
+    background-color: var(--input-bg);
     transition: 0.1s;
 }
 .input.password{
     padding-right: 40px;
 }
 .input::placeholder{
-    color: var(--register-placeholder-color);
+    color: var(--placeholder-color);
 }
 .input:focus, input:focus{
     outline: none;
@@ -111,10 +115,10 @@ body{
         top: 50%;
         transform: translateY(-50%);
         right: 0;
-        font-size: 19px;
+        font-size: 17px;
         padding: 10px;
         background: none;
-        color: #595959ff;
+        color: var(--placeholder-color);
         border: none;
         cursor: pointer;
         .fa-eye-slash{
@@ -126,7 +130,7 @@ body{
 /* BUTTONS */
 
 .btn-wrapper{
-    margin-top: 25px;
+    margin-top: 22px;
 }
 .btn{
     display: flex;
@@ -134,32 +138,32 @@ body{
     justify-content: center;
     font-size: var(--btn-font-size);
     font-weight: 600;
-    border-radius: var(--inputs-btns-border-radius);
+    border-radius: var(--input-btn-border-radius);
     text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
-    transition: 0.1s;
+    transition: 0.15s;
     width: 100%;
-    margin-bottom: 15px;
-    padding: 10px;
+    margin-bottom: 12px;
+    padding: 11px;
     gap: 8px;
     img{
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
 }
 .btn:hover{
-    transform: scale(1.03);
+    transform: scale(1.02);
 }
 .primary-btn{
-    background: #e9e4c8;
+    background: var(--badge-color);
     color: #1a1a1a;
     border: none;
 }
 .secondary-btn{
     background-color: #151515;
-    color: #e9e4c8;
-    border: 1px ridge #464646ff;
+    color: var(--badge-color);
+    border: var(--light-border);
 }
 .btn.google{
     margin-bottom: 0;
@@ -170,7 +174,7 @@ body{
 
 .register-container{
     width: 90%;
-    max-width: 450px;
+    max-width: 400px;
     color: var(--main-text-color);
     .register-header{
         display: flex;
@@ -196,13 +200,13 @@ body{
         justify-content: center;
         flex-direction: column;
         h1{
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
             margin: 0;
         }
         p{
-            font-size: 16px;
-            margin-top: 8px;
+            font-size: 14px;
+            margin-top: 6px;
             padding: 0;
             white-space: nowrap;
             a{
@@ -230,6 +234,7 @@ body{
     height: 100%;
     overflow: hidden;
     overflow-y: auto;
+    transition: 0.2s;
 
     /* HOLLOW CHAT LOGO */
 
@@ -448,7 +453,7 @@ body{
         left: 0;
         background: #000;
         opacity: 0.5;
-        transition: 0.15s;
+        transition: 0.1s;
     }
     .form-container, .container{
         background: #131313;
@@ -544,9 +549,9 @@ body{
 
 @media (max-width: 600px){
     :root{
-        --main-font-size: 17px;
-        --btn-font-size: 16px;
-        --inputs-btns-border-radius: 13px
+        --input-font-size: 18px;
+        --input-btn-border-radius: 15px;
+        --btn-font-size: 18px;
     }
     .alert, .model-alert{
         padding: 10px;
@@ -558,20 +563,27 @@ body{
         width: 20px;
         height: 20px;
     }
+    .brv{
+        margin: 0 8px;
+    }
     .input{
         margin: 8px 0;
-        padding: 12px;
+        padding: 13px 12px;
+    }
+    .password-wrapper .s-h{
+        font-size: 18px;
     }
     .btn-wrapper{
         margin-top: 16px;
     }
     .btn{
         margin-bottom: 12px;
-        padding: 10px;
+        padding: 12px;
         gap: 9px;
     }
     .register-container{
-        max-width: 400px;
+        width: 96%;
+        max-width: 420px;
         .register-header{
             margin-bottom: 15px;
         }
@@ -583,10 +595,10 @@ body{
         }
         .title-or-wrapper{
             h1{
-                font-size: 24px;
+                font-size: 22px;
             }
             p{
-                font-size: 17px;
+                font-size: 14px;
                 margin-top: 5px;
                 white-space: unset;
             }

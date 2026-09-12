@@ -18,7 +18,7 @@ body{
     grid-template-columns: 1fr 1.15fr;
     gap: 16px;
     .bio{
-        font-size: var(--main-font-size);
+        font-size: var(--input-font-size);
         height: 100px;
         resize: none;
     }
@@ -28,7 +28,7 @@ body{
     .privacy{
         margin-top: 10px;
         label{
-            font-size: 18px;
+            font-size: var(--input-font-size);
             white-space: nowrap;
         }
         select{
@@ -37,28 +37,33 @@ body{
     }
     .img-input{
         text-align: center;
-        border: 2px dashed #404040;
+        border: 1.5px dashed #404040;
         cursor: pointer;
-        color: var(--register-placeholder-color);
-        font-size: 17px;
+        color: var(--placeholder-color);
+        font-size: var(--input-font-size);
         padding: 15px 5px;
         p{
             margin: 0;
             padding: 0;
         }
         img{
-            margin-top: 5px;
+            object-fit: cover;
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            border: var(--light-border);
+            margin: auto auto;
         }
         .fa-x{
             padding: 5px;
             margin-right: 8px;
-            font-size: var(--main-font-size);
-            color: var(--register-placeholder-color);
+            font-size: var(--input-font-size);
+            color: var(--placeholder-color);
             float: right;
             z-index: 1;
         }
         .fa-image{
-            font-size: 40px;
+            font-size: 34px;
             margin-top: 10px;
         }
     }
@@ -73,7 +78,11 @@ body{
     .privacy{
         margin-top: 6px;
     }
-    .img-input{
+    .bio-pfp-wrapper .img-input{
         padding: 15px 5px;
+        img{
+            width: 100px;
+            height: 100px;
+        }
     }
 }

@@ -109,15 +109,14 @@ else{
                     
                     //HTTP Request
                     const res = await UI.sendPost('', formData);
-                    const jsonRes = JSON.parse(res);
-                    if(jsonRes.status == 'ok'){
-                        UI.alert(true, jsonRes.message, 2);
+                    if(res.status == 'ok'){
+                        UI.alert(true, res.message, 2);
                         setTimeout(() => {
                             window.location.replace('/');
                         }, 2000);
                     }
-                    else if(jsonRes.status == 'error'){
-                        UI.alert(false, jsonRes.message, null);
+                    else if(res.status == 'error'){
+                        UI.alert(false, res.message, null);
                     }
                 }
                 else{

@@ -112,7 +112,7 @@ else{
             <span class="alert-text"></span>
         </div>
         <form class="signup-form" method="post" enctype="multipart/form-data" novalidate>
-            <div class="form-step step-1">
+            <div class="form-step step-1" style="display: none">
                 <div class="username-email-wrapper">
                     <input type="username" class="input username" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15">
                     <input type="email" class="input email" name="email" placeholder="Email">
@@ -133,7 +133,7 @@ else{
                     </button>
                 </div>
             </div>
-            <div class="form-step step-2" style="display: none">
+            <div class="form-step step-2">
                 <div class="bio-pfp-wrapper">
                     <div class="bio-privacy-wrapper">
                         <textarea class="input bio" name="bio" maxlength="150" placeholder="Write a short bio...&#10;(Optional)"></textarea>
@@ -147,7 +147,7 @@ else{
                     </div>
                     <div class="input img-input">
                         <p>
-                            Choose a profile picture<br>(Optional)<br>
+                            Choose a profile picture (Optional)<br>
                         </p>
                         <i class="fa-solid fa-image"></i>
                     </div>
@@ -173,15 +173,14 @@ else{
                 
                 //HTTP Request
                 const res = await UI.sendPost('', formData);
-                const jsonRes = JSON.parse(res);
-                if(jsonRes.status == 'ok'){
-                    UI.alert(true, jsonRes.message, 2);
+                if(res.status == 'ok'){
+                    UI.alert(true, res.message, 2);
                     setTimeout(() => {
                         window.location.replace('/');
                     }, 2000);
                 }
-                else if(jsonRes.status == 'error'){
-                    UI.alert(false, jsonRes.message, null);
+                else if(res.status == 'error'){
+                    UI.alert(false, res.message, null);
                 }
             }
             else{
@@ -200,7 +199,7 @@ else{
             }
         });
         document.querySelector(".pfp").onchange = function (){
-            document.querySelector(".img-input").innerHTML = "<i class='fa-solid fa-x'></i><img src='"+URL.createObjectURL(document.querySelector(".pfp").files[0])+"' style='object-fit: cover;width: 100px;height: 100px;'>";
+            document.querySelector(".img-input").innerHTML = "<i class='fa-solid fa-x'></i><img src='"+URL.createObjectURL(document.querySelector(".pfp").files[0])+"'>";
         }
         
         //Navigate between step 1 and step 2 && checking the user's provided credentials in the front-end

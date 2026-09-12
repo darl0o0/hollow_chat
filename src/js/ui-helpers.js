@@ -66,7 +66,7 @@ const UI = {
             body: body
         });
     
-        return await response.text();
+        return await response.json();
     },
     
     // Strict get request
@@ -115,17 +115,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.querySelector('.notifications-action').addEventListener('click', () => {
-        document.querySelector(".requests-model").style.visibility = "visible";
-        document.querySelector(".main").style.filter = "blur(3px)";
-    })
+    if(document.querySelector('.notifications-action')){
+        document.querySelector('.notifications-action').addEventListener('click', () => {
+            document.querySelector(".requests-model").style.visibility = "visible";
+            document.querySelector(".main").style.filter = "blur(3px)";
+        });
+    }
 
+    if(document.querySelector(".background")){
+        document.addEventListener('keydown', (e) =>{
+            if(e.keyCode === 27){
+                UI.hideModel();
+            }
+        });
+    }
     document.querySelectorAll(".background").forEach(hideEvent => {
         hideEvent.onclick = UI.hideModel;
-    });
-    document.addEventListener('keydown', (e) =>{
-        if(e.keyCode === 27){
-            UI.hideModel();
-        }
     });
 });

@@ -189,7 +189,7 @@ else{
                 const formData = new FormData(e.target);
                 
                 //HTTP Request
-                await UI.sendPost('send.php', formData);
+                await UI.sendPost('/src/api/messages/', formData);
 
                 // Make the input empty && scroll to the bottom of the field && isTyping = 0
                 document.querySelector('.msg-input').value = null;

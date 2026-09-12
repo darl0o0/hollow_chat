@@ -118,7 +118,7 @@ else{
 
         // A function that defines the state between two users
         async function defineState(){
-            const res = await UI.sendGet('/src/api/relationship', {user2: '<?php echo $user2 ?>'});
+            const res = await UI.sendGet('/src/api/relationship/', {user2: '<?php echo $user2 ?>'});
             const actionInput = document.querySelector('[name="action"]');
             switch(res.response.relationship){
                 case false:
@@ -145,7 +145,7 @@ else{
             friendActionForm.addEventListener('submit', async function(e){
                 e.preventDefault();
                 const formData = new FormData(e.target);
-                const res = await UI.sendPost('friend_action.php', formData);
+                await UI.sendPost('/src/api/relationship/', formData);
                 defineState();
             });
         }
@@ -182,9 +182,8 @@ else{
                 const formData = new FormData(e.target);
         
                 //HTTP Request
-                const res = await UI.sendPost('/logout.php', formData);
-                const jsonRes = JSON.parse(res);
-                if(jsonRes.status == 'ok'){
+                const res = await UI.sendPost('/src/api/account/logout.php', formData);
+                if(res.status == 'ok'){
                     window.location.replace('/signin');
                 }
             })
