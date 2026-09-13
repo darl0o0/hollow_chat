@@ -5,8 +5,9 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Hollow Chat</title>
     <link rel="stylesheet" href="/src/css/settings.css">
+    <script type="module" src="/src/js/init/settings.js"></script>
+    <title>Hollow Chat</title>
 </head>
 <body>
     <div class="main settings">
@@ -40,7 +41,6 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
             </div>
         </div>
     </div>
-    <?php echo $requests_model ?>
     <div class="change-model model">
         <div class="background"></div>
         <div class="form-container">
@@ -97,73 +97,5 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
             </form>
         </div>
     </div>
-    <script>
-
-        // Show the on-screen models
-        document.querySelector(".change").onclick = function (){
-            document.querySelector(".change-model").style.visibility = "visible";
-            document.querySelector(".main").style.filter = "blur(3px)";
-        }
-        document.querySelector(".delete").onclick = function (){
-            document.querySelector(".delete-model").style.visibility = "visible";
-            document.querySelector(".main").style.filter = "blur(3px)";
-        }
-        document.querySelectorAll(".model .secondary-btn").forEach(hideEvent => {
-            hideEvent.onclick = UI.hideModel;
-        });
-
-        //Update form
-        document.querySelector(".update-form").addEventListener('submit', async function(e){
-            e.preventDefault();
-            const username = document.querySelector('.username').value;
-            const email = document.querySelector('.email').value;
-            if(username && email){
-                if(username != "<?php echo $user_data['username'];?>" || email != "<?php echo $user_data['email'];?>"){
-                    const formData = new FormData(e.target);
-                    
-                    //HTTP Request
-                    const res = await UI.sendPost('/src/api/account/update.php', formData);
-                    if(res.status == 'ok'){
-                        UI.alert(true, res.message, 3);
-                    }
-                    else if(res.status == 'error'){
-                        console.log(res.message);
-                        UI.alert(false, res.message, null);
-                    }
-                }
-                else{
-                    UI.alert(false, "Cannot use the current credentials.", null);
-                }
-            }
-            else{
-                UI.alert(false, "All inputs are required.", null);
-            }
-        })
-
-        // Delete account form
-        document.querySelector('.delete-form').addEventListener('submit', async function(e){
-            e.preventDefault();
-            const email = document.querySelector('.delete-email').value;
-            const password = document.querySelector('.delete-password').value;
-            if(email && password){
-                const formData = new FormData(e.target);
-                
-                //HTTP Request
-                const res = await UI.sendPost('/src/api/account/delete.php', formData);
-                if(res.status == 'ok'){
-                    UI.alert(true, res.message, 4, true);
-                    setTimeout(() => {
-                        window.location.replace('/signin');
-                    }, 4000);
-                }
-                else if(res.status == 'error'){
-                    UI.alert(false, res.message, null, true);
-                }
-            }
-            else{
-                UI.alert(false, "All inputs are required.", null, true);
-            }
-        });
-    </script>
 </body>
 </html>

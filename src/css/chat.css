@@ -106,7 +106,7 @@
         padding: 4px 8px;
     }
     input::placeholder{
-        color: var(--register-placeholder-color);
+        color: var(--placeholder-color);
     }
     input:focus{
         outline: none;
@@ -142,7 +142,7 @@
 
         .logo{
             padding: 8px 15px;
-            border-right: 1px ridge #464646ff;
+            border-right: var(--light-border);
             img{
                 width: 100%;
             }

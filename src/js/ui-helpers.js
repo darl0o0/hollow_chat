@@ -1,4 +1,4 @@
-const UI = {
+export const UI = {
 
     //The error function
     alert: function(type, alertText, duration, isForModel){
@@ -66,7 +66,13 @@ const UI = {
             body: body
         });
     
-        return await response.json();
+        const text = await response.text();
+
+        if(!text || !text.trim()){
+            return {};
+        }
+
+        return JSON.parse(text);
     },
     
     // Strict get request
@@ -89,6 +95,26 @@ const UI = {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email.trim());
     },
+
+    // Global elements
+    globalElements: function(){
+        if(document.querySelector('.requests-model')) return;
+
+        const modalHTML = `
+            <div class="model requests-model">
+                <div class="background"></div>
+                <div class="container">
+                    <h1><i class="fa-solid fa-bell"></i>Notifications</h1>
+                    <div class="title-sep-wrapper">
+                        <span class="title">Friend requests 5</span>
+                        <div class="sep"></div>
+                    </div>
+                    <div class="list"></div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    },
     
     // Hide the on-screen models
     hideModel: function(){
@@ -98,38 +124,3 @@ const UI = {
         document.querySelector(".main").style.filter = "none";
     }
 };
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    // Show/hide password
-    document.querySelectorAll('.s-h').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const input = btn.parentElement.querySelector('input');
-            const icon = btn.querySelector('i');
-
-            const isPassword = input.type === 'password';
-            input.type = isPassword ? 'text' : 'password';
-
-            icon.classList.toggle('fa-eye', !isPassword);
-            icon.classList.toggle('fa-eye-slash', isPassword);
-        });
-    });
-
-    if(document.querySelector('.notifications-action')){
-        document.querySelector('.notifications-action').addEventListener('click', () => {
-            document.querySelector(".requests-model").style.visibility = "visible";
-            document.querySelector(".main").style.filter = "blur(3px)";
-        });
-    }
-
-    if(document.querySelector(".background")){
-        document.addEventListener('keydown', (e) =>{
-            if(e.keyCode === 27){
-                UI.hideModel();
-            }
-        });
-    }
-    document.querySelectorAll(".background").forEach(hideEvent => {
-        hideEvent.onclick = UI.hideModel;
-    });
-});

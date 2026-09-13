@@ -14,7 +14,6 @@ $request_row = mysqli_fetch_all(mysqli_query($con, $requests_query));
 
 //The number to show next to the section's title
 $num_of_requests = mysqli_num_rows(mysqli_query($con, $requests_query));
-$requests_num = ($num_of_requests > 0)? (' ('.$num_of_requests.')'): '';
 
 // Notifications number
 $query_notifications = "select * from messages where rid = '$id' and isRead = '0'";
@@ -59,70 +58,35 @@ $panel = '
     </div>
 ';
 
-//List of requests
-if($num_of_requests > 0){
+// //List of requests
+// if($num_of_requests > 0){
     
-    // Listing requests
-    for($i = 0; $i < $num_of_requests ; $i++){
+//     // Listing requests
+//     for($i = 0; $i < $num_of_requests ; $i++){
         
-        // Define the other user's id
-        $user2_request = $request_row[$i][0];
-        $query = "select * from users where id = '$user2_request'";
-        $request = mysqli_fetch_all(mysqli_query($con, $query));
+//         // Define the other user's id
+//         $user2_request = $request_row[$i][0];
+//         $query = "select * from users where id = '$user2_request'";
+//         $request = mysqli_fetch_all(mysqli_query($con, $query));
 
-        // Bio
-        $bio = (strlen($request[0][4])>0)? $request[0][4] : 'No Bio.';
+//         // Bio
+//         $bio = (strlen($request[0][4])>0)? $request[0][4] : 'No Bio.';
 
-        //List requests
-        $list_of_requests .= "
-        <div class='user-card u-$user2_request'>
-            <a href='/profile?u=$user2_request' class='profile-link'></a>
-            <div class='pfp'>
-                <img class='pfp-img' src='/src/assets/pfps/".$request[0][5]."'>
-            </div>
-            <div class='label-wrapper'>
-                <div class='username-label'>".$request[0][1]."</div>
-                <span class='sub-label'>$bio</span>
-            </div>
-            <div class='btn-wrapper-requests'>
-                <form method='post' action='/profile/friend_action.php'>
-                    <input type='hidden' name='user2_id' value='$user2_request'>
-                    <input type='hidden' name='from' value='fr'>
-                    <button name='action' value='2' class='btn-requests'><i class='fa fa-check' aria-hidden='true'></i></button>
-                </form>
-                <form method='post' action='/profile/friend_action.php'>
-                    <input type='hidden' name='user2_id' value='$user2_request'>
-                    <input type='hidden' name='from' value='fr'>
-                    <button name='action' value='1' class='btn-requests'><i class='fa fa-times' aria-hidden='true'></i></button>
-                </form>
-            </div>
-        </div>
-        ";
-    }
-}
-else{
-    $list_of_requests = "<span class='nothing-here'>Nothing here.</span>";
-}
-$requests_model = '
-    <div class="model requests-model">
-        <div class="background"></div>
-        <div class="container">
-            <h1>Notifications</h1>
-            <div class="title-sep-wrapper">
-                <span class="title">Friend requests'.$requests_num.'</span>
-                <div class="sep"></div>
-            </div>
-            <div class="list">'.$list_of_requests.'</div>
-        </div>
-    </div>
-';
+//         //List requests
+//         $list_of_requests .= "
+//         ";
+//     }
+// }
+// else{
+//     $list_of_requests = "<span class='nothing-here'>Nothing here.</span>";
+// }
 ?>
 <meta name="csrf-token" content="<?php echo getCsrfToken(); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="shortcut icon" href="/src/assets/logo/hollow_icon_light.png" type="image/x-icon">
 <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script src="/src/js/ui-helpers.js"></script>
+<script type="module" src="/src/js/init/main.js"></script>
 <script>
     const socket = io('http://localhost:3000');
     const currentUserId = "<?php echo $id; ?>";
@@ -164,6 +128,7 @@ $requests_model = '
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+
         document.querySelectorAll('.num-of').forEach(numOf => {
             if(numOf.innerHTML == 0){
                 numOf.style.display = 'none';
@@ -171,6 +136,6 @@ $requests_model = '
             else if(numOf.innerHTML > 99){
                 numOf.innerHTML = "+99";
             }
-        })
+        });
     });
 </script>

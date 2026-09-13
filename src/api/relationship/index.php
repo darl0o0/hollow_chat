@@ -74,4 +74,5 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
         break;
     }
     mysqli_query($con, $query);
+    die();
 }

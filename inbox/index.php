@@ -6,6 +6,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
 <html lang="en">
 <head>
     <link rel="stylesheet" href="/src/css/inbox.css">
+    <script type="module" src="/src/js/init/inbox.js"></script>
     <title>Hollow Chat</title>
 </head>
 <body>
@@ -18,12 +19,10 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                     <span class="title">Messages</span>
                     <div class="sep"></div>
                 </div>
-                <div class="list">
-                </div>
+                <div class="list"></div>
             </div>
         </div>
     </div>
-    <?php echo $requests_model ?>
     <script>
         const id = "<?php echo $id ?>";
         // Listen for real-time presence changes broadcasted by server.js
@@ -96,68 +95,6 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                 }
             }
         });
-
-        window.onload = async function(){
-            const res = await UI.sendGet('/src/api/conversations');
-            const sortedConversations = res.response.sort((a, b) => {
-                return new Date(b.lastMsg.time) - new Date(a.lastMsg.time)
-            });
-            var buffer = "";
-            sortedConversations.forEach(conversation => {
-                const isOnline = eval(conversation.isOnline) ? 'visible' : 'hidden';
-                var username;
-
-                var lastMsg;
-                var badgeVsibility;
-                var lastMsgColor;
-                var lastMsgWeight;
-                
-                if(conversation.username != null){
-                    username = conversation.username;
-                }
-                else{
-                    username = "User not found"
-                }
-
-                if(conversation.lastMsg.sid != id){
-                    lastMsg = conversation.lastMsg.msg;
-    
-                    if(!eval(conversation.lastMsg.isRead)){
-                        badgeVsibility = 'visiblie';
-                        lastMsgColor = '#d5d6c3';
-                        lastMsgWeight = 'bolder';
-                    }
-                    else{
-                        badgeVsibility = 'hidden';
-                        lastMsgColor = '#a8a8a8';
-                        lastMsgWeight = '400';
-                    }
-                }
-                else{
-                    lastMsg = `You: ${conversation.lastMsg.msg}`;
-                    badgeVsibility = 'hidden';
-                }
-
-                buffer += `
-                    <div class='user-card u-${conversation.id}'>
-                        <a href='/chat?r=${conversation.id}' class='profile-link'></a>
-                            <div class='pfp'>
-                                <img class='pfp-img' src='/src/assets/pfps/${conversation.img}'>
-                                <div class='online-status' style='visibility: ${isOnline}'></div>
-                            </div>
-                            <div class='label-wrapper'>
-                                <div class='username-label'>${username}</div>
-                                <span class='sub-label' style='color:${lastMsgColor}; font-weight: ${lastMsgWeight}'>${lastMsg}</span>
-                            </div>
-                        <div class='btn-wrapper-inbox'>
-                            <div class='unread-msg' style='visibility: ${badgeVsibility}'></div>
-                            <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-            document.querySelector('.list').innerHTML = buffer;
-        }
     </script>
 </body>
 </html>

@@ -36,6 +36,8 @@ else{
 <html lang="en">
 <head>
     <link rel="stylesheet" href="/src/css/profile.css">
+    <script type="module" src="/src/js/init/profile.js"></script>
+    <meta name="user2" content="<?php echo $user2 ?>">
     <title>Hollow Chat</title>
 </head>
 <body>
@@ -85,8 +87,7 @@ else{
                     else{
                         echo '
                             <a href="/chat?r='.$user2.'" class="btn primary-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
-                            <form  
-                            action="friend_action.php" 
+                            <form
                             method="post" 
                             class="friend-action">
                                 <input type="hidden" name="user2" value="'. $user2.'">
@@ -100,7 +101,6 @@ else{
                 </div>
         </div>
     </div>
-    <?php echo $requests_model ?>
     <script>
         // Listen for real-time presence changes broadcasted by server.js
         socket.on('user_status_change', (data) => {
@@ -112,43 +112,6 @@ else{
                 statusLabel.innerHTML = data.isOnline ? "Online" : "Offline";
             }
         });
-
-        const profileActionBtn = document.querySelector('.profile-action-btn');
-        const friendActionForm = document.querySelector('.friend-action');
-
-        // A function that defines the state between two users
-        async function defineState(){
-            const res = await UI.sendGet('/src/api/relationship/', {user2: '<?php echo $user2 ?>'});
-            const actionInput = document.querySelector('[name="action"]');
-            switch(res.response.relationship){
-                case false:
-                    actionInput.value = 0;
-                    profileActionBtn.innerHTML = '<i class="fa fa-user-plus" aria-hidden="true"></i>Add Friend';
-                break;
-                case 'sent':
-                    actionInput.value = 1;
-                    profileActionBtn.innerHTML = '<i class="fa fa-user-times" aria-hidden="true"></i>Cancel Request';
-                break;
-                case 'pending':
-                    actionInput.value = 2;
-                    profileActionBtn.innerHTML = '<i class="fa fa-check" aria-hidden="true"></i> Accept Request';
-                break;
-                case true:
-                    actionInput.value = 1;
-                    profileActionBtn.innerHTML = '<i class="fa fa-user-times" aria-hidden="true"></i>Remove Friend';
-                break;
-            }
-        }
-
-        // Send strict post request instead of casual request
-        if(friendActionForm){
-            friendActionForm.addEventListener('submit', async function(e){
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                await UI.sendPost('/src/api/relationship/', formData);
-                defineState();
-            });
-        }
 
         // Copy profile link
         function copyProfileLink(){
@@ -169,25 +132,6 @@ else{
         shareProfileBtn.addEventListener('click', ()=>{
             copyProfileLink();
         });
-
-        window.onload = async function(){
-            if(friendActionForm)
-            defineState();
-        }
-
-        // Logout
-        if(document.querySelector('.logout-form')){
-            document.querySelector('.logout-form').addEventListener('submit', async function(e){
-                e.preventDefault();
-                const formData = new FormData(e.target);
-        
-                //HTTP Request
-                const res = await UI.sendPost('/src/api/account/logout.php', formData);
-                if(res.status == 'ok'){
-                    window.location.replace('/signin');
-                }
-            })
-        }
     </script>
     <style>
         .profile-action{

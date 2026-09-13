@@ -93,7 +93,7 @@ else{
     <link rel="shortcut icon" href="/src/assets/logo/hollow_icon_light.png" type="image/x-icon">
     <link rel="stylesheet" href="/src/css/signup.css">
     <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
-    <script src="/src/js/ui-helpers.js"></script>
+    <script type="module" src="/src/js/init/signup.js"></script>
 </head>
 <body>
     <div class="register-container signup-container">
@@ -112,7 +112,7 @@ else{
             <span class="alert-text"></span>
         </div>
         <form class="signup-form" method="post" enctype="multipart/form-data" novalidate>
-            <div class="form-step step-1" style="display: none">
+            <div class="form-step step-1">
                 <div class="username-email-wrapper">
                     <input type="username" class="input username" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15">
                     <input type="email" class="input email" name="email" placeholder="Email">
@@ -126,14 +126,14 @@ else{
                     <button type="button" class="s-h s-h-2"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="btn-wrapper">
-                    <button type="button" class="btn next primary-btn" onclick="gotoStep(2)">Next<i class="fa-solid fa-arrow-right"></i></button>
+                    <button type="button" class="btn next primary-btn">Next<i class="fa-solid fa-arrow-right"></i></button>
                     <button class="btn google secondary-btn" type="button">
                         <img src="/src/assets/google.png"></img>
                         <span>Sign in with Google</span>
                     </button>
                 </div>
             </div>
-            <div class="form-step step-2">
+            <div class="form-step step-2" style="display: none">
                 <div class="bio-pfp-wrapper">
                     <div class="bio-privacy-wrapper">
                         <textarea class="input bio" name="bio" maxlength="150" placeholder="Write a short bio...&#10;(Optional)"></textarea>
@@ -155,7 +155,7 @@ else{
                 </div>
                 <div class="btn-wrapper">
                     <button type="submit" class="btn primary-btn">Finish<i class="fa-solid fa-right-to-bracket"></i></button>
-                    <button class="btn secondary-btn" type="button" onclick="gotoStep(1)">
+                    <button class="btn secondary-btn back" type="button">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Go back</span>
                     </button>
@@ -164,29 +164,6 @@ else{
         </form>
     </div>
     <script>
-        //Prevent the user from submitting if they're not in the final step of the inscription
-        var currentStep = 1;
-        document.querySelector('.signup-form').addEventListener('submit', async function(e){
-            e.preventDefault();
-            if(currentStep == 2){
-                const formData = new FormData(e.target);
-                
-                //HTTP Request
-                const res = await UI.sendPost('', formData);
-                if(res.status == 'ok'){
-                    UI.alert(true, res.message, 2);
-                    setTimeout(() => {
-                        window.location.replace('/');
-                    }, 2000);
-                }
-                else if(res.status == 'error'){
-                    UI.alert(false, res.message, null);
-                }
-            }
-            else{
-                gotoStep(2);
-            }
-        });
 
         //The upload field functionality
         document.querySelector(".img-input").addEventListener("click", (e)=>{
@@ -200,53 +177,6 @@ else{
         });
         document.querySelector(".pfp").onchange = function (){
             document.querySelector(".img-input").innerHTML = "<i class='fa-solid fa-x'></i><img src='"+URL.createObjectURL(document.querySelector(".pfp").files[0])+"'>";
-        }
-        
-        //Navigate between step 1 and step 2 && checking the user's provided credentials in the front-end
-        function gotoStep(step){
-            if(step == 2){
-                const username = document.querySelector('.username').value;
-                const email = document.querySelector('.email').value;
-                const pass1 = document.querySelector('.pass-1').value;
-                const pass2 = document.querySelector('.pass-2').value;
-                if(username && email && pass1 && pass2){
-                    if(!username.includes(" ")){
-                        if(UI.isValidEmail(email)){
-                            if(pass1.length >= 8){
-                                if(pass1 == pass2){
-                                    document.querySelectorAll('.form-step').forEach(formStep => {
-                                        formStep.style.display = 'none';
-                                    });
-                                    document.querySelector(`.step-${step}`).style.display = 'inline';
-                                    currentStep++;
-                                }
-                                else{
-                                    UI.alert(false, "Passwords are not identical.", null);
-                                }
-                            }
-                            else{
-                                UI.alert(false, "Password must contain at least 8 characters.", null);
-                            }
-                        }
-                        else{
-                            UI.alert(false, "Please enter a valid email.", null);
-                        }
-                    }
-                    else{
-                        UI.alert(false, "Username cannot contain space.", null);
-                    }
-                }
-                else{
-                    UI.alert(false, "All inputs are required.", null);
-                }
-            }
-            else if(step == 1){
-                document.querySelectorAll('.form-step').forEach(formStep => {
-                    formStep.style.display = 'none';
-                });
-                document.querySelector(`.step-${step}`).style.display = 'inline';
-                currentStep--;
-            }
         }
     </script>
 </body>

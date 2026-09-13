@@ -43,6 +43,9 @@ else{
 <html lang="en">
 <head>
     <link rel="stylesheet" href="/src/css/chat.css">
+    <meta name="id" content="<?php echo $id ?>">
+    <meta name="rid" content="<?php echo $rec_id ?>">
+    <script type="module" src="/src/js/init/chat.js"></script>
     <title>Hollow Chat</title>
 </head>
 <body>
@@ -84,7 +87,6 @@ else{
             </form>
         </div>
     </div>
-    <?php echo $requests_model ?>
     <script>
         // Listen for real-time presence changes broadcasted by server.js
         socket.on('user_status_change', (data) => {
@@ -183,61 +185,20 @@ else{
         })
 
         // Send message
-        document.querySelector('.send-form').addEventListener('submit', async function(e){
+        document.querySelector('.send-form').addEventListener('submit', (e) => {
             e.preventDefault();
             if(document.querySelector('.msg-input').value){
-                const formData = new FormData(e.target);
-                
-                //HTTP Request
-                await UI.sendPost('/src/api/messages/', formData);
-
-                // Make the input empty && scroll to the bottom of the field && isTyping = 0
-                document.querySelector('.msg-input').value = null;
-                document.querySelector('.field').scrollTop = document.querySelector('.field').scrollHeight;
-                isTyping = false;
                 socket.emit('typing', {
                     typedBy: "<?php echo $id; ?>",
                     typedTo: "<?php echo $rec_id; ?>",
                     isTyping: 0
                 });
             }
-        })
+        });
 
-        window.onload = async function(){
-            const id = "<?php echo $id ?>";
-            const rid = "<?php echo $rec_id ?>";
-
-            // Load chat when the page is loaded
-            const res = await UI.sendGet('/src/api/messages/', {rid: rid});
-            if(Array.isArray(res.response)){
-                var buffer = '';
-                res.response.forEach(message => {
-                    if(message.sid == id){
-                        const isRead = eval(message.isRead) ? '#e9e4c8' : 'none';
-    
-                        buffer += `
-                            <div class='msg-wrap'>
-                                <div class='isRead unread' style='background: ${isRead};'></div>
-                                <div class='s m'>${message.msg}</div>
-                            </div>
-                        `;
-                    }
-                    else if(message.sid == rid){
-                        buffer += `
-                            <div class='r m'>${message.msg}</div>
-                        `;
-                    }
-                });
-                document.querySelector('.inner-field').innerHTML = buffer;
-                field.scrollTop = field.scrollHeight;
-            }
-            else if(res.response == null){
-                document.querySelector('.inner-field').innerHTML = `
-                    <center>Start chatting now.</center>
-                `;
-            }
-        }
-        markChatAsRead("<?php echo $rec_id; ?>");
+        document.addEventListener('DOMContentLoaded', () => {
+            markChatAsRead("<?php echo $rec_id; ?>");
+        });
     </script>
 </body>
 </html>

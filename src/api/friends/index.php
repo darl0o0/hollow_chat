@@ -8,52 +8,77 @@ requireStrictGet();
 
 $user_data = check_login($con);
 header('Content-Type: application/json; charset=utf-8');
-
 $id = $user_data['id'];
-$list_of_friends = "";
 
-//List of friends
-$user2_friend = "";
-$friends_query = "select * from friends where (user1 = '$id' or user2 = '$id') and status = 'done'";
-$friend_row = mysqli_fetch_all(mysqli_query($con, $friends_query));
+$data = [
+    'friends' => [],
+    'requests' => [
+        'incoming' => [],
+        'outgoing' => []
+    ]
+];
 
-//The number to show next to the section's title
-$num_of_friends = mysqli_num_rows(mysqli_query($con, $friends_query));
-$friends_num = ($num_of_friends > 0)? (' ('.$num_of_friends.')'): '';
+//Select from friends table
+$friends_query = "select * from friends where (user1 = '$id' or user2 = '$id')";
+$row = mysqli_fetch_all(mysqli_query($con, $friends_query));
+$num_of_rows = mysqli_num_rows(mysqli_query($con, $friends_query));
+    
+// Pushing into data
+for($i = 0; $i < $num_of_rows ; $i++){
 
-if($num_of_friends > 0){
+    // Define the other user's id
+    $user2 = ($row[$i][0] == $id)? $row[$i][1] : $row[$i][0];
+    $query = "select * from users where id = '$user2'";
+    $friend = mysqli_fetch_all(mysqli_query($con, $query));
 
-    // Listing friends
-    for($i = 0; $i < $num_of_friends ; $i++){
+    if($row[$i][2] == 'done'){
 
-        // Define the other user's id
-        $user2_friend = ($friend_row[$i][0] == $id)? $friend_row[$i][1] : $friend_row[$i][0];
-        $query = "select * from users where id = '$user2_friend'";
-        $friend = mysqli_fetch_all(mysqli_query($con, $query));
-        
-        // Bio and online status
-        $bio = (strlen($friend[0][4])>0)? $friend[0][4] : 'No Bio.';
-        $isOnline = $friend[0][6] ? 'visible' : 'hidden';
-
-        //List friends
-        $list_of_friends .= "
-        <div class='user-card u-$user2_friend'>
-            <a href='/profile?u=$user2_friend' class='profile-link'></a>
-                <div class='pfp'>
-                    <img class='pfp-img' src='/src/assets/pfps/".$friend[0][5]."'>
-                </div>
-                <div class='label-wrapper'>
-                    <div class='username-label'>".$friend[0][1]."</div>
-                    <span class='sub-label'>$bio</span>
-                </div>
-            <div class='btn-wrapper-inbox'>
-                <a href='/chat?r=$user2_friend' class='btn-inbox'><i class='fa fa-comment' aria-hidden='true'></i></a>
-                <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
-            </div>
-        </div>
-        ";
+        //Push friend
+        $data['friends'][] = [
+            'id' => $user2,
+            'username' => $friend[0][1],
+            'img' => $friend[0][5],
+            'bio' => $friend[0][4]
+        ];
     }
+    elseif($row[$i][2] == 'waiting'){
+        if($row[$i][1] == $id){
+
+            //Push incoming request
+            $data['requests']['incoming'][] = [
+                'id' => $user2,
+                'username' => $friend[0][1],
+                'img' => $friend[0][5],
+                'bio' => $friend[0][4]
+            ];
+        }
+        elseif($row[$i][0] == $id){
+
+            //Push outgoing request
+            $data['requests']['outgoing'][] = [
+                'id' => $user2,
+                'username' => $friend[0][1],
+                'img' => $friend[0][5],
+                'bio' => $friend[0][4]
+            ];
+        }
+    }
+    // $data['friends'][] = "
+    // <div class='user-card u-$user2_friend'>
+    //     <a href='/profile?u=$user2_friend' class='profile-link'></a>
+    //         <div class='pfp'>
+    //             <img class='pfp-img' src='/src/assets/pfps/".$friend[0][5]."'>
+    //         </div>
+    //         <div class='label-wrapper'>
+    //             <div class='username-label'>".$friend[0][1]."</div>
+    //             <span class='sub-label'>$bio</span>
+    //         </div>
+    //     <div class='btn-wrapper-inbox'>
+    //         <a href='/chat?r=$user2_friend' class='btn-inbox'><i class='fa fa-comment' aria-hidden='true'></i></a>
+    //         <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
+    //     </div>
+    // </div>
+    // ";
 }
-else{
-    $list_of_friends = "<span class='nothing-here'>Nothing here.</span>";
-}
+echo json_encode(['status' => 'ok', 'response' => $data]);
+die();

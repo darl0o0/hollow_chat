@@ -6,7 +6,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
 <html lang="en">
 <head>
     <link rel="stylesheet" href="/src/css/home.css">
-    <link rel="stylesheet" href="/src/css/global.css">
+    <script type="module" src="/src/js/init/home.js"></script>
     <title>Hollow Chat</title>
 </head>
 <body>
@@ -23,7 +23,6 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
             <div class="users-list"></div>
         </div>
     </div>
-    <?php echo $requests_model ?>
     <script>
         // Listen for real-time presence changes broadcasted by server.js
         socket.on('user_status_change', (data) => {
@@ -33,30 +32,6 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                 statusDot.style.visibility = data.isOnline ? "visible" : "hidden";
             }
         });
-
-        // List users
-        window.onload = async function(){
-            const res = await UI.sendGet('/src/api/users/');
-            var buffer = "";
-            res.response.forEach(user => {
-                const bio = user.bio ? user.bio : "No Bio."
-                const isOnline = eval(user.isOnline) ? 'visible' : "hidden"
-
-                buffer += `
-                    <a class='user-card u-${user.id}' href='profile?u=${user.id}'>
-                        <div class='pfp'>
-                            <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
-                            <div class='online-status' style='visibility: ${isOnline}'></div>
-                        </div>
-                        <div class='label-wrapper'>
-                            <div class='username-label'>${user.username}</div>
-                            <span class='sub-label'>${bio}</span>
-                        </div>
-                    </a>
-                `;
-            });
-            document.querySelector('.users-list').innerHTML = buffer;
-        }
     </script>
 </body>
 </html>
