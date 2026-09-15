@@ -12,12 +12,12 @@ $user2_request = "";
 $requests_query = "select * from friends where user2 = '$id' and status = 'waiting'";
 $request_row = mysqli_fetch_all(mysqli_query($con, $requests_query));
 
-//The number to show next to the section's title
+//The number of incoming requests
 $num_of_requests = mysqli_num_rows(mysqli_query($con, $requests_query));
 
-// Notifications number
-$query_notifications = "select * from messages where rid = '$id' and isRead = '0'";
-$num_of_notifications = mysqli_num_rows(mysqli_query($con, $query_notifications));
+// Number of messages that are not read yet
+$query_unread_messages = "select * from messages where rid = '$id' and isRead = '0'";
+$num_of_unread_messages = mysqli_num_rows(mysqli_query($con, $query_unread_messages));
 
 $panel = '
     <a class="logo" href="/">
@@ -29,7 +29,7 @@ $panel = '
         <a href="/inbox" class="panel-action inbox-action">
         <div class="icon-wrapper">        
             <i class="fa-solid fa-inbox"></i>
-            <div class="num-of">'.$num_of_notifications.'</div>
+            <div class="num-of">'.$num_of_unread_messages.'</div>
         </div>
         <span>Inbox</span>
         </a>
@@ -37,11 +37,11 @@ $panel = '
         <a href="/profile?u='.$id.'" class="panel-action goto-profile-mobile profile-action"><img src="/src/assets/pfps/'.$user_data['img'].'"></a>
 
         <button class="panel-action notifications-action">
-        <div class="icon-wrapper">        
-            <i class="fa-solid fa-bell"></i>
-            <div class="num-of">'.$num_of_requests.'</div>
-        </div>
-        <span>Notifications</span>
+            <div class="icon-wrapper">        
+                <i class="fa-solid fa-bell"></i>
+                <div class="num-of">'.$num_of_requests.'</div>
+            </div>
+            <span>Notifications</span>
         </button>
         
         <a href="/settings" class="panel-action settings-action"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
@@ -82,60 +82,12 @@ $panel = '
 // }
 ?>
 <meta name="csrf-token" content="<?php echo getCsrfToken(); ?>">
+<meta name="id" content="<?php echo $id; ?>">
+<meta name="num-of-unread" content="<?php echo $num_of_unread_messages; ?>">
+<meta name="num-of-requests" content="<?php echo $num_of_requests; ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="shortcut icon" href="/src/assets/logo/hollow_icon_light.png" type="image/x-icon">
 <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script type="module" src="/src/js/init/main.js"></script>
-<script>
-    const socket = io('http://localhost:3000');
-    const currentUserId = "<?php echo $id; ?>";
-    socket.emit('register_user', currentUserId);
-    
-    var onLoadNotifications = <?php echo $num_of_notifications ?>;
-    var currentNotifications = onLoadNotifications;
-
-    var tabTitle = (currentNotifications + <?php echo $num_of_requests?>) > 0 ?
-             `(${currentNotifications + <?php echo $num_of_requests?>}) Hollow Chat` :
-                "Hollow Chat";
-    document.title = tabTitle;
-    socket.on('new_message', (data)=>{
-        if(data.sid != currentUserId){
-            currentNotifications++;
-            document.querySelector('.inbox-action .num-of').style.display = 'flex';
-            document.querySelector('.inbox-action .num-of').innerHTML = currentNotifications;
-
-            tabTitle = (currentNotifications + <?php echo $num_of_requests?>) > 0 ?
-             `(${currentNotifications + <?php echo $num_of_requests?>}) Hollow Chat` :
-                "Hollow Chat";
-            document.title = tabTitle;
-        }
-    });
-
-    socket.on('message_marked_read', (data) => {
-        if(data.readBy == '<?php echo $id ?>'){
-            currentNotifications -= data.count;
-            document.querySelector('.inbox-action .num-of').innerHTML = currentNotifications;
-            if(document.querySelector('.inbox-action .num-of').innerHTML == 0){
-                document.querySelector('.inbox-action .num-of').style.display = 'none';
-            }
-
-            tabTitle = (currentNotifications + <?php echo $num_of_requests?>) > 0 ?
-             `(${currentNotifications + <?php echo $num_of_requests?>}) Hollow Chat` :
-                "Hollow Chat";
-            document.title = tabTitle;
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-
-        document.querySelectorAll('.num-of').forEach(numOf => {
-            if(numOf.innerHTML == 0){
-                numOf.style.display = 'none';
-            }
-            else if(numOf.innerHTML > 99){
-                numOf.innerHTML = "+99";
-            }
-        });
-    });
-</script>
+<script type="module" src="/src/js/presence.js"></script>

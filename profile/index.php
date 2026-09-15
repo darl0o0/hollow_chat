@@ -101,38 +101,6 @@ else{
                 </div>
         </div>
     </div>
-    <script>
-        // Listen for real-time presence changes broadcasted by server.js
-        socket.on('user_status_change', (data) => {
-            const statusDot = document.querySelector(".is-online");
-            const statusLabel = document.querySelector(".is-online-label");
-            if(data.userId == "<?php echo $user2; ?>"){
-                statusDot.style.background = data.isOnline ? "#e9e4c8" : "none";
-                statusDot.style.border = data.isOnline ? "2px solid #e9e4c8" : "2px ridge #464646";
-                statusLabel.innerHTML = data.isOnline ? "Online" : "Offline";
-            }
-        });
-
-        // Copy profile link
-        function copyProfileLink(){
-            const profileUrl = window.location.href;
-            navigator.clipboard.writeText(profileUrl).then(() => {
-                const btn = document.querySelector('.share-profile');
-                btn.innerHTML = 'Profile link copied!';
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fa-solid fa-share"></i>Share profile';
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy', err);
-            });
-        }
-
-        const shareProfileBtn = document.querySelector('.share-profile');
-        if(shareProfileBtn)
-        shareProfileBtn.addEventListener('click', ()=>{
-            copyProfileLink();
-        });
-    </script>
     <style>
         .profile-action{
             background-color: <?php echo $isMyProfile ?>;

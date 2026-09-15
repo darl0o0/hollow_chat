@@ -52,12 +52,16 @@ export const UI = {
         let body;
     
         if(data instanceof FormData){
-            // Leave body as FormData; browser automatically sets multipart/form-data boundary header
             body = data;
-        }else{
-            // Handle plain JS objects
-            headers['Content-Type'] = 'application/json';
-            body = JSON.stringify(data);
+        }
+        else{
+            // Convert plain JS objects into FormData so PHP populates $_POST automatically
+            body = new FormData();
+            for(const key in data){
+                if(Object.prototype.hasOwnProperty.call(data, key)){
+                    body.append(key, data[key]);
+                }
+            }
         }
     
         const response = await fetch(url, {
@@ -97,16 +101,16 @@ export const UI = {
     },
 
     // Global elements
-    globalElements: function(){
+    globalElements: function(numOfNot){
         if(document.querySelector('.requests-model')) return;
-
+        numOfNot = (numOfNot > 0) ? `(${numOfNot})` : '';
         const modalHTML = `
             <div class="model requests-model">
                 <div class="background"></div>
                 <div class="container">
                     <h1><i class="fa-solid fa-bell"></i>Notifications</h1>
                     <div class="title-sep-wrapper">
-                        <span class="title">Friend requests 5</span>
+                        <span class="title">Friend requests <span class="not-count">${numOfNot}</span></span>
                         <div class="sep"></div>
                     </div>
                     <div class="list"></div>
@@ -114,6 +118,15 @@ export const UI = {
             </div>
         `;
         document.body.insertAdjacentHTML('beforeend', modalHTML);
+    },
+
+    // Update notifications count
+    updateNotCount: function(count){
+        count = (count > 0) ? `(${count})` : '';
+        const countEl = document.querySelector('.requests-model .not-count');
+        if(countEl){
+            countEl.textContent = count;
+        }
     },
     
     // Hide the on-screen models

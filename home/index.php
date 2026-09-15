@@ -23,15 +23,5 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
             <div class="users-list"></div>
         </div>
     </div>
-    <script>
-        // Listen for real-time presence changes broadcasted by server.js
-        socket.on('user_status_change', (data) => {
-            const statusDot = document.querySelector(`.u-${data.userId} .online-status`);
-            
-            if (statusDot) {
-                statusDot.style.visibility = data.isOnline ? "visible" : "hidden";
-            }
-        });
-    </script>
 </body>
 </html>

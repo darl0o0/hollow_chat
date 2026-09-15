@@ -1,6 +1,10 @@
 import { UI } from "../ui-helpers.js";
+import { socket } from "./main.js";
+
+let id = null;
 
 document.addEventListener('DOMContentLoaded', async function(){
+    id = document.querySelector('meta[name="id"]')?.content;
 
     // List conversations
     const res = await UI.sendGet('/src/api/conversations');
@@ -30,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async function(){
                 lastMsg = conversation.lastMsg.msg;
 
                 if(!eval(conversation.lastMsg.isRead)){
-                    badgeVsibility = 'visiblie';
+                    badgeVsibility = 'visibile';
                     lastMsgColor = '#d5d6c3';
                     lastMsgWeight = 'bolder';
                 }
@@ -68,4 +72,74 @@ document.addEventListener('DOMContentLoaded', async function(){
         buffer = "<center>Nothing here.</center>";
     }
     document.querySelector('.list').innerHTML = buffer;
+});
+
+// Listen for real-time presence changes broadcasted by server.js
+socket.on('user_status_change', (data) => {
+    const statusDot = document.querySelector(`.u-${data.userId} .online-status`);
+    
+    if(statusDot){
+        statusDot.style.visibility = data.isOnline ? "visible" : "hidden";
+    }
+});
+
+// When a new message is received class as yours or the other user's && as read or unread
+socket.on('new_message', (data) => {
+
+    const targetId = (data.sid == id)? data.rid : data.sid;
+    const listContainer = document.querySelector('.list');
+    const conversationCard = document.querySelector(`.u-${targetId}`);
+    
+    if(conversationCard){
+        listContainer.prepend(conversationCard);
+    
+        const subLabel = document.querySelector(`.u-${targetId} .sub-label`);
+        const isUnreadMsg = document.querySelector(`.u-${targetId} .unread-msg`);
+    
+        const lastMsgText = (data.sid == id) ? `You: ${data.message}` : data.message;
+        conversationCard.setAttribute('data-last-msg', lastMsgText);
+        
+        if(subLabel){
+            subLabel.innerHTML = lastMsgText;
+            if(data.sid == id){
+                isUnreadMsg.style.visibility = 'hidden';
+                subLabel.style.color = '#a8a8a8';
+                subLabel.style.fontWeight = '400';
+            }
+            else{
+                isUnreadMsg.style.visibility = 'visible';
+                subLabel.style.color = '#d5d6c3';
+                subLabel.style.fontWeight = 'bolder';
+            }
+        }
+    }
+});
+
+// Class the last message as read as needed
+socket.on('message_marked_read', (data) => {
+    const subLabel = document.querySelector(`.u-${data.readTo} .sub-label`);
+    const isUnreadMsg = document.querySelector(`.u-${data.readTo} .unread-msg`);
+
+    if(data.readBy == id){
+        isUnreadMsg.style.visibility = 'hidden';
+        subLabel.style.color = '#a8a8a8';
+        subLabel.style.fontWeight = '400';
+    }
+});
+
+// When the other user is typing
+socket.on('typing_back', (data) => {
+    const targetId = (data.typedBy == id)? data.typedTo : data.typedBy;
+
+    const subLabel = document.querySelector(`.u-${targetId} .sub-label`);
+    const conversationCard = document.querySelector(`.u-${targetId}`);
+
+    if(data.typedBy == targetId && data.typedTo == id){
+        if(data.isTyping){
+            subLabel.innerHTML = 'Typing...';
+        }
+        else{
+            subLabel.innerHTML = conversationCard.getAttribute('data-last-msg') || '';
+        }
+    }
 });

@@ -3,14 +3,23 @@ import { UI } from "../ui-helpers.js";
 document.addEventListener('DOMContentLoaded', () => {
 
     // Show the on-screen models
-    document.querySelector(".change").addEventListener('click', () => {            
-        document.querySelector(".change-model").style.visibility = "visible";
-        document.querySelector(".main").style.filter = "blur(3px)";
+    const changeBtn = document.querySelector(".change");
+    const deleteBtn = document.querySelector(".delete");
+    const main = document.querySelector(".main");
+
+    changeBtn.addEventListener('click', () => { 
+        const model = document.querySelector(".change-model");
+        if(model) model.style.visibility = "visible";
+        if(main) main.style.filter = "blur(3px)";
     });
-    document.querySelector(".delete").addEventListener('click', () => {
-        document.querySelector(".delete-model").style.visibility = "visible";
-        document.querySelector(".main").style.filter = "blur(3px)";
-    })
+
+    deleteBtn.addEventListener('click', () => { 
+        const model = document.querySelector(".delete-model");
+        if(model) model.style.visibility = "visible";
+        if(main) main.style.filter = "blur(3px)";
+    });
+
+    // Hide the on-screen models
     document.querySelectorAll(".model .secondary-btn").forEach(hideEvent => {
         hideEvent.addEventListener('click', () => {
             UI.hideModel();
@@ -20,28 +29,39 @@ document.addEventListener('DOMContentLoaded', () => {
     //Update form
     document.querySelector(".update-form").addEventListener('submit', async function(e){
         e.preventDefault();
-        const username = document.querySelector('.username').value;
-        const email = document.querySelector('.email').value;
-        if(username && email){
-            if(username != "<?php echo $user_data['username'];?>" || email != "<?php echo $user_data['email'];?>"){
-                const formData = new FormData(e.target);
-                
-                //HTTP Request
-                const res = await UI.sendPost('/src/api/account/update.php', formData);
-                if(res.status == 'ok'){
-                    UI.alert(true, res.message, 3);
-                }
-                else if(res.status == 'error'){
-                    console.log(res.message);
-                    UI.alert(false, res.message, null);
-                }
-            }
-            else{
-                UI.alert(false, "Cannot use the current credentials.", null);
-            }
-        }
-        else{
+
+        const usernameEl = document.querySelector('.username');
+        const emailEl = document.querySelector('.email');
+
+        const username = usernameEl?.value.trim();
+        const email = emailEl?.value.trim();
+
+        if(!username || !email){
             UI.alert(false, "All inputs are required.", null);
+            return;
+        }
+
+        const initUsername = usernameEl.dataset.initial || '';
+        const initEmail = emailEl.dataset.initial || '';
+
+        if(username == initUsername && email == initEmail){
+            UI.alert(false, "Cannot use the current credentials.", null);
+            return;
+        }
+
+        const formData = new FormData(e.target);
+
+        const res = await UI.sendPost('/src/api/account/update.php', formData);
+
+        if(res.status == 'ok'){
+            UI.alert(true, res.message, 3);
+
+            usernameEl.dataset.initial = username;
+            emailEl.dataset.initial = email;
+        }
+        else if(res.status == 'error'){
+            UI.alert(false, res.message, null);
+            return;
         }
     });
     
@@ -50,23 +70,23 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const email = document.querySelector('.delete-email').value;
         const password = document.querySelector('.delete-password').value;
-        if(email && password){
-            const formData = new FormData(e.target);
-            
-            //HTTP Request
-            const res = await UI.sendPost('/src/api/account/delete.php', formData);
-            if(res.status == 'ok'){
-                UI.alert(true, res.message, 4, true);
-                setTimeout(() => {
-                    window.location.replace('/signin');
-                }, 4000);
-            }
-            else if(res.status == 'error'){
-                UI.alert(false, res.message, null, true);
-            }
-        }
-        else{
+        if(!email || !password){
             UI.alert(false, "All inputs are required.", null, true);
+            return;
+        }
+        const formData = new FormData(e.target);
+
+        const res = await UI.sendPost('/src/api/account/delete.php', formData);
+
+        if(res.status == 'ok'){
+            UI.alert(true, res.message, 4, true);
+            setTimeout(() => {
+                window.location.replace('/signin');
+            }, 4000);
+        }
+        else if(res.status == 'error'){
+            UI.alert(false, res.message, null, true);
+            return;
         }
     });
 });

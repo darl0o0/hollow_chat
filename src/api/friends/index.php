@@ -4,7 +4,7 @@
 session_start();
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
-requireStrictGet();
+// requireStrictGet();
 
 $user_data = check_login($con);
 header('Content-Type: application/json; charset=utf-8');
@@ -80,5 +80,10 @@ for($i = 0; $i < $num_of_rows ; $i++){
     // </div>
     // ";
 }
+$data['friends'] = (count($data['friends']) > 0) ? $data['friends'] : null;
+
+$data['requests']['incoming'] = (count($data['requests']['incoming']) > 0) ? $data['requests']['incoming'] : null;
+
+$data['requests']['outgoing'] = (count($data['requests']['outgoing']) > 0) ? $data['requests']['outgoing'] : null;
 echo json_encode(['status' => 'ok', 'response' => $data]);
 die();

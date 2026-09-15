@@ -45,6 +45,7 @@ else{
     <link rel="stylesheet" href="/src/css/chat.css">
     <meta name="id" content="<?php echo $id ?>">
     <meta name="rid" content="<?php echo $rec_id ?>">
+    <meta name="unread-count" content="<?php echo $unread_count ?>">
     <script type="module" src="/src/js/init/chat.js"></script>
     <title>Hollow Chat</title>
 </head>
@@ -87,118 +88,5 @@ else{
             </form>
         </div>
     </div>
-    <script>
-        // Listen for real-time presence changes broadcasted by server.js
-        socket.on('user_status_change', (data) => {
-            
-            // data = { userId: "...", isOnline: 1 or 0 }
-            document.querySelectorAll(".online-status").forEach(onlineStatus => {
-                if(data.userId == "<?php echo $rec_id; ?>"){
-                    onlineStatus.style.visibility = data.isOnline ? "visible" : "hidden";
-                }
-            });
-        });
-
-        // Receive messages instantly without polling
-        const field = document.querySelector('.field');
-        socket.on('new_message', (data) => {
-            const chatField = document.querySelector('.inner-field');
-            const msgDiv = document.createElement('div');
-            
-            // Set 's m' class for sender, 'r m' for receiver
-            if(data.sid === currentUserId){
-                msgDiv.className = 's m';
-                const msgWrap = document.createElement('div');
-                msgWrap.className = 'msg-wrap';
-                chatField.appendChild(msgWrap);
-                const msgIsRead = document.createElement('div');
-                msgIsRead.classList.add('isRead');
-                msgIsRead.classList.add('unread');
-                msgWrap.appendChild(msgIsRead);
-                msgWrap.appendChild(msgDiv);
-            }
-            else{
-                msgDiv.className = 'r m';
-                chatField.appendChild(msgDiv);
-                markChatAsRead("<?php echo $rec_id; ?>");
-            }
-            msgDiv.textContent = data.message;
-            
-            field.scrollTop = field.scrollHeight;
-        });
-
-        // Mark the last message as read when the page is loaded
-        function markChatAsRead(activeUserId){
-            socket.emit('mark_as_read', {
-                senderId: activeUserId,
-                receiverId: currentUserId,
-                unreadCount: <?php echo $unread_count ?>
-            });
-        }
-
-        // When the other user read's the current user's message
-        socket.on('message_marked_read', (data) => {
-            const activePartnerId = "<?php echo $rec_id; ?>"
-            if(data.readBy === activePartnerId){
-                document.querySelectorAll('.isRead.unread').forEach(el => {
-                    el.classList.remove('unread');
-                    el.classList.add('read');
-                });
-            }
-        });
-
-        // When typing
-        let isTyping = false;
-        const inputEl = document.querySelector('.send-form input');
-        inputEl.addEventListener('input', () => {
-            const hasText = inputEl.value.trim().length > 0;
-            if(hasText && !isTyping) {
-                isTyping = true;
-                socket.emit('typing', {
-                    typedBy: "<?php echo $id; ?>",
-                    typedTo: "<?php echo $rec_id; ?>",
-                    isTyping: 1
-                });
-            } 
-            else if(!hasText && isTyping) {
-                isTyping = false;
-                socket.emit('typing', {
-                    typedBy: "<?php echo $id; ?>",
-                    typedTo: "<?php echo $rec_id; ?>",
-                    isTyping: 0
-                });
-            }
-        });
-
-        // When the other user is typing
-        socket.on('typing_back', (data) => {
-            if(data.typedBy == "<?php echo $rec_id; ?>" && data.typedTo == currentUserId){
-                console.log('fghfgdhfgh')
-                if(data.isTyping){
-                    document.querySelector('.typing').style.display = 'inline';
-                    document.querySelector('.field').scrollTop = document.querySelector('.field').scrollHeight;
-                }
-                else{
-                    document.querySelector('.typing').style.display = 'none';
-                }
-            }
-        })
-
-        // Send message
-        document.querySelector('.send-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            if(document.querySelector('.msg-input').value){
-                socket.emit('typing', {
-                    typedBy: "<?php echo $id; ?>",
-                    typedTo: "<?php echo $rec_id; ?>",
-                    isTyping: 0
-                });
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            markChatAsRead("<?php echo $rec_id; ?>");
-        });
-    </script>
 </body>
 </html>

@@ -1,13 +1,15 @@
 import { UI } from "../ui-helpers.js";
+import { socket } from "./main.js";
 
 document.addEventListener('DOMContentLoaded', async function(){
 
     // List users
     const res = await UI.sendGet('/src/api/users/');
-    var buffer = "";
+
+    let buffer = "";
     res.response.forEach(user => {
         const bio = user.bio ? user.bio : "No Bio."
-        const isOnline = eval(user.isOnline) ? 'visible' : "hidden"
+        const isOnline = Boolean(Number(user.isOnline)) ? 'visible' : "hidden"
 
         buffer += `
             <a class='user-card u-${user.id}' href='profile?u=${user.id}'>
@@ -23,4 +25,13 @@ document.addEventListener('DOMContentLoaded', async function(){
         `;
     });
     document.querySelector('.users-list').innerHTML = buffer;
+});
+
+// Listen for real-time presence changes broadcasted by server.js
+socket.on('user_status_change', (data) => {
+    const onlineStatus = document.querySelector(`.u-${data.userId} .online-status`);
+    
+    if(onlineStatus){
+        onlineStatus.style.visibility = data.isOnline ? "visible" : "hidden";
+    }
 });

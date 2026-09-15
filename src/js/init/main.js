@@ -1,75 +1,166 @@
 import { UI } from "../ui-helpers.js";
+export const socket = io('http://localhost:3000');
 
-document.addEventListener('DOMContentLoaded', () => {
+let id = null;
+let activeChatUserId = null;
 
+let requestsCount = 0;
+let unreadCount = 0;
+let notificationsCount = 0;
+
+function updateNotUIState(){
+    notificationsCount = Math.max(0, unreadCount) + Math.max(0, requestsCount);
+    document.title = notificationsCount > 0 ? `(${notificationsCount}) Hollow Chat` : "Hollow Chat";
+
+    const inboxBadge = document.querySelector('.inbox.action .num-of');
+    if(inboxBadge){
+        if(unreadCount > 0){
+            inboxBadge.style.display = 'flex';
+            inboxBadge.textContent = unreadCount > 99 ? '+99' : unreadCount;
+        }
+        else{
+            inboxBadge.style.display = 'none';
+            inboxBadge.textContent = '0';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async function(){
+
+    id = document.querySelector('meta[name="id"]')?.content;
+    activeChatUserId = document.querySelector('meta[name="rid"]')?.content || null;
+    
+    requestsCount = parseInt(document.querySelector('meta[name="num-of-requests"]').content, 10) || 0;
+    unreadCount = parseInt(document.querySelector('meta[name="num-of-unread"]').content, 10) || 0;
+    updateNotUIState();
+
+    const res = await UI.sendGet('/src/api/friends/');
+    const incomingRequestsCount = res?.response?.requests?.incoming;
+    
     // Universal notifications list
-    UI.globalElements();
-
-    // Show/hide password
-    document.querySelectorAll('.s-h').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const input = btn.parentElement.querySelector('input');
-            const icon = btn.querySelector('i');
-
-            const isPassword = input.type === 'password';
-            input.type = isPassword ? 'text' : 'password';
-
-            icon.classList.toggle('fa-eye', !isPassword);
-            icon.classList.toggle('fa-eye-slash', isPassword);
+    UI.globalElements(incomingRequestsCount?.length || 0);
+    
+    if(res.response.requests.incoming != null){
+        let buffer = "";
+        res.response.requests.incoming.forEach(user => {
+            
+            const bio = user.bio ? user.bio : "No Bio."
+    
+            buffer += `
+                <div class='user-card u-${user.id}'>
+                    <a href='/profile?u=${user.id}' class='profile-link'></a>
+                    <div class='pfp'>
+                        <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
+                    </div>
+                    <div class='label-wrapper'>
+                        <div class='username-label'>${user.username}</div>
+                        <span class='sub-label'>${bio}</span>
+                    </div>
+                    <div class='btn-wrapper-requests'>
+                        <form method='post' action='/profile/friend_action.php' class='accept-form' data-id='${user.id}'>
+                            <button class='btn-requests'><i class='fa fa-check' aria-hidden='true'></i></button>
+                        </form>
+                        <form method='post' action='/profile/friend_action.php' class='decline-form' data-id='${user.id}'>
+                            <button class='btn-requests'><i class='fa fa-times' aria-hidden='true'></i></button>
+                        </form>
+                    </div>
+                </div>
+            `;
         });
-    });
-
-    // Notifications model
-    if(document.querySelector('.notifications-action')){
-        document.querySelector('.notifications-action').addEventListener('click', () => {
-            document.querySelector(".requests-model").style.visibility = "visible";
-            document.querySelector(".main").style.filter = "blur(3px)";
-        });
+        document.querySelector('.requests-model .list').innerHTML = buffer;
+    }
+    else{
+        document.querySelector('.requests-model .list').innerHTML = "<center>Nothing here.</center>";
     }
 
-    if(document.querySelector(".background")){
-        document.addEventListener('keydown', (e) =>{
-            if(e.keyCode === 27){
-                UI.hideModel();
-            }
-        });
-    }
-
-    document.querySelectorAll(".background").forEach(hideEvent => {
-        hideEvent.onclick = UI.hideModel;
+    document.querySelectorAll('.num-of').forEach(numOf => {
+        const val = parseInt(numOf.textContent, 10) || 0;
+        if(val == 0){
+            numOf.style.display = 'none';
+        }
+        else if(val > 99){
+            numOf.textContent = "+99";
+        }
     });
 });
 
-document.addEventListener('DOMContentLoaded', async function(){
-    const res = await UI.sendGet('/src/api/friends/');
-    var buffer = "";
-    res.response.requests.incoming.forEach(user => {
-        const bio = user.bio ? user.bio : "No Bio."
+document.addEventListener('submit', async (e) => {
+    const acceptForm = e.target.closest('.accept-form');
+    const declineForm = e.target.closest('.decline-form');
 
-        buffer += `
-            <div class='user-card u-${user.id}'>
-                <a href='/profile?u=${user.id}' class='profile-link'></a>
-                <div class='pfp'>
-                    <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
-                </div>
-                <div class='label-wrapper'>
-                    <div class='username-label'>${user.username}</div>
-                    <span class='sub-label'>${bio}</span>
-                </div>
-                <div class='btn-wrapper-requests'>
-                    <form method='post' action='/profile/friend_action.php'>
-                        <input type='hidden' name='user2_id' value='$user2_request'>
-                        <input type='hidden' name='from' value='fr'>
-                        <button name='action' value='2' class='btn-requests'><i class='fa fa-check' aria-hidden='true'></i></button>
-                    </form>
-                    <form method='post' action='/profile/friend_action.php'>
-                        <input type='hidden' name='user2_id' value='$user2_request'>
-                        <input type='hidden' name='from' value='fr'>
-                        <button name='action' value='1' class='btn-requests'><i class='fa fa-times' aria-hidden='true'></i></button>
-                    </form>
-                </div>
-            </div>
-        `;
+    if(acceptForm || declineForm){
+        e.preventDefault();
+        const form = acceptForm || declineForm;
+        const targetUserId = form.dataset.id;
+        const action = acceptForm ? 2 : 1;
+
+        await UI.sendPost('/src/api/relationship/', {user2: targetUserId, action});
+
+        const card = document.querySelector(`.u-${targetUserId}`);
+        card.remove();
+
+        requestsCount = Math.max(0, requestsCount - 1);
+        UI.updateNotCount(requestsCount);
+        updateNotUIState();
+
+        const listContainer = document.querySelector('.requests-model .list');
+        if(listContainer.children.length == 0){
+            listContainer.innerHTML = "<center>Nothing here.</center>";
+        }
+    }
+});
+
+// Show notifications model
+document.addEventListener('click', (e) => {
+    if(e.target.closest('.notifications-action')){
+        const model = document.querySelector(".requests-model");
+        const main = document.querySelector(".main");
+        if(model) model.style.visibility = "visible";
+        if(main) main.style.filter = "blur(3px)";
+    }
+});
+
+// Hide notifications model
+document.addEventListener('keydown', (e) =>{
+    if(e.keyCode === 27 || e.key === 'Escape'){
+        UI.hideModel();
+    }
+});
+
+document.addEventListener('click', (e) => {
+    if(e.target.matches('.background')){
+        UI.hideModel();
+    }
+});
+
+// Show/hide password
+document.querySelectorAll('.s-h').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const input = btn.parentElement.querySelector('input');
+        const icon = btn.querySelector('i');
+
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+
+        icon.classList.toggle('fa-eye', !isPassword);
+        icon.classList.toggle('fa-eye-slash', isPassword);
     });
-    document.querySelector('.requests-model .list').innerHTML = buffer;
+});
+
+socket.on('new_message', (data)=>{
+    const isChatOpen = (typeof activeChatUserId !== null) && (activeChatUserId == data.sid);
+    
+    if(data.sid != id && !isChatOpen){
+        unreadCount++;
+        updateNotUIState();
+    }
+});
+
+socket.on('message_marked_read', (data) => {
+
+    if(data.readBy == id){
+        const countToDeduct = parseInt(data.count, 10) || 0;
+        unreadCount = Math.max(0, unreadCount - countToDeduct);
+        updateNotUIState();
+    }
 });

@@ -24,8 +24,25 @@ include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
                     <span class="alert-text"></span>
                 </div>
                 <form method="post" class="update-form">
-                    <input type="username" class="input username" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15" value="<?php echo $user_data['username'];?>">
-                    <input type="email" class="input email" name="email" placeholder="Email" value="<?php echo $user_data['email'];?>">
+                    
+                    <input 
+                    type="username" 
+                    class="input username" 
+                    name="username" 
+                    placeholder="Username" 
+                    pattern="[A-Za-z0-9_]+" 
+                    maxlength="15" 
+                    value="<?php echo $user_data['username'];?>" 
+                    data-initial="<?php echo $user_data['username'];?>">
+
+                    <input 
+                    type="email" 
+                    class="input email" 
+                    name="email" 
+                    placeholder="Email" 
+                    value="<?php echo $user_data['email'];?>" 
+                    data-initial="<?php echo $user_data['email'];?>">
+
                     <div class="btn-wrapper">
                         <button type="submit" class="btn primary-btn submit">Apply<i class="fa-solid fa-check"></i></button>
                         <button type="button" class="btn secondary-btn change">Change password</button>
