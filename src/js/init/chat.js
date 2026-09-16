@@ -96,6 +96,7 @@ document.querySelector('.send-form').addEventListener('submit', async function(e
 socket.on('new_message', (data) => {
     const isRelevantMsg = (data.sid == id && data.rid == rid) || (data.sid == rid && data.rid == id);
     if(!isRelevantMsg) return;
+    console.log(data);
 
     const chatField = document.querySelector('.inner-field');
     const msgDiv = document.createElement('div');
@@ -119,7 +120,7 @@ socket.on('new_message', (data) => {
     }
     msgDiv.textContent = data.message;
     
-    field.scrollTop = field.scrollHeight;
+    document.querySelector('.field').scrollTop = document.querySelector('.field').scrollHeight;
 });
 
 // When the other user read's the current user's message

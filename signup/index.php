@@ -87,13 +87,11 @@ else{
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sign up</title>
-    <meta name="csrf-token" content="<?php echo getCsrfToken(); ?>">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="shortcut icon" href="/src/assets/logo/hollow_icon_light.png" type="image/x-icon">
+    <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/head.php"; ?>
+    
     <link rel="stylesheet" href="/src/css/signup.css">
-    <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
-    <script type="module" src="/src/js/init/signup.js"></script>
+    <script type="module" src="/src/js/init/signup.js" defer></script>
+    <title>Sign up</title>
 </head>
 <body>
     <div class="register-container signup-container">
@@ -154,7 +152,7 @@ else{
                     <input type="file" name="img" class="pfp" accept="image/jpg, image/jpeg, image/png">
                 </div>
                 <div class="btn-wrapper">
-                    <button type="submit" class="btn primary-btn">Finish<i class="fa-solid fa-right-to-bracket"></i></button>
+                    <button type="submit" class="btn primary-btn submit">Finish<i class="fa-solid fa-right-to-bracket"></i></button>
                     <button class="btn secondary-btn back" type="button">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Go back</span>
@@ -163,21 +161,5 @@ else{
             </div>
         </form>
     </div>
-    <script>
-
-        //The upload field functionality
-        document.querySelector(".img-input").addEventListener("click", (e)=>{
-            if(document.querySelector('.img-input .fa-x') && document.querySelector('.img-input .fa-x').contains(e.target)){
-                document.querySelector(".img-input").innerHTML = "Choose a profile picture<br>(Optional)<br><i class='fa-solid fa-image'></i>";
-                document.querySelector(".pfp").value = "";
-            }
-            else{
-                document.querySelector(".pfp").click();
-            }
-        });
-        document.querySelector(".pfp").onchange = function (){
-            document.querySelector(".img-input").innerHTML = "<i class='fa-solid fa-x'></i><img src='"+URL.createObjectURL(document.querySelector(".pfp").files[0])+"'>";
-        }
-    </script>
 </body>
 </html>

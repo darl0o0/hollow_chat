@@ -86,14 +86,14 @@ io.on('connection', (socket) => {
       }
 
       if (userId) {
-          // Check if user still has other tabs open in their room
-          const remainingSockets = await io.in(userId).fetchSockets();
+        // Check if user still has other tabs open in their room
+        const remainingSockets = await io.in(userId).fetchSockets();
 
-          // Only set offline if no other sockets remain in this room
-          if (remainingSockets.length === 0) {
-              await db.query('UPDATE users SET online = 0 WHERE id = ?', [userId]);
-              io.emit('user_status_change', { userId: userId, isOnline: 0 });
-          }
+        // Only set offline if no other sockets remain in this room
+        if (remainingSockets.length === 0) {
+            await db.query('UPDATE users SET online = 0 WHERE id = ?', [userId]);
+            io.emit('user_status_change', { userId: userId, isOnline: 0 });
+        }
       }
   });
 });
@@ -103,7 +103,7 @@ app.post('/broadcast', (req, res) => {
   const { sid, rid, message, isRead } = req.body;
 
   // Send message to all tabs/browsers of receiver
-  io.to(rid).emit('new_message', { sid, message });
+  io.to(rid).emit('new_message', { sid, rid, message });
 
   // Send back to all tabs/browsers of sender
   io.to(sid).emit('new_message', { sid, rid, message, isRead });

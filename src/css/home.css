@@ -45,6 +45,7 @@
     overflow-y: auto;
     list-style: none;
     padding-right: 5px;
+    min-height: 0;
 }
 
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */

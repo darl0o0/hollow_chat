@@ -1,7 +1,7 @@
 <?php
 
 //Initialization
-include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
 $mainDisplay = 'flex';
 $not_found = '';
 $isMyProfile = '';
@@ -35,6 +35,9 @@ else{
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/head.php"; ?>
+    <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main-head.php"; ?>
+
     <link rel="stylesheet" href="/src/css/profile.css">
     <script type="module" src="/src/js/init/profile.js"></script>
     <meta name="user2" content="<?php echo $user2 ?>">
@@ -42,7 +45,7 @@ else{
 </head>
 <body>
     <div class="main profile">
-        <?php echo $panel ?>
+        <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/panel.php"; ?>
         <div class="preview">
             <h1 class="not-found"><?php echo $not_found ?></h1>
             <div style="display: <?php echo $mainDisplay ?>" class="profile-wrapper">

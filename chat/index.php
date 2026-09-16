@@ -1,6 +1,6 @@
 <?php
 //Initialization
-include $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
 $not_found = '';
 $link = '/';
 if(!isset($_GET['r'])){
@@ -42,16 +42,19 @@ else{
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="/src/css/chat.css">
-    <meta name="id" content="<?php echo $id ?>">
+    <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/head.php"; ?>
+    <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main-head.php"; ?>
+    
     <meta name="rid" content="<?php echo $rec_id ?>">
     <meta name="unread-count" content="<?php echo $unread_count ?>">
+    
+    <link rel="stylesheet" href="/src/css/chat.css">
     <script type="module" src="/src/js/init/chat.js"></script>
     <title>Hollow Chat</title>
 </head>
 <body>
     <div class="main chat">
-        <?php echo $panel ?>
+        <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/panel.php"; ?>
         <a class="profile-header mobile-header" href="<?php echo $link ?>">
             <div class='pfp'>
                 <img class='pfp-img' src='/src/assets/pfps/<?php echo $img ?>'>

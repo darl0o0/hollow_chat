@@ -12,7 +12,7 @@ function updateNotUIState(){
     notificationsCount = Math.max(0, unreadCount) + Math.max(0, requestsCount);
     document.title = notificationsCount > 0 ? `(${notificationsCount}) Hollow Chat` : "Hollow Chat";
 
-    const inboxBadge = document.querySelector('.inbox.action .num-of');
+    const inboxBadge = document.querySelector('.inbox-action .num-of');
     if(inboxBadge){
         if(unreadCount > 0){
             inboxBadge.style.display = 'flex';
@@ -153,6 +153,7 @@ socket.on('new_message', (data)=>{
     if(data.sid != id && !isChatOpen){
         unreadCount++;
         updateNotUIState();
+        console.log('we')
     }
 });
 

@@ -53,20 +53,12 @@ else{
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sign in</title>
-    <meta name="csrf-token" content="<?php echo getCsrfToken(); ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="/src/assets/logo/hollow_icon_light.png" type="image/x-icon">
+    <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/head.php"; ?>
+    
     <link rel="stylesheet" href="/src/css/signin.css">
-    <link rel="stylesheet" href="/src/css/global.css">
-    <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
-    <script type="module" src="/src/js/init/signin.js"></script>
+    <script type="module" src="/src/js/init/signin.js" defer></script>
+    <title>Sign in</title>
     <style>
-        body{
-            display: flex;
-            justify-content: center;
-            margin-top: 8vh;
-        }
     </style>
 </head>
 <body>
