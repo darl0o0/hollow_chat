@@ -122,11 +122,21 @@ export const UI = {
 
     // Update notifications count
     updateNotCount: function(count){
-        count = (count > 0) ? `(${count})` : '';
-        const countEl = document.querySelector('.requests-model .not-count');
-        if(countEl){
-            countEl.textContent = count;
+        let countLabel = (count > 0) ? `(${count})` : '';
+        const countLabelEl = document.querySelector('.requests-model .not-count');
+        const notificationsBadge = document.querySelector('.notifications-action .num-of');
+
+        if(notificationsBadge){
+            if(count > 0){
+                notificationsBadge.style.display = 'flex';
+                notificationsBadge.textContent = count > 99 ? '+99' : count;
+            }
+            else{
+                notificationsBadge.style.display = 'none';
+                notificationsBadge.textContent = '0';
+            }
         }
+        countLabelEl.textContent = countLabel;
     },
     
     // Hide the on-screen models

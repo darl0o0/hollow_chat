@@ -260,7 +260,7 @@ body{
     .panel{
         display: flex;
         flex-direction: column;
-        padding: 10px 6px 6px 6px;
+        padding: 10px 6px 2px 6px;
         background: #0f0f0f;
         border-right: 1px ridge #464646ff;
         grid-area: menu;
@@ -302,7 +302,7 @@ body{
                 position: absolute;
                 top: -7px;
                 right: -2px;
-                display: flex;
+                display: none;
                 align-items: center;
                 justify-content: center;
                 padding: 1px 3px;

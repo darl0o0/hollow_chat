@@ -8,11 +8,20 @@ let requestsCount = 0;
 let unreadCount = 0;
 let notificationsCount = 0;
 
+// Update notifications count
+// function updateNotCount(count){
+//     count = (count > 0) ? `(${count})` : '';
+//     const notificationsBadge = document.querySelector('.requests-model .not-count');
+//     if(notificationsBadge){
+//         notificationsBadge.textContent = count;
+//     }
+// }
+
 function updateNotUIState(){
     notificationsCount = Math.max(0, unreadCount) + Math.max(0, requestsCount);
     document.title = notificationsCount > 0 ? `(${notificationsCount}) Hollow Chat` : "Hollow Chat";
-
     const inboxBadge = document.querySelector('.inbox-action .num-of');
+
     if(inboxBadge){
         if(unreadCount > 0){
             inboxBadge.style.display = 'flex';
@@ -32,19 +41,20 @@ document.addEventListener('DOMContentLoaded', async function(){
     
     requestsCount = parseInt(document.querySelector('meta[name="num-of-requests"]').content, 10) || 0;
     unreadCount = parseInt(document.querySelector('meta[name="num-of-unread"]').content, 10) || 0;
-    updateNotUIState();
 
     const res = await UI.sendGet('/src/api/friends/');
-    const incomingRequestsCount = res?.response?.requests?.incoming;
+    const incomingRequestsCount = res?.response?.requests?.incoming?.length;
     
     // Universal notifications list
-    UI.globalElements(incomingRequestsCount?.length || 0);
+    UI.globalElements(incomingRequestsCount);
+    UI.updateNotCount(requestsCount);
+    updateNotUIState();
     
     if(res.response.requests.incoming != null){
         let buffer = "";
+
         res.response.requests.incoming.forEach(user => {
-            
-            const bio = user.bio ? user.bio : "No Bio."
+            const bio = user.bio ? user.bio : "No Bio.";
     
             buffer += `
                 <div class='user-card u-${user.id}'>
@@ -96,10 +106,11 @@ document.addEventListener('submit', async (e) => {
 
         await UI.sendPost('/src/api/relationship/', {user2: targetUserId, action});
 
-        const card = document.querySelector(`.u-${targetUserId}`);
+        const card = document.querySelector(`.requests-model .u-${targetUserId}`);
         card.remove();
 
         requestsCount = Math.max(0, requestsCount - 1);
+        console.log(requestsCount);
         UI.updateNotCount(requestsCount);
         updateNotUIState();
 
