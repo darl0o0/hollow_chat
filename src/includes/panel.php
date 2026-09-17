@@ -1,6 +1,6 @@
 <?php
 //Initialization
-require_once $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
 ?>
 <a class="logo" href="/">
     <img src="/src/assets/logo/light_logo.png">

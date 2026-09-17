@@ -1,7 +1,7 @@
 <?php
 
 //Initialization
-require_once $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
 $mainDisplay = 'flex';
 $not_found = '';
 $isMyProfile = '';

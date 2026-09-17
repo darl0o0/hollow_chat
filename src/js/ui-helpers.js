@@ -38,11 +38,16 @@ export const UI = {
             alert.querySelector('.alert-text').innerHTML = '';
         }, (alertDuration*1000 - 100));
     },
+
+    // Retrieve cookie value by name
+    getCookie: function(name){
+        const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]+)'));
+        return match ? match[2] : '';
+    },
     
     // Strict post request
     sendPost: async function(url, data = {}) {
-        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-        const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+        const csrfToken = this.getCookie('csrf_token');
     
         const headers = {
             'X-Requested-With': 'XMLHttpRequest',

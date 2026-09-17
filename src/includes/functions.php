@@ -19,10 +19,27 @@ function check_login($con){
 
 // Generate CSRF token
 function getCsrfToken(){
-    if(empty($_SESSION['csrf_token'])){
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    if(empty($_COOKIE['csrf_token'])){
+        $token = bin2hex(random_bytes(32));
+        setcookie('csrf_token', $token, [
+            'expires' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => false,
+            'httponly' => false,
+            'samesite' => 'Lax'
+        ]);
+        $_COOKIE['csrf_token'] = $token;
     }
-    return $_SESSION['csrf_token'];
+    return $_COOKIE['csrf_token'];
+}
+
+// Validate incoming POST requests against the cookie
+function verifyCsrfToken($submittedToken){
+    if(empty($_COOKIE['csrf_token']) || empty($submittedToken)){
+        return false;
+    }
+    return hash_equals($_COOKIE['csrf_token'], $submittedToken);
 }
 
 // Check headers and CSRF token
@@ -32,7 +49,7 @@ function checkHeadersCSRF(){
     $headers = getallheaders();
     $requestHeader = $headers['X-Requested-With'] ?? $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
 
-    if ($requestHeader !== 'XMLHttpRequest') {
+    if ($requestHeader !== 'XMLHttpRequest'){
         http_response_code(403);
         exit(json_encode(['status' => 'error', 'message' => 'Direct access forbidden']));
     }
@@ -43,7 +60,7 @@ function checkHeadersCSRF(){
             ?? $_POST['csrf_token'] 
             ?? '';
 
-    if (empty($clientToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $clientToken)) {
+    if (!verifyCsrfToken($clientToken)){
         http_response_code(403);
         exit(json_encode(['status' => 'error', 'message' => 'Invalid or missing CSRF token']));
     }

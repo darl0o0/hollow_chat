@@ -1,6 +1,6 @@
 <?php
 //Initialization
-require_once $_SERVER['DOCUMENT_ROOT'] . "/register/index.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
 $not_found = '';
 $link = '/';
 if(!isset($_GET['r'])){
