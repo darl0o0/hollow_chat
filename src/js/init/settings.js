@@ -1,6 +1,22 @@
 import { UI } from "../ui-helpers.js";
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async function(){
+
+    const usernameEl = document.querySelector('.username');
+    const emailEl = document.querySelector('.email');
+
+    try{
+        const me = await UI.sendGet('/src/api/me/');
+
+        usernameEl.value = me.response.username;
+        emailEl.value = me.response.email;
+
+        usernameEl.setAttribute('data-initial', me.response.username);
+        emailEl.setAttribute('data-initial', me.response.email);
+    }
+    catch(error){
+        console.error(error);
+    }
 
     // Show the on-screen models
     const changeBtn = document.querySelector(".change");
@@ -29,9 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     //Update form
     document.querySelector(".update-form").addEventListener('submit', async function(e){
         e.preventDefault();
-
-        const usernameEl = document.querySelector('.username');
-        const emailEl = document.querySelector('.email');
 
         const username = usernameEl?.value.trim();
         const email = emailEl?.value.trim();

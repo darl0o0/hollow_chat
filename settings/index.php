@@ -34,17 +34,13 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
                     name="username" 
                     placeholder="Username" 
                     pattern="[A-Za-z0-9_]+" 
-                    maxlength="15" 
-                    value="<?php echo $user_data['username'];?>" 
-                    data-initial="<?php echo $user_data['username'];?>">
+                    maxlength="15">
 
                     <input 
                     type="email" 
                     class="input email" 
                     name="email" 
-                    placeholder="Email" 
-                    value="<?php echo $user_data['email'];?>" 
-                    data-initial="<?php echo $user_data['email'];?>">
+                    placeholder="Email">
 
                     <div class="btn-wrapper">
                         <button type="submit" class="btn primary-btn submit">Apply<i class="fa-solid fa-check"></i></button>
