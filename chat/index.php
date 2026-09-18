@@ -1,43 +1,10 @@
 <?php
 //Initialization
 require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
-$not_found = '';
-$link = '/';
-if(!isset($_GET['r'])){
-    $rec_id = '';
-    $username = 'User not found';
-    $img = 'pfp.jpg';
-    $isOnline = 'hidden';
-    $not_found = 'User not found';
-}
-else{
-    $rec_id = $_GET['r'];
-    $query = "select * from users where id = '$rec_id'";
+$qid = $_GET['q'] ?? '';
 
-    $query_unread_count = "select * from messages where sid = '$rec_id' and rid = '$id' and isRead = '0'";
-    $unread_count = mysqli_num_rows(mysqli_query($con, $query_unread_count));
-
-    $query_chat_exists = "select * from conversations where (user1 = '$id' and user2 = '$rec_id') or (user1 = '$rec_id' and user2 = '$id')";
-    
-    if(mysqli_num_rows(mysqli_query($con, $query)) == 0){
-        if(mysqli_num_rows(mysqli_query($con, $query_chat_exists)) == 0){
-            $rec_id = '';
-            $not_found = 'User not found';
-        }
-        $username = 'User not found';
-        $img = 'pfp.jpg';
-        $isOnline = 'hidden';
-        $user2 = $_GET['r'];
-    }
-    else{
-        $user2 = $_GET['r'];
-        $rec = mysqli_fetch_all(mysqli_query($con, $query));
-        $username = $rec[0][1];
-        $img = $rec[0][5];
-        $isOnline = $rec[0][6] ? 'visible' : 'hidden';
-        $link = '/profile?u='.$_GET['r'];
-    }
-}
+$query_unread_count = "select * from messages where sid = '$qid' and rid = '$id' and isRead = '0'";
+$unread_count = mysqli_num_rows(mysqli_query($con, $query_unread_count));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +12,7 @@ else{
     <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/head.php"; ?>
     <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main-head.php"; ?>
     
-    <meta name="rid" content="<?php echo $rec_id ?>">
+    <meta name="qid" content="<?php echo $qid ?>">
     <meta name="unread-count" content="<?php echo $unread_count ?>">
     
     <link rel="stylesheet" href="/src/css/chat.css">
@@ -55,29 +22,30 @@ else{
 <body>
     <div class="main chat">
         <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/panel.php"; ?>
-        <a class="profile-header mobile-header" href="<?php echo $link ?>">
+
+        <a class="profile-header mobile-header">
             <div class='pfp'>
-                <img class='pfp-img' src='/src/assets/pfps/<?php echo $img ?>'>
-                <div class='online-status' style="visibility: <?php echo $isOnline; ?>"></div>
+                <img class='pfp-img'>
+                <div class='online-status'></div>
             </div>
             <div class="label-wrapper">
-                <div class='username-label'><?php echo $username ?></div>
+                <div class='username-label'></div>
                 <span class="sub-label">View profile</span>
             </div>
         </a>
         <div class="preview">
-            <a class="profile-header desktop-header" href="<?php echo $link ?>">
+            <a class="profile-header desktop-header">
                 <div class='pfp'>
-                    <img class='pfp-img' src='/src/assets/pfps/<?php echo $img ?>'>
-                    <div class='online-status' style="visibility: <?php echo $isOnline; ?>"></div>
+                    <img class='pfp-img'>
+                    <div class='online-status'></div>
                 </div>
                 <div class="label-wrapper">
-                    <div class='username-label'><?php echo $username ?></div>
+                    <div class='username-label'></div>
                     <span class="sub-label">View profile</span>
                 </div>
             </a>
             <div class="field">
-                <center><h1 class="not-found"><?php echo $not_found ?></h1></center>
+                <center><h1 class="not-found"></h1></center>
                 <div class="inner-field"></div>
                 <div class="m r typing">
                     <img src="/src/assets/typing0.gif">
@@ -85,8 +53,8 @@ else{
             </div>
             <form class="send-form" method="post">
                 <input type="text" name="msg" class="msg-input" placeholder="Type a message..." autocomplete="off" autofocus>
-                <input type="hidden" name="sid" value="<?php echo $user_data['id'] ?>">
-                <input type="hidden" name="rid" value="<?php echo $user2 ?>">
+                <input type="hidden" name="sid">
+                <input type="hidden" name="rid">
                 <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
             </form>
         </div>

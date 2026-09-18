@@ -8,15 +8,6 @@ let requestsCount = 0;
 let unreadCount = 0;
 let notificationsCount = 0;
 
-// Update notifications count
-// function updateNotCount(count){
-//     count = (count > 0) ? `(${count})` : '';
-//     const notificationsBadge = document.querySelector('.requests-model .not-count');
-//     if(notificationsBadge){
-//         notificationsBadge.textContent = count;
-//     }
-// }
-
 function updateNotUIState(){
     notificationsCount = Math.max(0, unreadCount) + Math.max(0, requestsCount);
     document.title = notificationsCount > 0 ? `(${notificationsCount}) Hollow Chat` : "Hollow Chat";
@@ -36,7 +27,21 @@ function updateNotUIState(){
 
 document.addEventListener('DOMContentLoaded', async function(){
 
-    id = document.querySelector('meta[name="id"]')?.content;
+    // Calling user's own data
+    try{
+        const me = await UI.sendGet('/src/api/me/');
+        id = me.response.id;
+
+        document.querySelectorAll('.profile-action').forEach((profileAction) => {
+            profileAction.querySelector('img').src = `/src/assets/pfps/${me.response.img}`;
+            profileAction.href = `/profile?q=${me.response.id}`
+        });
+        document.querySelector('.profile-action .username-label').textContent = me.response.username;
+    }
+    catch(error){
+        console.error(error);
+    }
+
     activeChatUserId = document.querySelector('meta[name="rid"]')?.content || null;
     
     requestsCount = parseInt(document.querySelector('meta[name="num-of-requests"]').content, 10) || 0;
@@ -58,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     
             buffer += `
                 <div class='user-card u-${user.id}'>
-                    <a href='/profile?u=${user.id}' class='profile-link'></a>
+                    <a href='/profile?q=${user.id}' class='profile-link'></a>
                     <div class='pfp'>
                         <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
                     </div>
@@ -121,50 +126,12 @@ document.addEventListener('submit', async (e) => {
     }
 });
 
-// Show notifications model
-document.addEventListener('click', (e) => {
-    if(e.target.closest('.notifications-action')){
-        const model = document.querySelector(".requests-model");
-        const main = document.querySelector(".main");
-        if(model) model.style.visibility = "visible";
-        if(main) main.style.filter = "blur(3px)";
-    }
-});
-
-// Hide notifications model
-document.addEventListener('keydown', (e) =>{
-    if(e.keyCode === 27 || e.key === 'Escape'){
-        UI.hideModel();
-    }
-});
-
-document.addEventListener('click', (e) => {
-    if(e.target.matches('.background')){
-        UI.hideModel();
-    }
-});
-
-// Show/hide password
-document.querySelectorAll('.s-h').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const input = btn.parentElement.querySelector('input');
-        const icon = btn.querySelector('i');
-
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
-
-        icon.classList.toggle('fa-eye', !isPassword);
-        icon.classList.toggle('fa-eye-slash', isPassword);
-    });
-});
-
 socket.on('new_message', (data)=>{
     const isChatOpen = (typeof activeChatUserId !== null) && (activeChatUserId == data.sid);
     
     if(data.sid != id && !isChatOpen){
         unreadCount++;
         updateNotUIState();
-        console.log('we')
     }
 });
 

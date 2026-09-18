@@ -17,12 +17,47 @@ function markChatAsRead(activeUserId){
 document.addEventListener('DOMContentLoaded', async function(){
 
     id = document.querySelector('meta[name="id"]')?.content;
-    rid = document.querySelector('meta[name="rid"]')?.content;
+    rid = document.querySelector('meta[name="qid"]')?.content;
     unreadCount = document.querySelector('meta[name="unread-count"]')?.content;
 
     const field = document.querySelector('.field');
 
-    if(!id || !rid) return;
+    if(!id) return;
+
+    const header = document.querySelectorAll('.profile-header');
+    const img = document.querySelectorAll('.pfp-img');
+    const username = document.querySelectorAll('.username-label');
+    const onlineDot = document.querySelectorAll('.online-status');
+
+    try{
+        const user = await UI.sendGet('/src/api/users/search.php', {q: rid});
+        
+        if(user.response.profile && !user.response.isYou){
+            document.querySelector('.inner-field').style.display = 'flex';
+
+            header.forEach((Header)=>Header.href = `/profile?q=${rid}`);
+            img.forEach((Img)=>Img.src = `/src/assets/pfps/${user.response.profile.img}`);
+            username.forEach((Username)=>Username.textContent = user.response.profile.username);
+            onlineDot.forEach((OnlineDot)=>OnlineDot.style.visibility = user.response.profile.online ? 'visible' : 'hidden');
+
+            document.querySelector('input[name="sid"]').value = id;
+            document.querySelector('input[name="rid"]').value = rid;
+        }
+        else{
+            throw new Error('User not found');
+        }
+    }
+    catch(error){
+        console.error(error);
+        
+        document.querySelector('.inner-field').style.display = 'none';
+
+        document.querySelector('.not-found').textContent = "User not found.";
+        header.forEach((Header)=>Header.href = "/");
+        img.forEach((Img)=>Img.src = "/src/assets/pfps/pfp.jpg");
+        username.forEach((Username)=>Username.textContent = "User not found");
+        onlineDot.forEach((OnlineDot)=>OnlineDot.style.visibility = 'hidden');
+    }
 
     // Load chat when the page is loaded
     const res = await UI.sendGet('/src/api/messages/', {rid: rid});

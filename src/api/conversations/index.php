@@ -1,10 +1,10 @@
 <?php
 
 //Initialization
-session_start();
+include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
-requireStrictGet();
+// requireStrictGet();
 
 $user_data = check_login($con);
 header('Content-Type: application/json; charset=utf-8');

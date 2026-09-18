@@ -1,7 +1,7 @@
 <?php
 //Initialization
 if(session_status() === PHP_SESSION_NONE){
-    session_start();
+    include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 }
 require_once $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";

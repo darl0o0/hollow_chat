@@ -6,14 +6,14 @@ document.querySelector('.signin-form').addEventListener('submit', async function
     const email = document.querySelector('.email')?.value.trim();
     const password = document.querySelector('.password')?.value.trim();
 
-    if(!email || !password){
-        UI.alert(false, "All inputs are required.", null);
-        return;
-    }
-    if(!UI.isValidEmail(email)){
-        UI.alert(false, "Please enter a valid email.", null);
-        return;
-    }
+    // if(!email || !password){
+    //     UI.alert(false, "All inputs are required.", null);
+    //     return;
+    // }
+    // if(!UI.isValidEmail(email)){
+    //     UI.alert(false, "Please enter a valid email.", null);
+    //     return;
+    // }
     const formData = new FormData(e.target);
     const res = await UI.sendPost('', formData);
 

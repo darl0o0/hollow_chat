@@ -1,48 +1,53 @@
 <?php
 //Initialization
-session_start();
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
+
 if(!isset($_SESSION['id'])){
+
     if($_SERVER['REQUEST_METHOD'] == "POST"){
-        
         checkHeadersCSRF();
+        
         // Credentials
-        $email = $_POST['email'];
-        $password = $_POST['password'];
-        if(!empty($email) && !empty($password)){
-            
-            $query = "select * from users where email = '$email'";
-            $result = mysqli_query($con, $query);
-    
-            if($result){
-                if(mysqli_num_rows($result)>0){
-                    
-                    //If an account with the provided email exists:
-                    $user_data = mysqli_fetch_assoc($result);
-                    if($user_data['password'] === $password){
-    
-                        //Log the user in
-                        $query1 = "update users set online = 1 where email = '$email'";
-                        mysqli_query($con, $query1);
-                        $_SESSION['id'] = $user_data['id'];
-                        echo json_encode(['status' => 'ok', 'message' => 'Redirecting...']);
-                    }
-                    else{
-                        echo json_encode(['status' => 'error', 'message' => 'Wrong password.']);
-                    }
-                }
-                else{
-                    echo json_encode(['status' => 'error', 'message' => 'The provided credentials do not exist.']);
-                }
-            }
-            else{
-                echo json_encode(['status' => 'error', 'message' => 'Oops! Something went wrong.']);
-            }
-        }
-        else{
+        $email = trim($_POST['email']);
+        $password = trim($_POST['password']);
+        $query = "select * from users where email = '$email'";
+        $result = mysqli_query($con, $query);
+        $user_data = mysqli_fetch_assoc($result);
+
+        if(empty($email) || empty($password)){
             echo json_encode(['status' => 'error', 'message' => 'All inputs are required.']);
+            return;
         }
+
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            echo json_encode(['status' => 'error', 'message' => 'Please enter a valid email.']);
+            return;
+        }
+
+        if(!$result){
+            echo json_encode(['status' => 'error', 'message' => 'Oops! Something went wrong.']);
+            return;
+        }
+
+        if(mysqli_num_rows($result) == 0){
+            echo json_encode(['status' => 'error', 'message' => 'The provided credentials do not exist.']);
+            return;
+        }
+
+        if($user_data['password'] !== $password){
+            echo json_encode(['status' => 'error', 'message' => 'Wrong password.']);
+            return;
+        }
+
+        //Log in
+        $query1 = "update users set online = 1 where email = '$email'";
+        mysqli_query($con, $query1);
+
+        include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
+        $_SESSION['id'] = $user_data['id'];
+        
+        echo json_encode(['status' => 'ok', 'message' => 'Redirecting...']);
         die();
     }
 }

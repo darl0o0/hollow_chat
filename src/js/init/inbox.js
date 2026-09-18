@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
             buffer += `
                 <div class='user-card u-${conversation.id}'>
-                    <a href='/chat?r=${conversation.id}' class='profile-link'></a>
+                    <a href='/chat?q=${conversation.id}' class='profile-link'></a>
                         <div class='pfp'>
                             <img class='pfp-img' src='/src/assets/pfps/${conversation.img}'>
                             <div class='online-status' style='visibility: ${isOnline}'></div>

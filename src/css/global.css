@@ -352,7 +352,6 @@ body{
         min-height: 0;
         padding: 20px 5%;
         grid-area: preview;
-        overflow-y: hidden;
         .header-title{
             font-size: 28px;
             margin: 0;
@@ -725,7 +724,7 @@ body{
     .model{
         .form-container{
             max-width: 350px;
-            padding: 20px 25px 0px 25px;
+            padding: 20px 25px 20px 25px;
             .logo img{
                 width: 200px;
             }

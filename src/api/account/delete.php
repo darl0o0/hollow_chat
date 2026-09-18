@@ -1,10 +1,11 @@
 <?php
 
 //Initialization
-session_start();
+include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 $user_data = check_login($con);
+header('Content-Type: application/json; charset=utf-8');
 requireStrictPost();
 
 if($_SERVER['REQUEST_METHOD'] == "POST"){

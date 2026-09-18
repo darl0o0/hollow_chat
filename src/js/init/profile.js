@@ -36,6 +36,70 @@ async function defineState(){
 document.addEventListener('DOMContentLoaded', async function(){
     id = document.querySelector('meta[name="id"]')?.content;
     user2 = document.querySelector('meta[name="user2"]')?.content;
+
+    const img = document.querySelector('.profile-card img');
+    const username = document.querySelector('.profile-card .username-label');
+    const onlineDot = document.querySelector('.profile-card .is-online');
+    const onlineLabel = document.querySelector('.profile-card .is-online-label');
+
+    const date = document.querySelector('.details-section.date .text');
+    const bio = document.querySelector('.details-section.bio .text');
+    const privacy = document.querySelector('.details-section.privacy .text');
+
+    try{
+        const user = await UI.sendGet('/src/api/users/search.php', {q: user2});
+        
+        if(user.response.profile){
+            document.querySelector('.profile-wrapper').style.display = 'flex';
+
+            img.src = `/src/assets/pfps/${user.response.profile.img}`;
+            username.textContent = user.response.profile.username;
+            onlineDot.style.background = user.response.profile.online ? '#e9e4c8' : 'none';
+            onlineDot.style.border = user.response.profile.online ? '2px solid #e9e4c8' : '2px ridge #464646';
+            onlineLabel.textContent = user.response.profile.online ? 'Online' : 'Offline';
+    
+            date.textContent = user.response.profile.date;
+            bio.textContent = user.response.profile.bio;
+            privacy.textContent = user.response.profile.isPrivate ? 'Private' : 'Public';
+    
+            if(user.response.isYou){
+                onlineDot.style.border = '2px solid #e9e4c8';
+                onlineLabel.textContent = 'Online';
+
+                document.querySelector('.profile-action').style.background = 'rgba(125, 125, 125, 0.15)';
+    
+                document.querySelector('.profile-actions').innerHTML = `
+                    <button class="btn primary-btn share-profile">
+                    <i class="fa-solid fa-share"></i>
+                    Share profile
+                    </button>
+                    <form action="/logout.php" method="post" class="logout-form">
+                        <input type="hidden" name="id" value="${id}">
+                        <button type="submit" class="btn secondary-btn"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></button>
+                    </form>
+                `;
+            }
+            else{
+                document.querySelector('.profile-actions').innerHTML = `
+                    <a href="/chat?q=${user2}" class="btn primary-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
+                    <form
+                    method="post" 
+                    class="friend-action">
+                        <input type="hidden" name="user2" value="${user2}">
+                        <input type="hidden" name="action">
+                        <button type="submit" class="btn secondary-btn profile-action-btn"></button>
+                    </form>
+                `;
+            }
+        }
+        else{
+            document.querySelector('.profile-wrapper').style.display = 'none';
+            document.querySelector('.not-found').textContent = "User not found.";
+        }
+    }
+    catch(error){
+        console.error(error);
+    }
     
     const friendActionForm = document.querySelector('.friend-action');
     const logoutForm = document.querySelector('.logout-form');

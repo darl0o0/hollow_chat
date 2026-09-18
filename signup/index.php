@@ -1,82 +1,78 @@
 <?php
 //Initialization
-session_start();
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 
 if(!isset($_SESSION['id'])){
+
     if($_SERVER['REQUEST_METHOD'] == "POST"){
-
         checkHeadersCSRF();
+
         //Database primary parameters
-        $username = $_POST['username'];
-        $email = $_POST['email'];
-        $password1 = $_POST['password-1'];
-        $password2 = $_POST['password-2'];
-        if(!empty($username) && !empty($email) && !empty($password1) && !empty($password2)){
+        $username = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $password1 = trim($_POST['password-1']);
+        $password2 = trim($_POST['password-2']);
+            
+        //Uploading a profile picture
+        $raw_img = $_FILES['img'];
+        $file_name = $raw_img['name'];
+        $tmp_name = $raw_img['tmp_name'];
+        $file_dir = "../src/assets/pfps/".$file_name;
+        move_uploaded_file($tmp_name, $file_dir);
 
-            if(!str_contains($username, " ")){
+        //Database secondary parameters
+        $bio = trim($_POST['bio']);
+        $private = $_POST['privacy'];
+        $img = $raw_img['name'];
 
-                if(filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $query1 = "select * from users where username = '$username'";
+        $query2 = "select * from users where email = '$email'";
 
-                    if(strlen($password1) >= 8){
-
-                        if($password1 === $password2){
-                            
-                            //Uploading a profile picture
-                            $raw_img = $_FILES['img'];
-                            $file_name = $raw_img['name'];
-                            $tmp_name = $raw_img['tmp_name'];
-                            $file_dir = "../src/assets/pfps/".$file_name;
-                            move_uploaded_file($tmp_name, $file_dir);
-                
-                            //Database secondary parameters
-                            $bio = $_POST['bio'];
-                            $private = $_POST['privacy'];
-                            $img = $raw_img['name'];
-                
-                            $query1 = "select * from users where username = '$username'";
-                            $query2 = "select * from users where email = '$email'";
-                    
-                            if(mysqli_num_rows(mysqli_query($con, $query1)) == 0 && mysqli_num_rows(mysqli_query($con, $query2)) == 0){
-                    
-                                if(empty($img)){
-                                    $img = "pfp.jpg";
-                                }
-                    
-                                $id = bin2hex(random_bytes(8));
-                                $date = date('F Y');
-                                
-                                //Create the account and log the user in
-                                $query = "insert into users (id, username, email, password, bio, img, online, private, date) values ('$id', '$username', '$email', '$password1', '$bio', '$img', 1, '$private', '$date')";
-                                mysqli_query($con, $query);
-                    
-                                $_SESSION['id'] = $id;
-                                echo json_encode(['status' => 'ok', 'message' => 'Redirecting...']);
-                            }
-                            else{
-                                echo json_encode(['status' => 'error', 'message' => 'Cannot use the provided credentials.']);
-                            }
-                        }
-                        else{
-                            echo json_encode(['status' => 'error', 'message' => 'Passwords are not identical.']);
-                        }
-                    }
-                    else{
-                        echo json_encode(['status' => 'error', 'message' => 'Password must contain at least 8 characters.']);
-                    }
-                }
-                else{
-                    echo json_encode(['status' => 'error', 'message' => 'Please enter a valid email.']);
-                }
-            }
-            else{
-                echo json_encode(['status' => 'error', 'message' => 'Username cannot contain space.']);
-            }
-        }
-        else{
+        if(empty($username) || empty($email) || empty($password1) || empty($password2)){
             echo json_encode(['status' => 'error', 'message' => 'All inputs are required.']);
+            return;
         }
+
+        if(str_contains($username, " ")){
+            echo json_encode(['status' => 'error', 'message' => 'Username cannot contain space.']);
+            return;
+        }
+
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            echo json_encode(['status' => 'error', 'message' => 'Please enter a valid email.']);
+            return;
+        }
+
+        if(strlen($password1) < 8){
+            echo json_encode(['status' => 'error', 'message' => 'Password must contain at least 8 characters.']);
+            return;
+        }
+
+        if($password1 !== $password2){
+            echo json_encode(['status' => 'error', 'message' => 'Passwords are not identical.']);
+            return;
+        }
+
+        if(mysqli_num_rows(mysqli_query($con, $query1)) > 0 && mysqli_num_rows(mysqli_query($con, $query2)) > 0){
+            echo json_encode(['status' => 'error', 'message' => 'Cannot use the provided credentials.']);
+            return;
+        }
+
+        if(empty($img)){
+            $img = "pfp.jpg";
+        }
+        $id = bin2hex(random_bytes(8));
+        $date = date('F Y');
+        
+        //Create the account and log the user in
+        $query = "insert into users (id, username, email, password, bio, img, online, private, date) values ('$id', '$username', '$email', '$password1', '$bio', '$img', 1, '$private', '$date')";
+        mysqli_query($con, $query);
+
+        include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
+        
+        $_SESSION['id'] = $id;
+        echo json_encode(['status' => 'ok', 'message' => 'Redirecting...']);
         die();
     }
 }

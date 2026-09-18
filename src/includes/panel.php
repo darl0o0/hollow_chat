@@ -19,7 +19,9 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
         <span>Inbox</span>
     </a>
 
-    <a href="/profile?u=<?php echo $id ?>" class="panel-action goto-profile-mobile profile-action"><img src="/src/assets/pfps/<?php echo $user_data['img'] ?>"></a>
+    <a class="panel-action goto-profile-mobile profile-action">
+        <img>
+    </a>
 
     <button class="panel-action notifications-action">
         <div class="icon-wrapper">        
@@ -31,12 +33,12 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
     
     <a href="/settings" class="panel-action settings-action"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
     
-    <a href="/profile?u=<?php echo $id ?>" class="panel-action goto-profile-desktop profile-action">
+    <a class="panel-action goto-profile-desktop profile-action">
         <div class="pfp">
-            <img src="/src/assets/pfps/<?php echo $user_data['img'] ?>">
+            <img>
         </div>
         <div class="label-wrapper">
-            <div class="username-label"><?php echo $user_data['username'] ?></div>
+            <div class="username-label"></div>
             <span class="sub-label">My profile</span>
         </div>
     </a>

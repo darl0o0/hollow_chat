@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async function(){
         const isOnline = Boolean(Number(user.isOnline)) ? 'visible' : "hidden"
 
         buffer += `
-            <a class='user-card u-${user.id}' href='profile?u=${user.id}'>
+            <a class='user-card u-${user.id}' href='profile?q=${user.id}'>
                 <div class='pfp'>
                     <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
                     <div class='online-status' style='visibility: ${isOnline}'></div>
