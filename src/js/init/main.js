@@ -1,5 +1,14 @@
 import { UI } from "../ui-helpers.js";
 export const socket = io('http://localhost:3000');
+export let me = null;
+
+let resolveUserData;
+let rejectUserData;
+
+export const userDataReady = new Promise((resolve, reject) => {
+    resolveUserData = resolve;
+    rejectUserData = reject;
+});
 
 let id = null;
 let activeChatUserId = null;
@@ -29,18 +38,23 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     // Calling user's own data
     try{
-        const me = await UI.sendGet('/src/api/me/');
-        id = me.response.id;
+        const meRes = await UI.sendGet('/src/api/me/');
+        me = meRes.response;
 
-        document.querySelectorAll('.profile-action').forEach((profileAction) => {
-            profileAction.querySelector('img').src = `/src/assets/pfps/${me.response.img}`;
-            profileAction.href = `/profile?q=${me.response.id}`
-        });
-        document.querySelector('.profile-action .username-label').textContent = me.response.username;
+        resolveUserData(me);
     }
     catch(error){
         console.error(error);
+
+        rejectUserData(error);
     }
+    id = me.id;
+
+    document.querySelectorAll('.profile-action').forEach((profileAction) => {
+        profileAction.querySelector('img').src = `/src/assets/pfps/${me.img}`;
+        profileAction.href = `/profile?q=${me.id}`
+    });
+    document.querySelector('.profile-action .username-label').textContent = me.username;
 
     activeChatUserId = document.querySelector('meta[name="rid"]')?.content || null;
     

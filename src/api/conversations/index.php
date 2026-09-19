@@ -4,41 +4,50 @@
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
-// requireStrictGet();
-
-$user_data = check_login($con);
+requireStrictGet();
 header('Content-Type: application/json; charset=utf-8');
 
+$user_data = check_login($con);
 $id = $user_data['id'];
 $data = [];
 
 //List of conversations
-$user2_chat = "";
-$chats_query = "select * from conversations where (user1 = '$id' or user2 = '$id')";
-$chat_row = mysqli_fetch_all(mysqli_query($con, $chats_query));
-$num_of_chats = mysqli_num_rows(mysqli_query($con, $chats_query));
+$stmt_conversations = mysqli_prepare($con, "select * from conversations where (user1 = ? or user2 = ?)");
+mysqli_stmt_bind_param($stmt_conversations, "ss", $id, $id);
+mysqli_stmt_execute($stmt_conversations);
+$result_conversations = mysqli_stmt_get_result($stmt_conversations);
 
-if($num_of_chats > 0){
+$conversations = mysqli_fetch_all($result_conversations, MYSQLI_ASSOC);
+mysqli_stmt_close($stmt_conversations);
 
-    // Listing conversations
-    for($i = 0; $i < $num_of_chats ; $i++){
+if(count($conversations) > 0){
 
-        // Define the other user's id
-        $user2_chat = ($chat_row[$i][0] == $id)? $chat_row[$i][1] : $chat_row[$i][0];
-        $query = "select * from users where id = '$user2_chat'";
-        $chat = mysqli_fetch_all(mysqli_query($con, $query));
-        
-        // Select the last message for the current conversation
-        $query_last_msg = "select * from messages where (sid = '$id' and rid = '$user2_chat') or (sid = '$user2_chat' and rid = '$id') order by created_at desc limit 1";
+    foreach($conversations as $conversation){
+
+        // Select user
+        $id_user2 = ($conversation['user1'] == $id)? $conversation['user2'] : $conversation['user1'];
+
+        $stmt_user = mysqli_prepare($con, "select id, username, img, online from users where id = ?");
+        mysqli_stmt_bind_param($stmt_user, "s", $id_user2);
+        mysqli_stmt_execute($stmt_user);
+        $result_user = mysqli_stmt_get_result($stmt_user);
+
+        $row_user2 = mysqli_fetch_assoc($result_user);
+        mysqli_stmt_close($stmt_user);
 
         // Last message
-        $last_msg = mysqli_fetch_all(mysqli_query($con, $query_last_msg))[0];
+        $stmt_last_msg = mysqli_prepare($con, "select * from messages where (sid = ? and rid = ?) or (sid = ? and rid = ?) order by created_at desc limit 1");
+        mysqli_stmt_bind_param($stmt_last_msg, "ssss", $id, $id_user2, $id_user2, $id);
+        mysqli_stmt_execute($stmt_last_msg);
+        $result_last_msg = mysqli_stmt_get_result($stmt_last_msg);
 
-        // If user was deleted
-        if(mysqli_num_rows(mysqli_query($con, $query)) > 0){
-            $username = $chat[0][1];
-            $img = $chat[0][5];
-            $isOnline = $chat[0][6];
+        $row_last_msg = mysqli_fetch_assoc($result_last_msg);
+        mysqli_stmt_close($stmt_last_msg);
+
+        if($row_user2){
+            $username = $row_user2['username'];
+            $img = $row_user2['img'];
+            $isOnline = filter_var($row_user2['online'], FILTER_VALIDATE_BOOL);
         }
         else{
             $username = null;
@@ -48,15 +57,15 @@ if($num_of_chats > 0){
         
         //List conversations
         $data[] = [
-            'id' => $user2_chat,
+            'id' => $id_user2,
             'username' => $username,
             'img' => $img,
             'isOnline' => $isOnline,
             'lastMsg' => [
-                'sid' => $last_msg[0],
-                'msg' => $last_msg[2],
-                'isRead' => $last_msg[3],
-                'time' => $last_msg[4]
+                'sid' => $row_last_msg['sid'],
+                'msg' => $row_last_msg['msg'],
+                'isRead' => filter_var($row_last_msg['isRead'], FILTER_VALIDATE_BOOL),
+                'time' => $row_last_msg['created_at']
             ]
         ];
     }

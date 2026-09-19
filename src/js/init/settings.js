@@ -1,4 +1,7 @@
 import { UI } from "../ui-helpers.js";
+import { userDataReady} from "./main.js";
+
+let me = null;
 
 document.addEventListener('DOMContentLoaded', async function(){
 
@@ -6,13 +9,13 @@ document.addEventListener('DOMContentLoaded', async function(){
     const emailEl = document.querySelector('.email');
 
     try{
-        const me = await UI.sendGet('/src/api/me/');
+        me = await userDataReady;
 
-        usernameEl.value = me.response.username;
-        emailEl.value = me.response.email;
+        usernameEl.value = me.username;
+        emailEl.value = me.email;
 
-        usernameEl.setAttribute('data-initial', me.response.username);
-        emailEl.setAttribute('data-initial', me.response.email);
+        usernameEl.setAttribute('data-initial', me.username);
+        emailEl.setAttribute('data-initial', me.email);
     }
     catch(error){
         console.error(error);
@@ -64,17 +67,22 @@ document.addEventListener('DOMContentLoaded', async function(){
 
         const formData = new FormData(e.target);
 
-        const res = await UI.sendPost('/src/api/account/update.php', formData);
-
-        if(res.status == 'ok'){
-            UI.alert(true, res.message, 3);
-
-            usernameEl.dataset.initial = username;
-            emailEl.dataset.initial = email;
+        try{
+            const update = await UI.sendPost('/src/api/account/update.php', formData);
+    
+            if(update.status == 'ok'){
+                UI.alert(true, update.message, 3);
+    
+                usernameEl.dataset.initial = username;
+                emailEl.dataset.initial = email;
+            }
+            else if(update.status == 'error'){
+                UI.alert(false, update.message, null);
+                return;
+            }
         }
-        else if(res.status == 'error'){
-            UI.alert(false, res.message, null);
-            return;
+        catch(error){
+            console.error(error);
         }
     });
     
@@ -89,17 +97,22 @@ document.addEventListener('DOMContentLoaded', async function(){
         }
         const formData = new FormData(e.target);
 
-        const res = await UI.sendPost('/src/api/account/delete.php', formData);
-
-        if(res.status == 'ok'){
-            UI.alert(true, res.message, 4, true);
-            setTimeout(() => {
-                window.location.replace('/signin');
-            }, 4000);
+        try{
+            const deleteRes = await UI.sendPost('/src/api/account/delete.php', formData);
+    
+            if(deleteRes.status == 'ok'){
+                UI.alert(true, deleteRes.message, 4, true);
+                setTimeout(() => {
+                    window.location.replace('/signin');
+                }, 4000);
+            }
+            else if(deleteRes.status == 'error'){
+                UI.alert(false, deleteRes.message, null, true);
+                return;
+            }
         }
-        else if(res.status == 'error'){
-            UI.alert(false, res.message, null, true);
-            return;
+        catch(error){
+            console.error(error);
         }
     });
 });

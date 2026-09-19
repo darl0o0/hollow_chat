@@ -1,6 +1,7 @@
 import { UI } from "../ui-helpers.js";
-import { socket } from "./main.js";
+import { socket, userDataReady} from "./main.js";
 
+let me = null;
 let id = null;
 let rid = null;
 let unreadCount = 0;
@@ -15,8 +16,14 @@ function markChatAsRead(activeUserId){
 }
 
 document.addEventListener('DOMContentLoaded', async function(){
+    try{
+        me = await userDataReady;
+        id = me.id;
+    }
+    catch(error){
+        console.error(error);
+    }
 
-    id = document.querySelector('meta[name="id"]')?.content;
     rid = document.querySelector('meta[name="qid"]')?.content;
     unreadCount = document.querySelector('meta[name="unread-count"]')?.content;
 

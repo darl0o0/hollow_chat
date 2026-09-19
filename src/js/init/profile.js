@@ -1,12 +1,13 @@
 import { UI } from "../ui-helpers.js";
-import { socket } from "./main.js";
+import { socket, userDataReady} from "./main.js";
 
+let me = null;
 let id = null;
 let user2 = null;
 
 // A function that defines the state between two users
 async function defineState(){
-    user2 = document.querySelector('meta[name="user2"]')?.content;
+    user2 = document.querySelector('meta[name="qid"]')?.content;
     const profileActionBtn = document.querySelector('.profile-action-btn');
     const actionInput = document.querySelector('[name="action"]');
     if(!user2 || !profileActionBtn || !actionInput) return;
@@ -34,8 +35,14 @@ async function defineState(){
 }
 
 document.addEventListener('DOMContentLoaded', async function(){
-    id = document.querySelector('meta[name="id"]')?.content;
-    user2 = document.querySelector('meta[name="user2"]')?.content;
+    try{
+        me = await userDataReady;
+        id = me.id;
+    }
+    catch(error){
+        console.error(error);
+    }
+    user2 = document.querySelector('meta[name="qid"]')?.content;
 
     const img = document.querySelector('.profile-card img');
     const username = document.querySelector('.profile-card .username-label');
@@ -63,6 +70,7 @@ document.addEventListener('DOMContentLoaded', async function(){
             privacy.textContent = user.response.profile.isPrivate ? 'Private' : 'Public';
     
             if(user.response.isYou){
+                onlineDot.style.background = '#e9e4c8';
                 onlineDot.style.border = '2px solid #e9e4c8';
                 onlineLabel.textContent = 'Online';
 

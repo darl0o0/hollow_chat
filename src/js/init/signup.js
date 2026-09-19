@@ -57,20 +57,25 @@ document.querySelector('.signup-form').addEventListener('submit', async function
     e.preventDefault();
 
     if(currentStep == 2){
-        const formData = new FormData(e.target);
-        const res = await UI.sendPost('', formData);
-
-        if(res.status == 'error'){
-            gotoStep(1);
-            currentStep--;
-            UI.alert(false, res.message, null);
+        try{
+            const formData = new FormData(e.target);
+            const res = await UI.sendPost('', formData);
+    
+            if(res.status == 'error'){
+                gotoStep(1);
+                currentStep--;
+                UI.alert(false, res.message, null);
+            }
+            else if(res.status == 'ok'){
+                UI.alert(true, res.message, 2);
+                document.querySelector('.submit').disabled = true;
+                setTimeout(() => {
+                    window.location.replace('/');
+                }, 2000);
+            }
         }
-        else if(res.status == 'ok'){
-            UI.alert(true, res.message, 2);
-            document.querySelector('.submit').disabled = true;
-            setTimeout(() => {
-                window.location.replace('/');
-            }, 2000);
+        catch(error){
+            console.error(error);
         }
     }
     else{

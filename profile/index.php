@@ -11,7 +11,7 @@ $qid = $_GET['q'] ?? '';
 
     <link rel="stylesheet" href="/src/css/profile.css">
     <script type="module" src="/src/js/init/profile.js"></script>
-    <meta name="user2" content="<?php echo $qid ?>">
+    <meta name="qid" content="<?php echo $qid ?>">
     <title>Hollow Chat</title>
 </head>
 <body>

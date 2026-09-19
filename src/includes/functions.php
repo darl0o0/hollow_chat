@@ -4,12 +4,15 @@
 function check_login($con){
     if(isset($_SESSION['id'])){
         $id = $_SESSION['id'];
-        $query = "select * from users where id = '$id' limit 1";
-        $result = mysqli_query($con, $query);
-        if($result && mysqli_num_rows($result)>0){
-            $user_data = mysqli_fetch_assoc($result);
-            return $user_data;
-        }
+        $stmt_user_data = mysqli_prepare($con, "select * from users where id = ? limit 1");
+        mysqli_stmt_bind_param($stmt_user_data, "s", $id);
+        mysqli_stmt_execute($stmt_user_data);
+        $result_user_data = mysqli_stmt_get_result($stmt_user_data);
+
+        $row_user_data = mysqli_fetch_assoc($result_user_data);
+        mysqli_stmt_close($stmt_user_data);
+        
+        return $row_user_data;
     }
     else{
         header("Location: /signin");

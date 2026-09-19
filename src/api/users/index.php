@@ -4,31 +4,29 @@ include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 requireStrictGet();
-
-$user_data = check_login($con);
 header('Content-Type: application/json; charset=utf-8');
 
+$user_data = check_login($con);
 $id = $user_data['id'];
 $data = [];
 
-$query1 = "select * from users";
-$num_of_users = mysqli_num_rows(mysqli_query($con, $query1));
-$query = "select * from users where not (id = '$id') order by created_at desc";
+$stmt_users = mysqli_prepare($con, "select * from users where not (id = ?) order by created_at desc");
+mysqli_stmt_bind_param($stmt_users, "s", $id);
+mysqli_stmt_execute($stmt_users);
+$result_users = mysqli_stmt_get_result($stmt_users);
 
-// List the users
-for($i = 0; $i < $num_of_users-1 ; $i++){
+$users = mysqli_fetch_all($result_users, MYSQLI_ASSOC);
+mysqli_stmt_close($stmt_users);
 
-    $result = mysqli_fetch_all(mysqli_query($con, $query));
-    $bio = (strlen($result[$i][4])>0)? $result[$i][4] : 'No Bio.';
-    $isOnline = $result[$i][6] ? 'visible' : 'hidden';
-    
+foreach($users as $user){
     $data[] = [
-        'id' => $result[$i][0],
-        'username' => $result[$i][1],
-        'bio' => $result[$i][4],
-        'img' => $result[$i][5],
-        'isOnline' => $result[$i][6]
+        'id' => $user['id'],
+        'username' => $user['username'],
+        'bio' => $user['bio'],
+        'img' => $user['img'],
+        'isOnline' => $user['online']
     ];
 }
+
 echo json_encode(['status' => 'ok', 'response' => $data]);
 die();
