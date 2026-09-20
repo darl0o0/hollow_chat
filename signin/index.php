@@ -11,9 +11,14 @@ if(!isset($_SESSION['id'])){
         // Credentials
         $email = trim($_POST['email']);
         $password = trim($_POST['password']);
-        $query = "select * from users where email = '$email'";
-        $result = mysqli_query($con, $query);
-        $user_data = mysqli_fetch_assoc($result);
+
+        $stmt_user = mysqli_prepare($con, "select id, password from users where email = ?");
+        mysqli_stmt_bind_param($stmt_user, "s", $email);
+        mysqli_stmt_execute($stmt_user);
+        $result_user = mysqli_stmt_get_result($stmt_user);
+
+        $row_user = mysqli_fetch_assoc($result_user);
+        mysqli_stmt_close($stmt_user);
 
         if(empty($email) || empty($password)){
             echo json_encode(['status' => 'error', 'message' => 'All inputs are required.']);
@@ -25,27 +30,24 @@ if(!isset($_SESSION['id'])){
             return;
         }
 
-        if(!$result){
-            echo json_encode(['status' => 'error', 'message' => 'Oops! Something went wrong.']);
-            return;
-        }
-
-        if(mysqli_num_rows($result) == 0){
+        if(!$row_user){
             echo json_encode(['status' => 'error', 'message' => 'The provided credentials do not exist.']);
             return;
         }
 
-        if($user_data['password'] !== $password){
+        if(!password_verify($password, $row_user['password'])){
             echo json_encode(['status' => 'error', 'message' => 'Wrong password.']);
             return;
         }
 
         //Log in
-        $query1 = "update users set online = 1 where email = '$email'";
-        mysqli_query($con, $query1);
+        $stmt_online = mysqli_prepare($con, "update users set online = 1 where email = ?");
+        mysqli_stmt_bind_param($stmt_online, "s", $email);
+        mysqli_stmt_execute($stmt_online);
+        mysqli_stmt_close($stmt_online);
 
         include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
-        $_SESSION['id'] = $user_data['id'];
+        $_SESSION['id'] = $row_user['id'];
         
         echo json_encode(['status' => 'ok', 'message' => 'Redirecting...']);
         die();

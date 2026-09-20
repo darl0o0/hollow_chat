@@ -13,6 +13,7 @@ if(!isset($_SESSION['id'])){
         $email = trim($_POST['email']);
         $password1 = trim($_POST['password-1']);
         $password2 = trim($_POST['password-2']);
+        $hashed_password = password_hash($password1, PASSWORD_DEFAULT);
             
         //Uploading a profile picture
         $raw_img = $_FILES['img'];
@@ -26,8 +27,13 @@ if(!isset($_SESSION['id'])){
         $private = $_POST['privacy'];
         $img = $raw_img['name'];
 
-        $query1 = "select * from users where username = '$username'";
-        $query2 = "select * from users where email = '$email'";
+        $stmt_user = mysqli_prepare($con, "select * from users where username = ? or email = ?");
+        mysqli_stmt_bind_param($stmt_user, "ss", $username, $email);
+        mysqli_stmt_execute($stmt_user);
+        $result_user = mysqli_stmt_get_result($stmt_user);
+
+        $row_user = mysqli_fetch_all($result_user, MYSQLI_ASSOC);
+        mysqli_stmt_close($stmt_user);
 
         if(empty($username) || empty($email) || empty($password1) || empty($password2)){
             echo json_encode(['status' => 'error', 'message' => 'All inputs are required.']);
@@ -54,7 +60,7 @@ if(!isset($_SESSION['id'])){
             return;
         }
 
-        if(mysqli_num_rows(mysqli_query($con, $query1)) > 0 && mysqli_num_rows(mysqli_query($con, $query2)) > 0){
+        if(count($row_user) != 0){
             echo json_encode(['status' => 'error', 'message' => 'Cannot use the provided credentials.']);
             return;
         }
@@ -66,8 +72,10 @@ if(!isset($_SESSION['id'])){
         $date = date('F Y');
         
         //Create the account and log the user in
-        $query = "insert into users (id, username, email, password, bio, img, online, private, date) values ('$id', '$username', '$email', '$password1', '$bio', '$img', 1, '$private', '$date')";
-        mysqli_query($con, $query);
+        $stmt_register = mysqli_prepare($con, "insert into users (id, username, email, password, bio, img, online, private, date) values (?, ?, ?, ?, ?, ?, 1, ?, ?)");
+        mysqli_stmt_bind_param($stmt_register, "ssssssis", $id, $username, $email, $hashed_password, $bio, $img, $private, $date);
+        mysqli_stmt_execute($stmt_register);
+        mysqli_stmt_close($stmt_register);
 
         include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
         

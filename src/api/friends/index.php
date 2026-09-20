@@ -4,7 +4,7 @@
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
-requireStrictGet();
+// requireStrictGet();
 
 $user_data = check_login($con);
 header('Content-Type: application/json; charset=utf-8');
@@ -19,47 +19,57 @@ $data = [
 ];
 
 //Select from friends table
-$friends_query = "select * from friends where (user1 = '$id' or user2 = '$id')";
-$row = mysqli_fetch_all(mysqli_query($con, $friends_query));
-$num_of_rows = mysqli_num_rows(mysqli_query($con, $friends_query));
-    
+$stmt_friends = mysqli_prepare($con, "select * from friends where (user1 = ? or user2 = ?)");
+mysqli_stmt_bind_param($stmt_friends, "ss", $id, $id);
+mysqli_stmt_execute($stmt_friends);
+$result_friends = mysqli_stmt_get_result($stmt_friends);
+
+$friends = mysqli_fetch_all($result_friends, MYSQLI_ASSOC);
+mysqli_stmt_close($stmt_friends);
+
 // Pushing into data
-for($i = 0; $i < $num_of_rows ; $i++){
+foreach($friends as $row_friend){
 
     // Define the other user's id
-    $user2 = ($row[$i][0] == $id)? $row[$i][1] : $row[$i][0];
-    $query = "select * from users where id = '$user2'";
-    $friend = mysqli_fetch_all(mysqli_query($con, $query));
+    $friend_id = ($row_friend['user1'] == $id)? $row_friend['user2'] : $row_friend['user1'];
 
-    if($row[$i][2] == 'done'){
+    $stmt_user = mysqli_prepare($con, "select * from users where id = ?");
+    mysqli_stmt_bind_param($stmt_user, "s", $friend_id);
+    mysqli_stmt_execute($stmt_user);
+    $result_friends = mysqli_stmt_get_result($stmt_user);
+
+    $friend = mysqli_fetch_assoc($result_friends);
+    mysqli_stmt_close($stmt_user);
+
+    if($row_friend['status'] == 'done'){
 
         //Push friend
         $data['friends'][] = [
-            'id' => $user2,
-            'username' => $friend[0][1],
-            'img' => $friend[0][5],
-            'bio' => $friend[0][4]
+            'id' => $friend_id,
+            'username' => $friend['username'],
+            'img' => $friend['img'],
+            'bio' => $friend['bio']
         ];
     }
-    elseif($row[$i][2] == 'waiting'){
-        if($row[$i][1] == $id){
+    elseif($row_friend['status'] == 'waiting'){
+        if($row_friend['user2'] == $id){
 
             //Push incoming request
             $data['requests']['incoming'][] = [
-                'id' => $user2,
-                'username' => $friend[0][1],
-                'img' => $friend[0][5],
-                'bio' => $friend[0][4]
+                'id' => $friend_id,
+                'username' => $friend['username'],
+                'img' => $friend['img'],
+                'bio' => $friend['bio']
             ];
         }
-        elseif($row[$i][0] == $id){
+        elseif($row_friend['user1'] == $id){
 
             //Push outgoing request
             $data['requests']['outgoing'][] = [
-                'id' => $user2,
-                'username' => $friend[0][1],
-                'img' => $friend[0][5],
-                'bio' => $friend[0][4]
+                'id' => $friend_id,
+                'username' => $friend['username'],
+                'img' => $friend['img'],
+                'bio' => $friend['bio']
             ];
         }
     }
