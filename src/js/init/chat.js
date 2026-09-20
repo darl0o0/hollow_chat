@@ -138,7 +138,6 @@ document.querySelector('.send-form').addEventListener('submit', async function(e
 socket.on('new_message', (data) => {
     const isRelevantMsg = (data.sid == id && data.rid == rid) || (data.sid == rid && data.rid == id);
     if(!isRelevantMsg) return;
-    console.log(data);
 
     const chatField = document.querySelector('.inner-field');
     const msgDiv = document.createElement('div');

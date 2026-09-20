@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     });
     document.querySelector('.profile-action .username-label').textContent = me.username;
 
-    activeChatUserId = document.querySelector('meta[name="rid"]')?.content || null;
+    activeChatUserId = document.querySelector('meta[name="qid"]')?.content || null;
     
     requestsCount = parseInt(document.querySelector('meta[name="num-of-requests"]').content, 10) || 0;
     unreadCount = parseInt(document.querySelector('meta[name="num-of-unread"]').content, 10) || 0;
@@ -129,7 +129,6 @@ document.addEventListener('submit', async (e) => {
         card.remove();
 
         requestsCount = Math.max(0, requestsCount - 1);
-        console.log(requestsCount);
         UI.updateNotCount(requestsCount);
         updateNotUIState();
 
@@ -143,6 +142,7 @@ document.addEventListener('submit', async (e) => {
 socket.on('new_message', (data)=>{
     const isChatOpen = (typeof activeChatUserId !== null) && (activeChatUserId == data.sid);
     
+    console.log(isChatOpen);
     if(data.sid != id && !isChatOpen){
         unreadCount++;
         updateNotUIState();

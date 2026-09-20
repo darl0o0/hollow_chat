@@ -15,16 +15,21 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
     $rid = $_GET['rid'] ?? '';
     
     // Select all messages of both users
-    $query_messages = "select * from messages where (sid = '$id' and rid = '$rid') or (sid = '$rid' and rid = '$id')";
-    $num_of_msgs = mysqli_num_rows(mysqli_query($con, $query_messages));
+    $stmt_messages = mysqli_prepare($con, "select * from messages where (sid = ? and rid = ?) or (sid = ? and rid = ?)");
+    mysqli_stmt_bind_param($stmt_messages, "ssss", $id, $rid, $rid, $id);
+    mysqli_stmt_execute($stmt_messages);
+    $result_messages = mysqli_stmt_get_result($stmt_messages);
+
+    $messages = mysqli_fetch_all($result_messages, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt_messages);
     
-    if($num_of_msgs > 0){
-        $result = mysqli_fetch_all(mysqli_query($con, $query_messages));
-        for($i = 0; $i < $num_of_msgs; $i++){
+    if(count($messages) > 0){
+
+        foreach($messages as $message){
             $data[] = [
-                'sid' => $result[$i][0],
-                'msg' => $result[$i][2],
-                'isRead' => $result[$i][3]
+                'sid' => $message['sid'],
+                'msg' => $message['msg'],
+                'isRead' => $message['isRead']
             ];
         }
     }
@@ -34,7 +39,6 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
     echo json_encode(['status' => 'ok', 'response' => $data]);
     die();
 }
-
 elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     requireStrictPost();
 
@@ -48,11 +52,20 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
         'message' => $msg
     ]);
 
-    $num_msg_query = "select * from messages where (sid = '$sid' and rid = '$rid') or (sid = '$rid' and rid = '$sid')";
-    $num_of_msg = mysqli_num_rows(mysqli_query($con, $num_msg_query));
+    $stmt_msg_count = mysqli_prepare($con, "select count(*) from messages where (sid = ? and rid = ?) or (sid = ? and rid = ?)");
+    mysqli_stmt_bind_param($stmt_msg_count, "ssss", $sid, $rid, $rid, $sid);
+    mysqli_stmt_execute($stmt_msg_count);
+    $result_msg_count = mysqli_stmt_get_result($stmt_msg_count);
+
+    $row_count = mysqli_fetch_row($result_msg_count);
+    $num_of_msg = $row_count[0];
+    mysqli_stmt_close($stmt_msg_count);
 
     if($num_of_msg == 0){
-        mysqli_query($con, "insert into conversations (user1, user2) values ('$sid', '$rid')");
+        $stmt_insert_conversation = mysqli_prepare($con, "insert into conversations (user1, user2) values (?, ?)");
+        mysqli_stmt_bind_param($stmt_insert_conversation, "ss", $sid, $rid);
+        mysqli_stmt_execute($stmt_insert_conversation);
+        mysqli_stmt_close($stmt_insert_conversation);
     }
 
     //Send a curl request to the Node.js server (server.js)
@@ -68,8 +81,10 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     // Execute curl request
     curl_exec($ch);
 
-    $query = "insert into messages (sid, rid, msg, isRead) values ('$sid', '$rid', '$msg', 0)";
-    mysqli_query($con, $query);
+    $stmt_insert_msg = mysqli_prepare($con, "insert into messages (sid, rid, msg, isRead) values (?, ?, ?, 0)");
+    mysqli_stmt_bind_param($stmt_insert_msg, "sss", $sid, $rid, $msg);
+    mysqli_stmt_execute($stmt_insert_msg);
+    mysqli_stmt_close($stmt_insert_msg);
     
     curl_close($ch);
     echo json_encode(['status' => 'ok', 'message' => 'sent']);
