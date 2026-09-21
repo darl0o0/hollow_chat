@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', async function(){
                     Share profile
                     </button>
                     <form action="/logout.php" method="post" class="logout-form">
-                        <input type="hidden" name="id" value="${id}">
                         <button type="submit" class="btn secondary-btn"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></button>
                     </form>
                 `;
@@ -130,13 +129,12 @@ document.addEventListener('DOMContentLoaded', async function(){
     if(logoutForm){
         logoutForm.addEventListener('submit', async function(e){
             e.preventDefault();
-            const formData = new FormData(e.target);
 
-            const res = await UI.sendPost('/src/api/account/logout.php', formData);
+            const res = await UI.sendPost('/src/api/account/logout.php');
             if(res.status == 'ok'){
                 window.location.replace('/signin');
             }
-        })
+        });
     }
 
     // Copy profile link

@@ -55,7 +55,10 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
             ];
         }
     }
-    echo json_encode(['status' => 'ok', 'response' => $data]);
+    echo json_encode([
+        'status' => 'ok',
+        'response' => $data
+    ]);
     die();
 }
 
@@ -87,6 +90,9 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
             mysqli_stmt_close($stmt_add);
         break;
     }
-    echo json_encode(['status' => 'ok', 'response' => null]);
+    echo json_encode([
+        'status' => 'ok',
+        'response' => null
+    ]);
     die();
 }

@@ -16,16 +16,18 @@ function markChatAsRead(activeUserId){
 }
 
 document.addEventListener('DOMContentLoaded', async function(){
+    rid = document.querySelector('meta[name="qid"]')?.content;
+    unreadCount = document.querySelector('meta[name="unread-count"]')?.content;
+
     try{
         me = await userDataReady;
         id = me.id;
+
+        markChatAsRead(rid);
     }
     catch(error){
         console.error(error);
     }
-
-    rid = document.querySelector('meta[name="qid"]')?.content;
-    unreadCount = document.querySelector('meta[name="unread-count"]')?.content;
 
     const field = document.querySelector('.field');
 
@@ -95,10 +97,6 @@ document.addEventListener('DOMContentLoaded', async function(){
             <center>Start chatting now.</center>
         `;
     }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    markChatAsRead(rid);
 });
 
 // Listen for real-time presence changes broadcasted by server.js

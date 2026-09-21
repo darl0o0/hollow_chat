@@ -5,7 +5,15 @@ $dbhost = "localhost";
 $dbuser = "root";
 $dbpass = "";
 $dbname = "hollow_chat";
-if(!$con = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname)){
-    die("Failed to connect!");
+
+try{
+    $con = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
 }
-?>
+catch(mysqli_sql_exception $e){
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Database connection failed.'
+    ]);
+    die();
+}

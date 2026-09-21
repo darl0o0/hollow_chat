@@ -40,5 +40,8 @@ if(isset($_GET['q'])){
     }
 }
 
-echo json_encode(['status' => 'ok', 'response' => $data]);
+echo json_encode([
+    'status' => 'ok',
+    'response' => $data
+]);
 die();

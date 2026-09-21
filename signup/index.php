@@ -27,6 +27,46 @@ if(!isset($_SESSION['id'])){
         $private = $_POST['privacy'];
         $img = $raw_img['name'];
 
+        if(empty($username) || empty($email) || empty($password1) || empty($password2)){
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'All inputs are required.'
+            ]);
+            return;
+        }
+
+        if(str_contains($username, " ")){
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Username cannot contain space.'
+            ]);
+            return;
+        }
+
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Please enter a valid email.'
+            ]);
+            return;
+        }
+
+        if(strlen($password1) < 8){
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Password must contain at least 8 characters.'
+            ]);
+            return;
+        }
+
+        if($password1 !== $password2){
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Passwords are not identical.'
+            ]);
+            return;
+        }
+
         $stmt_user = mysqli_prepare($con, "select * from users where username = ? or email = ?");
         mysqli_stmt_bind_param($stmt_user, "ss", $username, $email);
         mysqli_stmt_execute($stmt_user);
@@ -35,33 +75,11 @@ if(!isset($_SESSION['id'])){
         $row_user = mysqli_fetch_all($result_user, MYSQLI_ASSOC);
         mysqli_stmt_close($stmt_user);
 
-        if(empty($username) || empty($email) || empty($password1) || empty($password2)){
-            echo json_encode(['status' => 'error', 'message' => 'All inputs are required.']);
-            return;
-        }
-
-        if(str_contains($username, " ")){
-            echo json_encode(['status' => 'error', 'message' => 'Username cannot contain space.']);
-            return;
-        }
-
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            echo json_encode(['status' => 'error', 'message' => 'Please enter a valid email.']);
-            return;
-        }
-
-        if(strlen($password1) < 8){
-            echo json_encode(['status' => 'error', 'message' => 'Password must contain at least 8 characters.']);
-            return;
-        }
-
-        if($password1 !== $password2){
-            echo json_encode(['status' => 'error', 'message' => 'Passwords are not identical.']);
-            return;
-        }
-
-        if(count($row_user) != 0){
-            echo json_encode(['status' => 'error', 'message' => 'Cannot use the provided credentials.']);
+        if(count($row_user) > 0){
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Cannot use the provided credentials.'
+            ]);
             return;
         }
 
@@ -71,7 +89,7 @@ if(!isset($_SESSION['id'])){
         $id = bin2hex(random_bytes(8));
         $date = date('F Y');
         
-        //Create the account and log the user in
+        //Create the account and login
         $stmt_register = mysqli_prepare($con, "insert into users (id, username, email, password, bio, img, online, private, date) values (?, ?, ?, ?, ?, ?, 1, ?, ?)");
         mysqli_stmt_bind_param($stmt_register, "ssssssis", $id, $username, $email, $hashed_password, $bio, $img, $private, $date);
         mysqli_stmt_execute($stmt_register);
@@ -80,7 +98,10 @@ if(!isset($_SESSION['id'])){
         include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
         
         $_SESSION['id'] = $id;
-        echo json_encode(['status' => 'ok', 'message' => 'Redirecting...']);
+        echo json_encode([
+            'status' => 'ok',
+            'message' => 'Redirecting...'
+        ]);
         die();
     }
 }

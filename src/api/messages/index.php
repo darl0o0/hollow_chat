@@ -36,7 +36,10 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
     elseif($rid != ''){
         $data = null;
     }
-    echo json_encode(['status' => 'ok', 'response' => $data]);
+    echo json_encode([
+        'status' => 'ok',
+        'response' => $data
+    ]);
     die();
 }
 elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
@@ -87,5 +90,8 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     mysqli_stmt_close($stmt_insert_msg);
     
     curl_close($ch);
-    echo json_encode(['status' => 'ok', 'message' => 'sent']);
+    echo json_encode([
+        'status' => 'ok',
+        'message' => 'sent'
+    ]);
 }
