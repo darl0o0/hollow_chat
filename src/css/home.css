@@ -50,7 +50,7 @@
 
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
-@media (max-width: 600px){
+@media (max-width: 550px){
     .search-wrapper{
         .search-icon{
             left: 10px;

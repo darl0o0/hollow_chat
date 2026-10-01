@@ -21,23 +21,6 @@ document.addEventListener('DOMContentLoaded', async function(){
         console.error(error);
     }
 
-    // Show the on-screen models
-    const changeBtn = document.querySelector(".change");
-    const deleteBtn = document.querySelector(".delete");
-    const main = document.querySelector(".main");
-
-    changeBtn.addEventListener('click', () => { 
-        const model = document.querySelector(".change-model");
-        if(model) model.style.visibility = "visible";
-        if(main) main.style.filter = "blur(3px)";
-    });
-
-    deleteBtn.addEventListener('click', () => { 
-        const model = document.querySelector(".delete-model");
-        if(model) model.style.visibility = "visible";
-        if(main) main.style.filter = "blur(3px)";
-    });
-
     // Hide the on-screen models
     document.querySelectorAll(".model .secondary-btn").forEach(hideEvent => {
         hideEvent.addEventListener('click', () => {

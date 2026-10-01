@@ -97,7 +97,7 @@ else{
             </div>
             <div class="btn-wrapper">
                 <button class="btn submit primary-btn" type="submit">Sign in <i class="fa-solid fa-right-to-bracket"></i></button>
-                <button class="btn google  secondary-btn"><img src="/src/assets/google.png"></img>Sign in with Google</button>
+                <button class="btn google  secondary-btn" type="button"><img src="/src/assets/google.png"></img>Sign in with Google</button>
             </div>
         </form>
     </div>

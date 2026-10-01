@@ -23,7 +23,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
         <img>
     </a>
 
-    <button class="panel-action notifications-action">
+    <button class="panel-action notifications-action model-show" link-model="requests-model">
         <div class="icon-wrapper">        
             <i class="fa-solid fa-bell"></i>
             <div class="num-of"><?php echo $num_of_requests ?></div>

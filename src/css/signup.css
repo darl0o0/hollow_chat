@@ -73,7 +73,7 @@ body{
 
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
-@media (max-width: 600px){
+@media (max-width: 550px){
     .privacy{
         margin-top: 6px;
     }

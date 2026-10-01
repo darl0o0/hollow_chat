@@ -16,3 +16,6 @@ uploads/*
 
 # Node.js modules
 node_modules/
+
+.VSCodeCounter/
+test.php

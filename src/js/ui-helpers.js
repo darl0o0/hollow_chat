@@ -1,3 +1,5 @@
+let debounceTimer;
+
 export const UI = {
 
     //The error function
@@ -72,7 +74,8 @@ export const UI = {
         const response = await fetch(url, {
             method: 'POST',
             headers: headers,
-            body: body
+            body: body,
+            credentials: 'include'
         });
     
         const text = await response.text();
@@ -93,10 +96,17 @@ export const UI = {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-            }
+            },
+            credentials: 'include'
         });
     
-        return await response.json();
+        try{
+            return await response.json();
+        }
+        catch(error){
+            console.error("Server returned non-JSON response:", response);
+            throw new Error("Server returned HTML instead of JSON (likely session expired or PHP error).");
+        }
     },
 
     //Check if the email is valid
@@ -150,5 +160,54 @@ export const UI = {
             model.style.visibility = "hidden";
         })
         document.querySelector(".main").style.filter = "none";
+    },
+
+    // Select a user via ID
+    selectUserById: function(argId, list){
+        const user = list.find(u => u.id == argId);
+        if(!user) return null;
+
+        return {
+            id: user.id,
+            username: user.username,
+            img: user.img,
+            bio: user.bio ? user.bio : "No Bio."
+        };
+    },
+
+    // Return multiple users data
+    fetchUsersBatch: async function(userIds){
+        if(!userIds || userIds.length == 0) return [];
+
+        const search = await this.sendPost('/src/api/users/multiple-search.php', {
+            ids: JSON.stringify(userIds)
+        });
+
+        if(search.status == 'ok'){
+            return search.response;
+        }
+
+        return [];
+    },
+
+    // Search for a specific object in a list
+    searchObjectFromList: function(query, list, key){
+        return new Promise((resolve) => {
+            clearTimeout(debounceTimer);
+
+            debounceTimer = setTimeout(() => {
+                const filteredList = list.filter(object => {
+                    const keyMatch = object[key] && object[key].toLowerCase().includes(query);
+                    return keyMatch;
+                });
+
+                resolve(filteredList.length > 0 ? filteredList : null);
+            }, 300);
+        });
+    },
+
+    getObjectSize: function(obj){
+        const str = JSON.stringify(obj);
+        return new Blob([str]).size;
     }
 };

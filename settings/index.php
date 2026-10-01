@@ -44,10 +44,10 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
 
                     <div class="btn-wrapper">
                         <button type="submit" class="btn primary-btn submit">Apply<i class="fa-solid fa-check"></i></button>
-                        <button type="button" class="btn secondary-btn change">Change password</button>
+                        <button type="button" class="btn secondary-btn change model-show" link-model="change-model">Change password</button>
                     </div>
                 </form>
-                <button class="btn delete">Delete account</button>
+                <button class="btn delete model-show" link-model="delete-model">Delete account</button>
             </div>
             <div class="appearance section">
                 <div class="title-sep-wrapper">

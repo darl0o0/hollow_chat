@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', async function(){
     try{
         const meRes = await UI.sendGet('/src/api/me/');
         me = meRes.response;
-
         resolveUserData(me);
+
     }
     catch(error){
         console.error(error);
@@ -142,7 +142,6 @@ document.addEventListener('submit', async (e) => {
 socket.on('new_message', (data)=>{
     const isChatOpen = (typeof activeChatUserId !== null) && (activeChatUserId == data.sid);
     
-    console.log(isChatOpen);
     if(data.sid != id && !isChatOpen){
         unreadCount++;
         updateNotUIState();

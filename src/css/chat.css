@@ -15,6 +15,13 @@
         width: 50px;
         height: 50px;
     }
+    .pfp .sub-pfp{
+        width: 40px;
+        height: 40px;
+    }
+    .pfp .sub-pfp:not(:first-child){
+        margin-left: -16px;
+    }
 }
 .mobile-header{
     display: none;
@@ -49,37 +56,60 @@
         background: #1a1a1a;
         border: 1px ridge #353535;
     }
+    .msg-wrap, .typing-wrapper{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        .pfp-link{
+            border-radius: 50%;
+        }
+        .msg-pfp{
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #000;
+        }
+        .msg-pfp:not(:first-child){
+            margin-left: -25px;
+        }
+        .s{
+            border-bottom-right-radius: 3px;
+            background-color: #e9e4c8;
+            color: #000;
+            align-self: flex-end;
+        }
+        .isRead{
+            width: 10px;
+            height: 10px;
+            border: 1px ridge #e9e4c8;
+            border-radius: 50%;
+        }
+        .isRead.read{
+            background: #e9e4c8;
+        }
+        .isRead.unread{
+            background: none;
+        }
+    }
     .inner-field{
         display: flex;
         flex-direction: column;
         gap: 8px;
-        .msg-wrap{
-            display: flex;
+        .s-wrapper{
             align-self: flex-end;
-            align-items: center;
-            .s{
-                border-bottom-right-radius: 3px;
-                background-color: #e9e4c8;
-                color: #000;
-                align-self: flex-end;
+        }
+        .r-wrapper{
+            align-self: flex-start;
+            img{
+                object-fit: cover;
             }
-            .isRead{
-                width: 10px;
-                height: 10px;
-                border: 1px ridge #e9e4c8;
-                margin-right: 12px;
-                border-radius: 50%;
-            }
-            .isRead.read{
-                background: #e9e4c8;
-            }
-            .isRead.unread{
-                background: none;
-            }
+        }
+        .section-gap{
+            margin-bottom: 15px;
         }
     }
     .typing{
-        display: none;
         height: min-content;
         padding: 8px 6px;
         img{
@@ -131,7 +161,7 @@
 
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
-@media (max-width: 600px){
+@media (max-width: 550px){
     .chat{
         grid-template-areas:
         "header profile"

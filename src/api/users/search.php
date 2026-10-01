@@ -2,7 +2,7 @@
 
 //Initialization
 require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
-requireStrictGet();
+// requireStrictGet();
 
 $user_data = check_login($con);
 header('Content-Type: application/json; charset=utf-8');
