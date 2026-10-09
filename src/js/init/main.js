@@ -1,4 +1,4 @@
-import { UI } from "../ui-helpers.js";
+import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
 export const socket = io('http://localhost:3000');
 export let me = null;
 
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     // Calling user's own data
     try{
-        const meRes = await UI.sendGet('/src/api/me/');
+        const meRes = await HTTP.sendGet('/src/api/me/');
         me = meRes.response;
         resolveUserData(me);
 
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     requestsCount = parseInt(document.querySelector('meta[name="num-of-requests"]').content, 10) || 0;
     unreadCount = parseInt(document.querySelector('meta[name="num-of-unread"]').content, 10) || 0;
 
-    const res = await UI.sendGet('/src/api/friends/');
+    const res = await HTTP.sendGet('/src/api/friends/');
     const incomingRequestsCount = res?.response?.requests?.incoming?.length;
     
     // Universal notifications list
@@ -123,7 +123,7 @@ document.addEventListener('submit', async (e) => {
         const targetUserId = form.dataset.id;
         const action = acceptForm ? 2 : 1;
 
-        await UI.sendPost('/src/api/relationship/', {user2: targetUserId, action});
+        await HTTP.sendPost('/src/api/relationship/', {user2: targetUserId, action});
 
         const card = document.querySelector(`.requests-model .u-${targetUserId}`);
         card.remove();

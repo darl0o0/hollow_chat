@@ -7,6 +7,12 @@ body{
 
 /* SIGNUP CONTAINER STYLING */
 
+.form-step{
+    display: none;
+}
+.active-form-step{
+    display: inline;
+}
 .username-email-wrapper{
     display: grid;
     grid-template-columns: 1fr 1.4fr;
@@ -34,7 +40,7 @@ body{
             margin-bottom: 14px;
         }
     }
-    .img-input{
+    .upload-field{
         text-align: center;
         border: 1.5px dashed #404040;
         cursor: pointer;
@@ -66,6 +72,9 @@ body{
             margin-top: 10px;
         }
     }
+    .active-drag{
+        border: 1.5px dashed #b2ad7f;
+    }
     .pfp{
         display: none;
     }
@@ -77,7 +86,7 @@ body{
     .privacy{
         margin-top: 6px;
     }
-    .bio-pfp-wrapper .img-input{
+    .bio-pfp-wrapper .upload-field{
         padding: 15px 5px;
         img{
             width: 100px;

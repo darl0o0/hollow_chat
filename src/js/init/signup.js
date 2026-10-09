@@ -1,102 +1,153 @@
-import { UI } from "../ui-helpers.js";
+import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
 
-let currentStep = 1;
+let currentPreviewUrl = null;
 
+// Elements
+const elFormSignup = document.querySelector('.signup-form');
+
+const elUsername = elFormSignup.querySelector('.username');
+const elEmail = elFormSignup.querySelector('.email');
+const elPass1 = elFormSignup.querySelector('.pass-1');
+const elPass2 = elFormSignup.querySelector('.pass-2');
+
+const elUploadField = elFormSignup.querySelector(".upload-field");
+
+// Functions
 function validateStep1(){
-    const username = document.querySelector('.username')?.value.trim();
-    const email = document.querySelector('.email')?.value.trim();
-    const pass1 = document.querySelector('.pass-1')?.value.trim();
-    const pass2 = document.querySelector('.pass-2')?.value.trim();
+    const username = elUsername.value.trim();
+    const email = elEmail.value.trim();
+    const pass1 = elPass1.value.trim();
+    const pass2 = elPass2.value.trim();
+
     if(!username || !email || !pass1 || !pass2){
-        UI.alert(false, "All inputs are required.", null);
-        return false;
+        throw new Error("All inputs are required.");
     }
     if(username.includes(" ")){
-        UI.alert(false, "Username cannot contain space.", null);
-        return false;
+        throw new Error("Username cannot contain space.");
     }
-    if(!UI.isValidEmail(email)){
-        UI.alert(false, "Please enter a valid email.", null);
-        return false;
+    if(!Check.isValidEmail(email)){
+        throw new Error("Please enter a valid email.");
     }
     if(pass1.length < 8){
-        UI.alert(false, "Password must contain at least 8 characters.", null);
-        return false;
+        throw new Error("Password must be at least 8 characters long.");
     }
     if(pass1 != pass2){
-        UI.alert(false, "Passwords are not identical.", null);
-        return false;
+        throw new Error("Passwords do not match.");
     }
-    return true;
 }
 
-//Navigate between step 1 and step 2 && checking the user's provided credentials in the front-end
 function gotoStep(step){
     if(step == 2){
-        if(!validateStep1()) return;
-
-        document.querySelectorAll('.form-step').forEach(formStep => {
-            formStep.style.display = 'none';
-        });
-        document.querySelector(`.step-${step}`).style.display = 'inline';
-
-        currentStep++;
-    }
-    else if(step == 1){
-        document.querySelectorAll('.form-step').forEach(formStep => {
-            formStep.style.display = 'none';
-        });
-        document.querySelector(`.step-${step}`).style.display = 'inline';
-        
-        currentStep--;
-    }
-}
-
-//Prevent the user from submitting if they're not in the final step of the inscription
-document.querySelector('.signup-form').addEventListener('submit', async function(e){
-    e.preventDefault();
-
-    if(currentStep == 2){
         try{
-            const formData = new FormData(e.target);
-            const res = await UI.sendPost('', formData);
-    
-            if(res.status == 'error'){
-                gotoStep(1);
-                currentStep--;
-                UI.alert(false, res.message, null);
-            }
-            else if(res.status == 'ok'){
-                UI.alert(true, res.message, 2);
-                document.querySelector('.submit').disabled = true;
-                setTimeout(() => {
-                    window.location.replace('/');
-                }, 2000);
-            }
+            if(!Form.getFormState(elFormSignup)) return;
+
+            validateStep1();
         }
         catch(error){
-            console.error(error);
+            Form.isFormEnabled(elFormSignup, false);
+            UI.alert(false, error.message);
+            setTimeout(() => {
+                Form.isFormEnabled(elFormSignup, true);
+            }, 5000);
+            return;
         }
     }
-    else{
-        gotoStep(2);
-    }
-});
-
-document.querySelector('.next').addEventListener('click', () => gotoStep(2));
-
-document.querySelector('.back').addEventListener('click', () => gotoStep(1));
-
-//The upload field functionality
-document.querySelector(".img-input").addEventListener("click", (e)=>{
-    if(document.querySelector('.img-input .fa-x') && document.querySelector('.img-input .fa-x').contains(e.target)){
-        document.querySelector(".img-input").innerHTML = "Choose a profile picture<br>(Optional)<br><i class='fa-solid fa-image'></i>";
-        document.querySelector(".pfp").value = "";
-    }
-    else{
-        document.querySelector(".pfp").click();
-    }
-});
-document.querySelector(".pfp").onchange = function (){
-    document.querySelector(".img-input").innerHTML = "<i class='fa-solid fa-x'></i><img src='"+URL.createObjectURL(document.querySelector(".pfp").files[0])+"'>";
+    elFormSignup.querySelectorAll('.form-step').forEach(formStep => {
+        formStep.classList.remove('active-form-step');
+    });
+    elFormSignup.querySelector(`.step-${step}`).classList.add('active-form-step');
 }
+
+function uploadFile(file){
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const maxSizeMB = 2;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    try{
+        if(!allowedTypes.includes(file.type)){
+            elFormSignup.querySelector(".pfp").value = '';
+            throw new Error('Please upload a valid image.');
+        }
+        if(file.size > maxSizeBytes){
+            elFormSignup.querySelector(".pfp").value = '';
+            throw new Error(`File size exceeds ${maxSizeMB}MB limit.`);
+        }
+        if(currentPreviewUrl){
+            URL.revokeObjectURL(currentPreviewUrl);
+        }
+        currentPreviewUrl = URL.createObjectURL(file);
+        elUploadField.innerHTML = `<i class='fa-solid fa-x'></i><img src='${currentPreviewUrl}'>`;
+    }
+    catch(error){
+        Form.isFormEnabled(elFormSignup, false);
+        UI.alert(false, error.message);
+        setTimeout(() => {
+            Form.isFormEnabled(elFormSignup, true);
+        }, 5000);
+    }
+}
+
+Form.initForm(elFormSignup, '', true, '/');
+
+elFormSignup.querySelector('.next').addEventListener('click', () => gotoStep(2));
+elFormSignup.querySelector('.back').addEventListener('click', () => gotoStep(1));
+elFormSignup.querySelector('.submit').addEventListener('click', (e) => {
+    try{
+        if(!Form.getFormState(elFormSignup)) return;
+
+        validateStep1();
+    }
+    catch(error){
+        e.stopImmediatePropagation();
+        gotoStep(1)
+        Form.isFormEnabled(elFormSignup, false);
+        UI.alert(false, error.message);
+        setTimeout(() => {
+            Form.isFormEnabled(elFormSignup, true);
+        }, 5000);
+        return;
+    }
+}, true);
+
+//The drag and drop field
+elUploadField.addEventListener("click", (e)=>{
+    const xIcon = elFormSignup.querySelector('.upload-field .fa-x');
+
+    if(xIcon && (e.target === xIcon || xIcon.contains(e.target))){
+        e.stopPropagation();
+        
+        if(currentPreviewUrl){
+            URL.revokeObjectURL(currentPreviewUrl);
+            currentPreviewUrl = null;
+        }
+        elUploadField.innerHTML = "Choose a profile picture<br>(Optional)<br><i class='fa-solid fa-image'></i>";
+        elFormSignup.querySelector(".pfp").value = "";
+    }
+    else{
+        elFormSignup.querySelector(".pfp").click();
+    }
+});
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(uploadEvent => {
+    elUploadField.addEventListener(uploadEvent, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+});
+['dragenter', 'dragover'].forEach(onDragEvent => {
+    elUploadField.addEventListener(onDragEvent, () => elUploadField.classList.add('active-drag'));
+});
+['dragleave', 'drop'].forEach(offDragEvent => {
+    elUploadField.addEventListener(offDragEvent, () => elUploadField.classList.remove('active-drag'));
+});
+elUploadField.addEventListener('drop', (e) => {
+    const files = e.dataTransfer.files;
+    if(files.length > 0){
+        elFormSignup.querySelector(".pfp").files = files;
+        uploadFile(files[0]);
+    }
+});
+elFormSignup.querySelector(".pfp").addEventListener('change', (e) => {
+    if(e.target.files[0]){
+        const file = e.target.files[0];
+        uploadFile(file);
+    }
+});

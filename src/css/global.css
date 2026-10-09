@@ -35,7 +35,8 @@ body{
 
 /* ERROR */
 
-.alert, .model-alert{
+.alert{
+    display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
@@ -48,19 +49,36 @@ body{
         max-width: 300px;
     }
 }
+.alert.error{
+    background: #2a1215;
+    color: #e57373;
+    border: 1px solid #5c2329;
+    .cooldown-circle{
+        background: conic-gradient(#e7766c var(--angle), transparent var(--angle));
+    }
+}
+.alert.ok{
+    background: #182a12;
+    color: #73e584;
+    border: 1px solid #255c23;
+    .cooldown-circle{
+        background: conic-gradient(#76e76c var(--angle), transparent var(--angle));
+    }
+}
 @property --angle {
   syntax: '<angle>';
   initial-value: 0deg;
   inherits: false;
 }
 .cooldown-circle{
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  margin-right: 14px;
-  animation-name: sweep;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    margin-right: 14px;
+    animation-name: sweep;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
 }
 @keyframes sweep{
   100% {
@@ -89,7 +107,7 @@ body{
 
 /* INPUTS */
 
-.input{
+.input:not(.agree){
     margin: 6px 0;
     padding: 12px;
     border-radius: var(--input-btn-border-radius);
@@ -171,6 +189,13 @@ body{
 .btn.google{
     margin-bottom: 0;
     color: #eaeaea;
+}
+.btn-disabled{
+    opacity: 0.6;
+    cursor: default;
+}
+.btn-disabled:hover{
+    transform: none;
 }
 
 /* REGISTER CONTAINERS */
@@ -352,10 +377,6 @@ body{
         min-height: 0;
         padding: 20px 5%;
         grid-area: preview;
-        .header-title{
-            font-size: 28px;
-            margin: 0;
-        }
         .section{
             margin-top: 15px;
             margin-bottom: 5px;
@@ -462,6 +483,10 @@ body{
         background: #000;
         opacity: 0.5;
         transition: 0.1s;
+        z-index: 1;
+    }
+    .form-container::content{
+        transition: 0.15s;
     }
     .form-container, .container{
         background: #131313;
@@ -469,7 +494,7 @@ body{
         border-radius: 25px;
         border: 1px ridge #464646ff;
         z-index: 1;
-        transition: 0.08s;
+        transition: 0.15s;
         .logo{
             border-bottom: 1px ridge #464646ff;
             text-align: center;
@@ -565,6 +590,9 @@ body{
 center{
     margin-top: 6px;
 }
+*.visible{
+    visibility: visible;
+}
 
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
@@ -646,6 +674,7 @@ center{
             border-right: none;
             border-top: 1px ridge #464646ff;
             padding: 6px 3px;
+            z-index: 1;
             form{
                 display: flex;
                 width: 100%;
@@ -694,11 +723,6 @@ center{
         }
         .preview{
             padding: 12px 20px 5px 20px;
-            .header-title{
-                font-size: 27px;
-                margin: 0;
-                margin-bottom: 5px;
-            }
             .section{
                 margin-top: 14px;
                 .title-sep-wrapper{

@@ -85,18 +85,15 @@ else{
                 <p>Or create an account <a href="/signup">here</a></p>
             </div>
         </div>
-        <div class="alert" style="display: none">
-            <div class="cooldown-circle"></div>
-            <span class="alert-text"></span>
-        </div>
-        <form method="post" class="signin-form" novalidate>
-            <input type="email" class="input email" name="email" placeholder="Email" autocomplete="off">
+        <div class="alert-placeholder"></div>
+        <form method="post" class="signin-form" novalidate autocomplete="off">
+            <input type="email" class="input email required" name="email" placeholder="Email" autocomplete="off">
             <div class="password-wrapper">
-                <input type="password" class="input password" name="password" placeholder="Password">
+                <input type="password" class="input password required" name="password" placeholder="Password">
                 <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
             </div>
             <div class="btn-wrapper">
-                <button class="btn submit primary-btn" type="submit">Sign in <i class="fa-solid fa-right-to-bracket"></i></button>
+                <button class="btn submit primary-btn" type="button">Sign in <i class="fa-solid fa-right-to-bracket"></i></button>
                 <button class="btn google  secondary-btn" type="button"><img src="/src/assets/google.png"></img>Sign in with Google</button>
             </div>
         </form>

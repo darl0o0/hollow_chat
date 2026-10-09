@@ -1,13 +1,19 @@
-import { UI } from "../ui-helpers.js";
+import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
 
-let id = null;
+// User objects
 let me = null;
 
+// IDs
+let id = null;
+
+// Lists of objects
 let users;
 
+// Buffers
 let bufferUsers = "";
 
+// Elements
 const ElUsersList = document.querySelector('.users-list');
 
 document.addEventListener('DOMContentLoaded', async function(){
@@ -21,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     
     // List users
     try{
-        const apiUsers = await UI.sendGet('/src/api/users/');
+        const apiUsers = await HTTP.sendGet('/src/api/users/');
         users = apiUsers.response;
     
         users.forEach(user => {
@@ -58,7 +64,7 @@ document.querySelector('.search').addEventListener('input', async (e) => {
     }
 
     try{
-        const searchUsers = await UI.searchObjectFromList(query, users, 'username');
+        const searchUsers = await Fetch.searchObjectFromList(query, users, 'username');
         let bufferSearchUsers = "";
         
         if(searchUsers){

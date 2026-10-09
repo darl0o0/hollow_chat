@@ -1,5 +1,5 @@
 // Initialization
-import { UI } from "../ui-helpers.js";
+import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
 
 // User objects
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     // List conversations
     try{
-        const apiConversations = await UI.sendGet('/src/api/conversations');
+        const apiConversations = await HTTP.sendGet('/src/api/conversations');
     
         if(apiConversations.response != null && Array.isArray(apiConversations.response)){
 
@@ -77,12 +77,12 @@ document.addEventListener('DOMContentLoaded', async function(){
                     if(conversation.isGroup){
                         const group = conversation;
                         relevantGroups.push(group.id);
-                        const membersData = await UI.fetchUsersBatch(group.members);
+                        const membersData = await HTTP.fetchUsersBatch(group.members);
                         const otherUsers = membersData.filter(user => {
                             return user.username != me.username;
                         });
                         otherUsers.forEach(user => {
-                            if(!UI.selectUserById(user.id, relevantUsers)){
+                            if(!Fetch.selectUserById(user.id, relevantUsers)){
                                 user = { isGroup: false, ...user };
                                 relevantUsers.push(user);
                             }
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
                     lastMsg = !conversation.isGroup ? 
                     conversation.lastMsg.msg : 
-                    `${UI.selectUserById(conversation.lastMsg.sid, relevantUsers).username}: ${conversation.lastMsg.msg}`;
+                    `${Fetch.selectUserById(conversation.lastMsg.sid, relevantUsers).username}: ${conversation.lastMsg.msg}`;
     
                     if(!eval(conversation.lastMsg.isRead)){
                         badgeVsibility = 'flex';
@@ -192,7 +192,7 @@ document.addEventListener('click', (e) => {
     
     if(elUserCard){
         selectedUserId = elUserCard.getAttribute('user-id');
-        const selectedUser = UI.selectUserById(selectedUserId, conversations);
+        const selectedUser = Fetch.selectUserById(selectedUserId, conversations);
 
         if(selectedMembers.length < 4){
             document.querySelector(`.grp-model .list .u-${selectedUserId}`).remove();
@@ -206,7 +206,7 @@ document.addEventListener('click', (e) => {
     }
     else if(elSelectedMemberTag){
         selectedUserId = elSelectedMemberTag.getAttribute('user-id');
-        const selectedUser = UI.selectUserById(selectedUserId, conversations);
+        const selectedUser = Fetch.selectUserById(selectedUserId, conversations);
 
         document.querySelector(`.grp-model .member-tag.u-${selectedUserId}`).remove();
         
@@ -262,7 +262,7 @@ document.querySelector('.inbox .search').addEventListener('input', async (e) => 
         return;
     }
 
-    const searchInbox = await UI.searchObjectFromList(query, conversations, 'username');
+    const searchInbox = await Fetch.searchObjectFromList(query, conversations, 'username');
 
     if(!searchInbox){
         elInboxList.innerHTML = '<center>No conversations found.</center>';
@@ -343,7 +343,7 @@ document.querySelector('.grp-model .search').addEventListener('input', async (e)
         return;
     }
 
-    const searchSuggestions = await UI.searchObjectFromList(query, suggestions, 'username');
+    const searchSuggestions = await Fetch.searchObjectFromList(query, suggestions, 'username');
 
     if(!searchSuggestions){
         elSuggestionsList.innerHTML = '<center>No conversations found.</center>';
@@ -385,7 +385,7 @@ document.querySelector('.create-grp-btn').addEventListener('click', async functi
     }
 
     try{
-        const createGrp = await UI.sendPost('/src/api/conversations/create-grp.php', {
+        const createGrp = await HTTP.sendPost('/src/api/conversations/create-grp.php', {
             group_name: null,
             members: JSON.stringify(selectedMembers)
         });
@@ -488,7 +488,7 @@ socket.on('typing_back', async (data) => {
             'Typing...' : 
             (typers.get(data.typedTo).length > 1 ? 
                 `${typers.get(data.typedTo).length} are typing...` : 
-                `${UI.selectUserById(typers.get(data.typedTo), conversations).username} is typing...`
+                `${Fetch.selectUserById(typers.get(data.typedTo), conversations).username} is typing...`
             );
         }
         else{
@@ -505,7 +505,7 @@ socket.on('typing_back', async (data) => {
             (elConversationCard.getAttribute('data-last-msg') || '') : 
             typers.get(data.typedTo).length < 1 ? 
             (elConversationCard.getAttribute('data-last-msg') || '') : 
-            `${UI.selectUserById(typers.get(data.typedTo), conversations).username} is typing...`;
+            `${Fetch.selectUserById(typers.get(data.typedTo), conversations).username} is typing...`;
         }
     }
 });

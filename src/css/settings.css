@@ -8,25 +8,62 @@
 }
 
 /* SETTINGS FORM AND BUTTONS */
-
+.preview{
+    overflow-y: auto;
+}
 .preview form{
     display: flex;
     flex-direction: column;
     margin: 0;
+}
+.pfp-wrapper{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+}
+.img-input{
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    img{
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        filter: grayscale(40%) brightness(0.5);
+        object-fit: cover;
+    }
+    i{
+        position: absolute;
+        color: #fff;
+        font-size: 35px;
+    }
+}
+input[name='img']{
+    display: none;
+}
+.bio{
+    font-size: var(--input-font-size);
+    height: 100px;
+    resize: none;
+}
+.bio::placeholder{
+    white-space: pre-line;
 }
 .update-form .btn-wrapper{
     display: flex;
     flex-direction: row;
     gap: 16px;
 }
-.btn.submit{
+.update-form .btn.submit{
     width: 60%;
     i{
         margin-right: 0;
     }
 }
 .btn.delete{
-    width: 100%;
     color: #faf5f0;
     background-color: #c43c3c;
     border: none;
@@ -47,5 +84,22 @@
         font-size: 18px;
         line-height: 1.5;
         overflow-wrap: break-word;
+    }
+}
+
+/* MEDIA QUERIES FOR MOBILES AND TABLETS */
+
+@media (max-width: 550px){
+    .pfp-wrapper{
+        gap: 20px;
+    }
+    .img-input{
+        img{
+            width: 100px;
+            height: 100px;
+        }
+        i{
+            font-size: 40px;
+        }
     }
 }

@@ -1,101 +1,50 @@
-import { UI } from "../ui-helpers.js";
+import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
 import { userDataReady} from "./main.js";
 
+// User objects
 let me = null;
 
-document.addEventListener('DOMContentLoaded', async function(){
+// Elements
+const elFormUpdate = document.querySelector('.update-form');
 
-    const usernameEl = document.querySelector('.username');
-    const emailEl = document.querySelector('.email');
+const elUpdateUsername = elFormUpdate.querySelector('.username');
+const elUpdateEmail = elFormUpdate.querySelector('.email');
+const elUpdatePfp = elFormUpdate.querySelector('input[name="img"]');
+const elImg = elFormUpdate.querySelector('img');
+const elUpdateBio = elFormUpdate.querySelector('.bio');
+
+const elFormDelete = document.querySelector('.delete-form');
+
+const elFormReset = document.querySelector('.reset-form');
+
+
+document.addEventListener('DOMContentLoaded', async function(){
 
     try{
         me = await userDataReady;
 
-        usernameEl.value = me.username;
-        emailEl.value = me.email;
+        elUpdateUsername.value = me.username;
+        elUpdateEmail.value = me.email;
+        elImg.src = `/src/assets/pfps/${me.img}`;
+        elUpdateBio.value = me.bio;
 
-        usernameEl.setAttribute('data-initial', me.username);
-        emailEl.setAttribute('data-initial', me.email);
+        elUpdateUsername.setAttribute('data-initial', me.username);
+        elUpdateEmail.setAttribute('data-initial', me.email);
+        elUpdateBio.setAttribute('data-initial', me.bio);
     }
     catch(error){
         console.error(error);
     }
-
-    // Hide the on-screen models
-    document.querySelectorAll(".model .secondary-btn").forEach(hideEvent => {
-        hideEvent.addEventListener('click', () => {
-            UI.hideModel();
-        });
-    });
     
-    //Update form
-    document.querySelector(".update-form").addEventListener('submit', async function(e){
-        e.preventDefault();
+});
 
-        const username = usernameEl?.value.trim();
-        const email = emailEl?.value.trim();
+Form.initForm(elFormUpdate, '/src/api/account/update.php', true);
+Form.initForm(elFormDelete, '/src/api/account/delete.php', false, '/');
+Form.initForm(elFormReset, '/src/api/account/reset-pass.php', false);
 
-        if(!username || !email){
-            UI.alert(false, "All inputs are required.", null);
-            return;
-        }
+document.querySelector('.img-input').addEventListener('click', () => elUpdatePfp.click());
 
-        const initUsername = usernameEl.dataset.initial || '';
-        const initEmail = emailEl.dataset.initial || '';
-
-        if(username == initUsername && email == initEmail){
-            UI.alert(false, "Cannot use the current credentials.", null);
-            return;
-        }
-
-        const formData = new FormData(e.target);
-
-        try{
-            const update = await UI.sendPost('/src/api/account/update.php', formData);
-    
-            if(update.status == 'ok'){
-                UI.alert(true, update.message, 3);
-    
-                usernameEl.dataset.initial = username;
-                emailEl.dataset.initial = email;
-            }
-            else if(update.status == 'error'){
-                UI.alert(false, update.message, null);
-                return;
-            }
-        }
-        catch(error){
-            console.error(error);
-        }
-    });
-    
-    // Delete account form
-    document.querySelector('.delete-form').addEventListener('submit', async function(e){
-        e.preventDefault();
-        const email = document.querySelector('.delete-email').value;
-        const password = document.querySelector('.delete-password').value;
-        if(!email || !password){
-            UI.alert(false, "All inputs are required.", null, true);
-            return;
-        }
-        const formData = new FormData(e.target);
-
-        try{
-            const deleteRes = await UI.sendPost('/src/api/account/delete.php', formData);
-    
-            if(deleteRes.status == 'ok'){
-                UI.alert(true, deleteRes.message, 4, true);
-                setTimeout(() => {
-                    window.location.replace('/signin');
-                }, 4000);
-            }
-            else if(deleteRes.status == 'error'){
-                UI.alert(false, deleteRes.message, null, true);
-                return;
-            }
-        }
-        catch(error){
-            console.error(error);
-        }
-    });
+elUpdatePfp.addEventListener('change', (e) => {
+    elImg.src = URL.createObjectURL(e.target.files[0]);
+    Form.isFormEnabled(elFormUpdate)
 });

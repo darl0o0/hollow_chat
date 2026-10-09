@@ -1,4 +1,4 @@
-import { UI } from "./ui-helpers.js";
+import { UI } from "./helpers.js";
 
 // Show notifications model
 document.addEventListener('click', (e) => {
@@ -6,12 +6,16 @@ document.addEventListener('click', (e) => {
     if(modelBtn){
         const modelName = modelBtn.getAttribute('link-model');
 
-        console.log(modelName);
         const model = document.querySelector(`.${modelName}`);
         const main = document.querySelector(".main");
 
         if(model) model.style.visibility = "visible";
         if(main) main.style.filter = "blur(3px)";
+    }
+
+    const hideModalBtn = e.target.closest('.model-hide');
+    if(hideModalBtn){
+        UI.hideModel();
     }
 });
 

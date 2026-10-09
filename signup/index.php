@@ -54,7 +54,7 @@ if(!isset($_SESSION['id'])){
         if(strlen($password1) < 8){
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Password must contain at least 8 characters.'
+                'message' => 'Please provide an 8 characters long password.'
             ]);
             return;
         }
@@ -62,7 +62,7 @@ if(!isset($_SESSION['id'])){
         if($password1 !== $password2){
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Passwords are not identical.'
+                'message' => 'Passwords do not match.'
             ]);
             return;
         }
@@ -130,22 +130,19 @@ else{
                 <p>Or sign in to your account <a href="/signin">here</a></p>
             </div>
         </div>
-        <div class="alert" style="display: none">
-            <div class="cooldown-circle"></div>
-            <span class="alert-text"></span>
-        </div>
+        <div class="alert-placeholder"></div>
         <form class="signup-form" method="post" enctype="multipart/form-data" novalidate>
-            <div class="form-step step-1">
+            <div class="form-step step-1 active-form-step">
                 <div class="username-email-wrapper">
-                    <input type="username" class="input username" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15">
-                    <input type="email" class="input email" name="email" placeholder="Email">
+                    <input type="username" class="input username required" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15">
+                    <input type="email" class="input email required" name="email" placeholder="Email">
                 </div>
                 <div class="password-wrapper">
-                    <input type="password" class="input password pass-1" name="password-1" placeholder="Password">
+                    <input type="password" class="input password pass-1 required match" name="password-1" placeholder="Password">
                     <button type="button" class="s-h s-h-1"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="password-wrapper">
-                    <input type="password" class="input password pass-2" name="password-2" placeholder="Confirm password">
+                    <input type="password" class="input password pass-2 required match" name="password-2" placeholder="Confirm password">
                     <button type="button" class="s-h s-h-2"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="btn-wrapper">
@@ -156,19 +153,19 @@ else{
                     </button>
                 </div>
             </div>
-            <div class="form-step step-2" style="display: none">
+            <div class="form-step step-2">
                 <div class="bio-pfp-wrapper">
                     <div class="bio-privacy-wrapper">
                         <textarea class="input bio" name="bio" maxlength="150" placeholder="Write a short bio...&#10;(Optional)"></textarea>
                         <div class="privacy">
-                            <label>Account's privacy:</label>
+                            <label>Account privacy:</label>
                             <select name="privacy" class="input privacy-select">
                                 <option value="0">Public</option>
                                 <option value="1">Private</option>
                             </select>
                         </div>
                     </div>
-                    <div class="input img-input">
+                    <div class="input upload-field">
                         <p>
                             Choose a profile picture (Optional)<br>
                         </p>
@@ -177,7 +174,7 @@ else{
                     <input type="file" name="img" class="pfp" accept="image/jpg, image/jpeg, image/png">
                 </div>
                 <div class="btn-wrapper">
-                    <button type="submit" class="btn primary-btn submit">Finish<i class="fa-solid fa-right-to-bracket"></i></button>
+                    <button type="button" class="btn primary-btn submit">Finish<i class="fa-solid fa-right-to-bracket"></i></button>
                     <button class="btn secondary-btn back" type="button">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Go back</span>

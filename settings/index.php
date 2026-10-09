@@ -16,35 +16,39 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
     <div class="main settings">
         <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/panel.php"; ?>
         <div class="preview">
-            <span class="header-title">Settings</span>
             <div class="account section">
                 <div class="title-sep-wrapper">
                     <span class="title">Account settings</span>
                     <div class="sep"></div>
                 </div>
-                <div class="alert" style="display: none">
-                    <div class="cooldown-circle"></div>
-                    <span class="alert-text"></span>
-                </div>
-                <form method="post" class="update-form">
-                    
-                    <input 
-                    type="username" 
-                    class="input username" 
-                    name="username" 
-                    placeholder="Username" 
-                    pattern="[A-Za-z0-9_]+" 
-                    maxlength="15">
-
-                    <input 
-                    type="email" 
-                    class="input email" 
-                    name="email" 
-                    placeholder="Email">
-
+                <div class="alert-placeholder"></div>
+                <form method="post" class="update-form distinct" novalidate>
+                    <div class="pfp-wrapper">
+                        <div class="img-input">
+                            <img>
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <input type="file" name="img" accept="image/jpg, image/jpeg, image/png">
+                        <div class="inputs-wrapper">
+                            <input 
+                            type="username" 
+                            class="input username required distinct" 
+                            name="username" 
+                            placeholder="Username" 
+                            pattern="[A-Za-z0-9_]+" 
+                            maxlength="15">
+        
+                            <input 
+                            type="email" 
+                            class="input email required distinct" 
+                            name="email" 
+                            placeholder="Email">
+                        </div>
+                    </div>
+                    <textarea class="input bio distinct" name="bio" maxlength="150" placeholder="Write a short bio...&#10;(Optional)"></textarea>
                     <div class="btn-wrapper">
-                        <button type="submit" class="btn primary-btn submit">Apply<i class="fa-solid fa-check"></i></button>
-                        <button type="button" class="btn secondary-btn change model-show" link-model="change-model">Change password</button>
+                        <button type="button" class="btn primary-btn submit">Apply<i class="fa-solid fa-check"></i></button>
+                        <button type="button" class="btn secondary-btn change model-show" link-model="reset-model">Change password</button>
                     </div>
                 </form>
                 <button class="btn delete model-show" link-model="delete-model">Delete account</button>
@@ -57,28 +61,29 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
             </div>
         </div>
     </div>
-    <div class="change-model model">
+    <div class="reset-model model">
         <div class="background"></div>
         <div class="form-container">
             <div class="logo">
                 <img src="/src/assets/logo/light_logo.png">
             </div>
-            <h1>Change your password:</h1>
-            <form action="change_pass.php" method="post" autocomplete="off">
+            <h1>Reset your password:</h1>
+            <div class="alert-placeholder"></div>
+            <form method="post" autocomplete="off" class="reset-form">
                 <div class="password-wrapper">
-                    <input type="password" name="old_pass" placeholder="Old password" class="input password">
+                    <input type="password" name="old_pass" placeholder="Old password" class="input password required">
                     <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="password-wrapper">
-                    <input type="password" name="new_pass1" placeholder="New password" class="input password">
+                    <input type="password" name="new_pass" placeholder="New password" class="input password required">
                     <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="password-wrapper">
-                    <input type="password" name="new_pass2" placeholder="Confirm new password" class="input password">
+                    <input type="password" name="new_pass1" placeholder="Confirm new password" class="input password required">
                     <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="btn-wrapper">
-                    <button class="btn primary-btn" type="submit">Apply</button>
+                    <button class="btn primary-btn submit" type="button">Apply</button>
                     <button class="btn secondary-btn" type="button">Cancel</button>
                 </div>
             </form>
@@ -91,24 +96,30 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
                 <img src="/src/assets/logo/light_logo.png">
             </div>
             <h1>Delete your account:</h1>
-            <div class="model-alert" style="display: none">
-                <div class="cooldown-circle"></div>
-                <span class="alert-text"></span>
-            </div>
+            <div class="alert-placeholder"></div>
             <form method="post" autocomplete="off" class="delete-form"
             novalidate>
-                <input type="email" class="input delete-email" name="email" placeholder="Email" autocomplete="off">
+                <input 
+                type="email" 
+                class="email input required" 
+                name="email" 
+                placeholder="Email" 
+                autocomplete="off">
                 <div class="password-wrapper">
-                    <input type="password" name="password" placeholder="Password" class="input password delete-password">
+                    <input 
+                    type="password" 
+                    name="password" 
+                    placeholder="Password" 
+                    class="password input required">
                     <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="checkbox">
-                    <input type="checkbox" class="agree" name="agree" required>
+                    <input type="checkbox" class="input agree required" name="agree" required>
                     <label for="agree">I unserstand that my account will be permanently deleted</label>
                 </div>
                 <div class="btn-wrapper">
-                    <button class="btn delete" type="submit"><i class="fa-solid fa-trash"></i>Delete Account</button>
-                    <button class="btn secondary-btn" type="button">Cancel</button>
+                    <button class="btn delete submit" type="button"><i class="fa-solid fa-trash"></i>Delete Account</button>
+                    <button class="btn secondary-btn model-hide" type="button">Cancel</button>
                 </div>
             </form>
         </div>

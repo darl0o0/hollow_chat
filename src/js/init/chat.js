@@ -1,5 +1,5 @@
 // Initialization
-import { UI } from "../ui-helpers.js";
+import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
 
 // User objects
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     const pfpContainer = document.querySelectorAll('.pfp-container');
 
     try{
-        const apiUser = await UI.sendGet('/src/api/users/search.php', {q: qid});
+        const apiUser = await HTTP.sendGet('/src/api/users/search.php', {q: qid});
         target = apiUser.response;
 
         if(target.profile && !target.isYou){
@@ -117,12 +117,12 @@ document.addEventListener('DOMContentLoaded', async function(){
             resolveTargetData();
         }
         else{
-            const apiCheckGrp = await UI.sendGet('/src/api/conversations/check-grp.php', {q: qid});
+            const apiCheckGrp = await HTTP.sendGet('/src/api/conversations/check-grp.php', {q: qid});
             group = apiCheckGrp.response.group;
             isGroup = apiCheckGrp.response.isGroup;
 
             if(isGroup){
-                const membersData = await UI.fetchUsersBatch(apiCheckGrp.response.members);
+                const membersData = await HTTP.fetchUsersBatch(apiCheckGrp.response.members);
                 otherUsers = membersData.filter(user => {
                     return user.id != me.id;
                 });
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     }
 
     // Load chat when the page is loaded
-    const apiMessages = await UI.sendGet('/src/api/messages/', {qid, isGroup});
+    const apiMessages = await HTTP.sendGet('/src/api/messages/', {qid, isGroup});
     const messages = apiMessages.response;
 
     if(Array.isArray(messages)){
@@ -274,7 +274,7 @@ socket.on('typing_back', async (data) => {
     else{
 
         if(otherUserIds.includes(data.typedBy) && data.typedTo == groupId){
-            const typer = UI.selectUserById(data.typedBy, otherUsers);
+            const typer = Fetch.selectUserById(data.typedBy, otherUsers);
             const wrapper = document.querySelector('.typing-wrapper');
 
             if(data.isTyping){
@@ -321,11 +321,12 @@ socket.on('user_status_change', (data) => {
             groupPresence.push(data.userId);
             countGroupPresence++;
         }
-        else if(groupPresence.includes(data.userId)){
+        else if(!data.isOnline && groupPresence.includes(data.userId)){
             groupPresence = groupPresence.filter(id => id != data.userId);
             countGroupPresence--;
         }
     }
+    
     document.querySelectorAll(".online-status").forEach(onlineStatus => {
 
         if(data.userId == qid){
@@ -342,7 +343,7 @@ document.querySelector('.send-form').addEventListener('submit', async function(e
     if(msgText){
         
         //HTTP Request
-        await UI.sendPost('/src/api/messages/', newMessageData(msgText));
+        await HTTP.sendPost('/src/api/messages/', newMessageData(msgText));
 
         // Make the input empty && scroll to the bottom of the field && isTyping = 0
         document.querySelector('.msg-input').value = null;
@@ -381,7 +382,7 @@ socket.on('new_message', (data) => {
             sender = target.profile;
         }
         else{
-            sender = UI.selectUserById(data.sid, otherUsers);
+            sender = Fetch.selectUserById(data.sid, otherUsers);
         }
         const pfps = document.querySelectorAll(`.msg-wrap.m-${sender.id} .msg-pfp`);
         if(pfps.length > 0){

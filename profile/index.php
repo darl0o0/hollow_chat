@@ -17,34 +17,7 @@ $qid = $_GET['q'] ?? '';
 <body>
     <div class="main profile">
         <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/panel.php"; ?>
-        <div class="preview">
-            <h1 class="not-found"></h1>
-            <div class="profile-wrapper">
-                <div class="profile-card">
-                    <img>
-                    <span class="username-label"></span>
-                    <div class="online-status">
-                        <div class="is-online"></div>
-                        <span class="is-online-label"></span>
-                    </div>
-                </div>
-                <div class="profile-details">
-                    <div class="details-section date">
-                        <span class="title">Member since</span>
-                        <span class="text"></span>
-                    </div>
-                    <div class="details-section bio">
-                        <span class="title">Bio</span>
-                        <span class="text"></span>
-                    </div>
-                    <div class="details-section privacy">
-                        <span class="title">Account privacy</span>
-                        <span class="text"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="profile-actions"></div>
-        </div>
+        <div class="preview"></div>
     </div>
 </body>
 </html>

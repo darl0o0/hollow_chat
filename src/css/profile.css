@@ -5,22 +5,26 @@
 .preview{
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 0px 20px;
 }
 .profile-wrapper{
-    display: none;
-    gap: 40px;
+    display: flex;
+    width: 80%;
+    min-width: 250px;
+    max-width: 380px;
+    gap: 20px;
     .profile-card{
         display: flex;
         align-items: center;
         flex-direction: column;
         img{
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             object-fit: cover;
             border-radius: 50%;
             margin-bottom: 14px;
-            border: 1.2px ridge #464646ff;
+            border: var(--light-border);
         }
         .username-label{
             font-size: var(--main-font-size);
@@ -49,12 +53,12 @@
             flex-direction: column;
             margin-bottom: 18px;
             .title{
-                font-size: var(--main-font-size);
+                font-size: 18px;
                 font-weight: bold;
-                margin-bottom: 2px;
+                margin-bottom: 3px;
             }
             .text{
-                font-size: 16px;
+                font-size: 15px;
                 font-weight: light;
                 color: #909182;
             }
@@ -65,8 +69,8 @@
     display: flex;
     flex-direction: column;
     width: 80%;
-    min-width: 310px;
-    max-width: 480px;
+    min-width: 250px;
+    max-width: 380px;
     margin-top: 10px;
 }
 
