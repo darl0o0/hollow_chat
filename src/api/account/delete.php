@@ -17,19 +17,11 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     $password = $_POST['password'];
 
     if(empty($email) || empty($password)){
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'All inputs are required.'
-        ]);
-        return;
+        ok(false, 'All inputs are required.');
     }
 
     if($email !== $user_data['email'] || !password_verify($password, $user_data['password'])){
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Invalid email or password.'
-        ]);
-        return;
+        ok(false, 'Invalid email or password.');
     }
 
     //Delete user
@@ -60,9 +52,5 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
         );
     }
     session_destroy();
-    echo json_encode([
-        'status' => 'ok',
-        'message' => 'Account Deleted.'
-    ]);
-    die();
+    ok(true, 'Account Deleted.');
 }

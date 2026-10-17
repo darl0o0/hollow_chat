@@ -7,25 +7,18 @@ if(!isset($_SESSION['id'])){
 
     if($_SERVER['REQUEST_METHOD'] == "POST"){
         checkHeadersCSRF();
+        $input = json_decode(file_get_contents('php://input'), true);
         
         // Credentials
-        $email = trim($_POST['email']);
-        $password = trim($_POST['password']);
+        $email = trim($input['email']);
+        $password = trim($input['password']);
 
         if(empty($email) || empty($password)){
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'All inputs are required.'
-            ]);
-            return;
+            ok(false, 'All inputs are required.');
         }
 
         if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Please enter a valid email.'
-            ]);
-            return;
+            ok(false, 'Please enter a valid email.');
         }
 
         $stmt_user = mysqli_prepare($con, "select id, password from users where email = ?");
@@ -37,11 +30,7 @@ if(!isset($_SESSION['id'])){
         mysqli_stmt_close($stmt_user);
 
         if(!$row_user || !password_verify($password, $row_user['password'])){
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Invalid email or password.'
-            ]);
-            return;
+            ok(false, 'Invalid email or password.');
         }
 
         //Login
@@ -53,11 +42,7 @@ if(!isset($_SESSION['id'])){
         include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
         $_SESSION['id'] = $row_user['id'];
         
-        echo json_encode([
-            'status' => 'ok',
-            'message' => 'Redirecting...'
-        ]);
-        die();
+        ok(true, 'Redirecting...');
     }
 }
 else{
@@ -82,7 +67,7 @@ else{
             <div class="brv"></div>
             <div class="title-or-wrapper">
                 <h1>Sign in</h1>
-                <p>Or create an account <a href="/signup">here</a></p>
+                <p>Or create an account <a href="/signup/">here</a></p>
             </div>
         </div>
         <div class="alert-placeholder"></div>

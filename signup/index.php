@@ -7,12 +7,13 @@ if(!isset($_SESSION['id'])){
 
     if($_SERVER['REQUEST_METHOD'] == "POST"){
         checkHeadersCSRF();
+        $input = json_decode(file_get_contents('php://input'), true);
 
         //Database primary parameters
-        $username = trim($_POST['username']);
-        $email = trim($_POST['email']);
-        $password1 = trim($_POST['password-1']);
-        $password2 = trim($_POST['password-2']);
+        $username = trim($input['username']);
+        $email = trim($input['email']);
+        $password1 = trim($input['password-1']);
+        $password2 = trim($input['password-2']);
         $hashed_password = password_hash($password1, PASSWORD_DEFAULT);
             
         //Uploading a profile picture
@@ -23,48 +24,28 @@ if(!isset($_SESSION['id'])){
         move_uploaded_file($tmp_name, $file_dir);
 
         //Database secondary parameters
-        $bio = trim($_POST['bio']);
-        $private = $_POST['privacy'];
+        $bio = trim($input['bio']);
+        $private = $input['privacy'];
         $img = $raw_img['name'];
 
         if(empty($username) || empty($email) || empty($password1) || empty($password2)){
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'All inputs are required.'
-            ]);
-            return;
+            ok(false, 'All inputs are required.');
         }
 
         if(str_contains($username, " ")){
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Username cannot contain space.'
-            ]);
-            return;
+            ok(false, 'Username cannot contain space.');
         }
 
         if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Please enter a valid email.'
-            ]);
-            return;
+            ok(false, 'Please enter a valid email.');
         }
 
         if(strlen($password1) < 8){
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Please provide an 8 characters long password.'
-            ]);
-            return;
+            ok(false, 'Please provide an 8 characters long password.');
         }
 
         if($password1 !== $password2){
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Passwords do not match.'
-            ]);
-            return;
+            ok(false, 'Passwords do not match.');
         }
 
         $stmt_user = mysqli_prepare($con, "select * from users where username = ? or email = ?");
@@ -76,11 +57,7 @@ if(!isset($_SESSION['id'])){
         mysqli_stmt_close($stmt_user);
 
         if(count($row_user) > 0){
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Cannot use the provided credentials.'
-            ]);
-            return;
+            ok(false, 'Cannot use the provided credentials.');
         }
 
         if(empty($img)){
@@ -98,11 +75,7 @@ if(!isset($_SESSION['id'])){
         include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
         
         $_SESSION['id'] = $id;
-        echo json_encode([
-            'status' => 'ok',
-            'message' => 'Redirecting...'
-        ]);
-        die();
+        ok(true, 'Redirecting...');
     }
 }
 else{
@@ -127,7 +100,7 @@ else{
             <div class="brv"></div>
             <div class="title-or-wrapper">
                 <h1>Sign up</h1>
-                <p>Or sign in to your account <a href="/signin">here</a></p>
+                <p>Or sign in to your account <a href="/signin/">here</a></p>
             </div>
         </div>
         <div class="alert-placeholder"></div>

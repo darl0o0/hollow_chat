@@ -96,8 +96,4 @@ $data['requests']['incoming'] = (count($data['requests']['incoming']) > 0) ? $da
 
 $data['requests']['outgoing'] = (count($data['requests']['outgoing']) > 0) ? $data['requests']['outgoing'] : null;
 
-echo json_encode([
-    'status' => 'ok',
-    'response' => $data
-]);
-die();
+ok(true, $data);

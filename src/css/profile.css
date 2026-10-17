@@ -11,8 +11,6 @@
 .profile-wrapper{
     display: flex;
     width: 80%;
-    min-width: 250px;
-    max-width: 380px;
     gap: 20px;
     .profile-card{
         display: flex;
@@ -69,8 +67,6 @@
     display: flex;
     flex-direction: column;
     width: 80%;
-    min-width: 250px;
-    max-width: 380px;
     margin-top: 10px;
 }
 
@@ -86,8 +82,6 @@
         gap: 40px;
     }
     .profile-actions{
-        min-width: 250px;
-        max-width: 320px;
         form{
             margin: 0;
         }

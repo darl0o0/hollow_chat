@@ -15,35 +15,19 @@ $new_pass = $_POST['new_pass'];
 $new_pass1 = $_POST['new_pass1'];
 
 if(empty($old_pass) || empty($new_pass) || empty($new_pass1)){
-    echo json_encode([ 
-        'status' => 'error',
-        'message' => 'All inputs are required.'
-    ]);
-    return;
+    ok(false, 'All inputs are required.');
 }
 
 if(!password_verify($old_pass, $user_data['password'])){
-    echo json_encode([ 
-        'status' => 'error',
-        'message' => 'Wrong password.'
-    ]);
-    return;
+    ok(false, 'Wrong password.');
 }
 
 if(strlen($new_pass) < 8){
-    echo json_encode([ 
-        'status' => 'error',
-        'message' => 'Please provide an 8 characters long password.'
-    ]);
-    return;
+    ok(false, 'Please provide an 8 characters long password.');
 }
 
 if($new_pass !== $new_pass1){
-    echo json_encode([ 
-        'status' => 'error',
-        'message' => 'Passwords do not match.'
-    ]);
-    return;
+    ok(false, 'Passwords do not match.');
 }
 
 // Update the credentials
@@ -53,8 +37,4 @@ mysqli_stmt_bind_param($stmt_update, "ss", $new_hashed_password, $id);
 mysqli_stmt_execute($stmt_update);
 mysqli_stmt_close($stmt_update);
 
-echo json_encode([
-    'status' => 'ok',
-    'message' => 'Password updated.'
-]);
-die();
+ok(true, 'Password updated.');

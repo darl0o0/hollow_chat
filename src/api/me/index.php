@@ -18,8 +18,4 @@ $data = [
     'isPrivate' => filter_var($user_data['private'], FILTER_VALIDATE_BOOLEAN)
 ];
 
-echo json_encode([
-    'status' => 'ok',
-    'response' => $data
-]);
-die();
+ok(true, $data);

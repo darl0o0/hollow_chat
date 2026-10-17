@@ -75,8 +75,8 @@ export const HTTP = {
     fetchUsersBatch: async function(userIds){
         if(!userIds || userIds.length == 0) return [];
 
-        const search = await this.sendPost('/src/api/users/multiple-search.php', {
-            ids: JSON.stringify(userIds)
+        const search = await this.sendPost('/src/api/batch-fetch/', {
+            q: userIds
         });
 
         if(search.status == 'ok'){
@@ -91,6 +91,7 @@ export const HTTP = {
         const csrfToken = Fetch.getCookie('csrf_token');
     
         const headers = {
+            'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': csrfToken
         };
@@ -102,12 +103,7 @@ export const HTTP = {
         }
         else{
             // Convert plain JS objects into FormData so PHP populates $_POST automatically
-            body = new FormData();
-            for(const key in data){
-                if(Object.prototype.hasOwnProperty.call(data, key)){
-                    body.append(key, data[key]);
-                }
-            }
+            body = JSON.stringify(data);
         }
     
         const response = await fetch(url, {
@@ -211,6 +207,25 @@ export const Form = {
         return formState.has(form) ? formState.get(form) : true;
     },
 
+    // Convert formData into JSON object
+    formToJson: function(formData){
+        const obj = {};
+
+        formData.forEach((value, key) => {
+            if(Object.prototype.hasOwnProperty.call(obj, key)){
+                if(!Array.isArray(obj[key])){
+                    obj[key] = [obj[key]];
+                }
+                obj[key].push(value);
+            }
+            else{
+                obj[key] = value;
+            }
+        });
+
+        return obj;
+    },
+
     // Initialize a form
     initForm: function(form, action, updatePasswordManager, redirect){
         this.isFormEnabled(form, false);
@@ -304,14 +319,14 @@ export const Form = {
                 }
             }
 
-            const formData = new FormData(form);
-            const res = await HTTP.sendPost(action, formData);
+            const data = this.formToJson(new FormData(form));
+            const res = await HTTP.sendPost(action, data);
         
             if(res.status == 'error'){
-                throw new Error(res.message);
+                throw new Error(res.response);
             }
             else if(res.status == 'ok'){
-                UI.alert(true, res.message, 2, elFormParent);
+                UI.alert(true, res.response, 2, elFormParent);
                 this.isFormEnabled(form, false);
 
                 if(isDistinct){
@@ -353,5 +368,16 @@ export const Check = {
     isValidEmail: function(email){
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email.trim());
+    }
+}
+
+export const performanceTimer = {
+    start(){
+        return performance.now();
+    },
+    stop(startTime, label = 'Execution'){
+        const duration = (performance.now() - startTime).toFixed(2);
+        console.log(`[Performance] ${label}: ${duration}ms`);
+        return duration;
     }
 }

@@ -28,8 +28,4 @@ foreach($users as $user){
     ];
 }
 
-echo json_encode([
-    'status' => 'ok',
-    'response' => $data
-]);
-die();
+ok(true, $data);

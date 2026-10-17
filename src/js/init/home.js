@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async function(){
             const isOnline = Boolean(Number(user.isOnline)) ? 'visible' : "hidden"
     
             bufferUsers += `
-                <a class='user-card u-${user.id}' href='profile?q=${user.id}'>
+                <a class='user-card u-${user.id}' href='profile/?q=${user.id}'>
                     <div class='pfp'>
                         <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
                         <div class='online-status' style='visibility: ${isOnline}'></div>
@@ -74,7 +74,7 @@ document.querySelector('.search').addEventListener('input', async (e) => {
                 const isOnline = Boolean(Number(user.isOnline)) ? 'visible' : "hidden"
         
                 bufferSearchUsers += `
-                    <a class='user-card u-${user.id}' href='profile?q=${user.id}'>
+                    <a class='user-card u-${user.id}' href='profile/?q=${user.id}'>
                         <div class='pfp'>
                             <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
                             <div class='online-status' style='visibility: ${isOnline}'></div>

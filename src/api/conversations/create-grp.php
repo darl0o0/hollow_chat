@@ -44,10 +44,6 @@ mysqli_stmt_bind_param($stmt_insert_conversation, "s", $group_id);
 mysqli_stmt_execute($stmt_insert_conversation);
 mysqli_stmt_close($stmt_insert_conversation);
 
-echo json_encode([
-    'status' => 'ok',
-    'response' => [
-        'groupId' => $group_id
-    ]
+ok(true, [
+    'groupId' => $group_id
 ]);
-die();

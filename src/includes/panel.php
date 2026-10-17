@@ -4,6 +4,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
 ?>
 <a class="logo" href="/">
     <img src="/src/assets/logo/light_logo.png">
+    <img src="/src/assets/logo/hollow_icon_light.png">
 </a>
 <div class="panel">
     <a href="/" class="panel-action home-action">
@@ -11,7 +12,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
         <span>Home</span>
     </a>
 
-    <a href="/inbox" class="panel-action inbox-action">
+    <a href="/inbox/" class="panel-action inbox-action">
         <div class="icon-wrapper">        
             <i class="fa-solid fa-inbox"></i>
             <div class="num-of"><?php echo $num_of_unread_messages ?></div>
@@ -31,7 +32,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
         <span>Notifications</span>
     </button>
     
-    <a href="/settings" class="panel-action settings-action"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+    <a href="/settings/" class="panel-action settings-action"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
     
     <a class="panel-action goto-profile-desktop profile-action">
         <div class="pfp">

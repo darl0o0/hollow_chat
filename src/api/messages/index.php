@@ -66,26 +66,25 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
             'isRead' => $message['isRead']
         ];
     }
-    echo json_encode([
-        'status' => 'ok',
-        'response' => $data
-    ]);
-    die();
+
+    ok(true, $data);
 }
 elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     requireStrictPost();
+    
+    $input = json_decode(file_get_contents('php://input'), true);
 
     // Curl request data
-    $sid = $_POST['sid'];
-    $msg = $_POST['msg'];
-    $is_group = $_POST['isGroup'];
-    $group_id = $_POST['groupId'];
+    $sid = $input['sid'];
+    $msg = $input['msg'];
+    $is_group = $input['isGroup'];
+    $group_id = $input['groupId'];
 
-    $qid = filter_var($is_group, FILTER_VALIDATE_BOOL) ? $group_id : $_POST['qid'];
+    $qid = filter_var($is_group, FILTER_VALIDATE_BOOL) ? $group_id : $input['qid'];
 
     $socketData = json_encode([
         'sid' => $sid,
-        'rid' => json_decode($_POST['qid'], true) ?? $_POST['qid'],
+        'rid' => json_decode($input['qid'], true) ?? $input['qid'],
         'msg' => $msg,
         'isGroup' => filter_var($is_group, FILTER_VALIDATE_BOOL),
         'groupId' => $group_id
@@ -128,8 +127,5 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     mysqli_stmt_close($stmt_insert_msg);
     
     curl_close($ch);
-    echo json_encode([
-        'status' => 'ok',
-        'message' => 'sent'
-    ]);
+    ok(true, $data);
 }

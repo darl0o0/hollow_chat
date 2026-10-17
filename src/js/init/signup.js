@@ -45,7 +45,7 @@ function gotoStep(step){
         }
         catch(error){
             Form.isFormEnabled(elFormSignup, false);
-            UI.alert(false, error.message);
+            UI.alert(false, error.response);
             setTimeout(() => {
                 Form.isFormEnabled(elFormSignup, true);
             }, 5000);
@@ -79,7 +79,7 @@ function uploadFile(file){
     }
     catch(error){
         Form.isFormEnabled(elFormSignup, false);
-        UI.alert(false, error.message);
+        UI.alert(false, error.response);
         setTimeout(() => {
             Form.isFormEnabled(elFormSignup, true);
         }, 5000);
@@ -100,7 +100,7 @@ elFormSignup.querySelector('.submit').addEventListener('click', (e) => {
         e.stopImmediatePropagation();
         gotoStep(1)
         Form.isFormEnabled(elFormSignup, false);
-        UI.alert(false, error.message);
+        UI.alert(false, error.response);
         setTimeout(() => {
             Form.isFormEnabled(elFormSignup, true);
         }, 5000);

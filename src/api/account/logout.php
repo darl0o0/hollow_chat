@@ -28,7 +28,4 @@ if(ini_get("session.use_cookies")){
         $params['httponly']
     );
 }
-echo json_encode([
-    'status' => 'ok'
-]);
-die();
+ok(true, 'Logged out');

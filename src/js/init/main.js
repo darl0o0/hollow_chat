@@ -1,5 +1,5 @@
 import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
-export const socket = io('http://localhost:3000');
+export const socket = io('https://adjustment-beverage-medium-diameter.trycloudflare.com');
 export let me = null;
 
 let resolveUserData;
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     document.querySelectorAll('.profile-action').forEach((profileAction) => {
         profileAction.querySelector('img').src = `/src/assets/pfps/${me.img}`;
-        profileAction.href = `/profile?q=${me.id}`
+        profileAction.href = `/profile/?q=${me.id}`
     });
     document.querySelector('.profile-action .username-label').textContent = me.username;
 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     
             buffer += `
                 <div class='user-card u-${user.id}'>
-                    <a href='/profile?q=${user.id}' class='profile-link'></a>
+                    <a href='/profile/?q=${user.id}' class='profile-link'></a>
                     <div class='pfp'>
                         <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
                     </div>

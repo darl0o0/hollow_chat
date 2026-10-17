@@ -29,10 +29,6 @@ $result_users = mysqli_stmt_get_result($stmt_users);
 
 $row_users = mysqli_fetch_all($result_users, MYSQLI_ASSOC);
 $data = $row_users;
-
-echo json_encode([
-    'status' => 'ok',
-    'response' => $data
-]);
 mysqli_stmt_close($stmt_users);
-die();
+
+ok(true, $data);

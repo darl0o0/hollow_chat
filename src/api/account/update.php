@@ -27,19 +27,11 @@ if($user_data['img'] !== $raw_img['name'] && !empty($raw_img['name'])){
 }
 
 if(empty($username) || empty($email)){
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'All inputs are required.'
-    ]);
-    return;
+    ok(false, 'All inputs are required.');
 }
 
 if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Please enter a valid email.'
-    ]);
-    return;
+    ok(false, 'Please enter a valid email.');
 }
 
 $stmt_user = mysqli_prepare($con, "select * from users where (username = ? or email = ?) and id != ?");
@@ -48,11 +40,7 @@ mysqli_stmt_execute($stmt_user);
 $result_user = mysqli_stmt_get_result($stmt_user);
 
 if(mysqli_num_rows($result_user) > 0){
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Username or email is already taken.'
-    ]);
-    return;
+    ok(false, 'Username or email is already taken.');
 }
 
 $isUnchanged = $username == $user_data['username'] &&
@@ -61,11 +49,7 @@ $isUnchanged = $username == $user_data['username'] &&
                empty($img);
 
 if($isUnchanged){
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'No changes were made.'
-    ]);
-    return;
+    ok(false, 'No changes were made.');
 }
 
 // Update the credentials
@@ -74,8 +58,4 @@ mysqli_stmt_bind_param($stmt_update, "sssss", $username, $email, $img, $bio, $id
 mysqli_stmt_execute($stmt_update);
 mysqli_stmt_close($stmt_update);
 
-echo json_encode([
-    'status' => 'ok',
-    'message' => 'Profile updated.'
-]);
-die();
+ok(true, 'Profile updated.');

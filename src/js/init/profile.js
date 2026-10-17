@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
                 profileActions = `
                     <div class="profile-actions">
-                        <a href="/chat?q=${user2}" class="btn primary-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
+                        <a href="/inbox/?q=${user2}" class="btn primary-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
                         <form
                         method="post" 
                         class="friend-action">
