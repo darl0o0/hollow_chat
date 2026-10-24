@@ -61,13 +61,15 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
 
 elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     requireStrictPost();
-    $qid = $_POST['user2'];
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    $qid = $input['user2'];
 
     // Execute the action received from the profile page
     // 0 = send friend request
     // 1 = cancel or decline request
     // 2 = accept request
-    switch($_POST['action']){
+    switch($input['action']){
         case "0":
             $stmt_send = mysqli_prepare($con, "insert into friends (user1, user2, status) values (?, ?, 'waiting')");
             mysqli_stmt_bind_param($stmt_send, "ss", $id, $qid);
@@ -88,5 +90,5 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
         break;
     }
     
-    ok(true, $data);
+    ok(true);
 }

@@ -46,6 +46,7 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
 
         foreach($messages as $message){
             $data[] = [
+                'id' => $message['id'],
                 'sid' => $message['sid'],
                 'msg' => $message['msg'],
                 'isRead' => $message['isRead'],
@@ -80,31 +81,25 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     $is_group = $input['isGroup'];
     $group_id = $input['groupId'];
 
-    $qid = filter_var($is_group, FILTER_VALIDATE_BOOL) ? $group_id : $input['qid'];
+    $rid = filter_var($is_group, FILTER_VALIDATE_BOOL) ? $group_id : $input['qid'];
+
+    $dec_sid = base_convert($sid, 16, 10);
+    $dec_rid = base_convert($rid, 16, 10);
+    $common_id = base_convert(bcadd($dec_sid, $dec_rid), 10, 16);
+
+    $timestamp = time();
+    $time_id = dechex($timestamp);
+
+    $mid = $common_id.$time_id;
 
     $socketData = json_encode([
+        'id' => $mid,
         'sid' => $sid,
         'rid' => json_decode($input['qid'], true) ?? $input['qid'],
         'msg' => $msg,
         'isGroup' => filter_var($is_group, FILTER_VALIDATE_BOOL),
         'groupId' => $group_id
     ]);
-
-    $stmt_msg_count = mysqli_prepare($con, "select count(*) from messages where (sid = ? and rid = ?) or (sid = ? and rid = ?)");
-    mysqli_stmt_bind_param($stmt_msg_count, "ssss", $sid, $qid, $qid, $sid);
-    mysqli_stmt_execute($stmt_msg_count);
-    $result_msg_count = mysqli_stmt_get_result($stmt_msg_count);
-
-    $row_count = mysqli_fetch_row($result_msg_count);
-    $num_of_msg = $row_count[0];
-    mysqli_stmt_close($stmt_msg_count);
-
-    if($num_of_msg == 0){
-        $stmt_insert_conversation = mysqli_prepare($con, "insert into conversations (user1, user2, is_group) values (?, ?, 0)");
-        mysqli_stmt_bind_param($stmt_insert_conversation, "ss", $sid, $qid);
-        mysqli_stmt_execute($stmt_insert_conversation);
-        mysqli_stmt_close($stmt_insert_conversation);
-    }
 
     //Send a curl request to the Node.js server (server.js)
     $ch = curl_init('http://127.0.0.1:3000/broadcast');
@@ -117,15 +112,30 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
         'Content-Type: application/json',
         'Content-Length: ' . strlen($socketData)
     ]);
-    
-    // Execute curl request
     curl_exec($ch);
+    curl_close($ch);
 
-    $stmt_insert_msg = mysqli_prepare($con, "insert into messages (sid, rid, msg, isRead) values (?, ?, ?, 0)");
-    mysqli_stmt_bind_param($stmt_insert_msg, "sss", $sid, $qid, $msg);
+    // Insert conversation
+    $stmt_msg_count = mysqli_prepare($con, "select count(*) from messages where (sid = ? and rid = ?) or (sid = ? and rid = ?)");
+    mysqli_stmt_bind_param($stmt_msg_count, "ssss", $sid, $rid, $rid, $sid);
+    mysqli_stmt_execute($stmt_msg_count);
+    $result_msg_count = mysqli_stmt_get_result($stmt_msg_count);
+
+    $row_count = mysqli_fetch_row($result_msg_count);
+    $num_of_msg = $row_count[0];
+    mysqli_stmt_close($stmt_msg_count);
+    if($num_of_msg == 0){
+        $stmt_insert_conversation = mysqli_prepare($con, "insert into conversations (user1, user2, is_group) values (?, ?, 0)");
+        mysqli_stmt_bind_param($stmt_insert_conversation, "ss", $sid, $rid);
+        mysqli_stmt_execute($stmt_insert_conversation);
+        mysqli_stmt_close($stmt_insert_conversation);
+    }
+
+    // Insert message
+    $stmt_insert_msg = mysqli_prepare($con, "insert into messages (id, sid, rid, msg, isRead, created_at) values (?, ?, ?, ?, 0, ?)");
+    mysqli_stmt_bind_param($stmt_insert_msg, "ssssi", $mid, $sid, $rid, $msg, $timestamp);
     mysqli_stmt_execute($stmt_insert_msg);
     mysqli_stmt_close($stmt_insert_msg);
     
-    curl_close($ch);
-    ok(true, $data);
+    ok(true, 'sent');
 }

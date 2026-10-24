@@ -6,6 +6,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 header('Content-Type: application/json; charset=utf-8');
 requireStrictPost();
+$input = json_decode(file_get_contents('php://input'), true);
 
 $user_data = check_login($con);
 $id = $user_data['id'];
@@ -16,15 +17,9 @@ $placeholders = [];
 $params = [$group_id, null, $id];
 $types = "sss";
 
-$members_ids = [];
-$members = json_decode($_POST['members'], true);
+$members_ids = $input['members'];
 
-foreach($members as $member){
-    $member_id = $member['id'];
-    $members_ids[] = $member_id;
-}
-
-for($i = 0; $i < count($members); $i++){
+for($i = 0; $i < count($members_ids); $i++){
     $slot_number = $i + 1;
     $cols[] = "m{$slot_number}";
     $placeholders[] = "?";

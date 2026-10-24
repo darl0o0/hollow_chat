@@ -9,7 +9,7 @@
     padding: 12px;
     border-bottom: 1px ridge #464646ff;
 
-    .pfp{
+    .wrap-pfp{
         img{
             width: 50px;
             height: 50px;
@@ -69,10 +69,10 @@
         font-size: 20px;
     }
     .msg{
-        padding: 6px 10px;
+        padding: 6px 10px 7px 10px;
         line-height: 1.4;
         font-size: 18px;
-        border-radius: 18px;
+        border-radius: 3px;
         max-width: 200px;
         overflow-wrap: break-word;
         word-break: break-word;
@@ -80,48 +80,76 @@
     .you{
         align-self: flex-start;
         color: #e9e4c8;
-        border-bottom-left-radius: 3px;
         background: #1a1a1a;
         border: 1px ridge #353535;
+        border-top-right-radius: 18px;
+        border-bottom-right-radius: 18px;
     }
-    .msg-wrap, .typing-wrap{
+    .wrap-msg, .wrap-typing{
         display: flex;
-        align-items: center;
         gap: 10px;
-        .pfp-link{
-            border-radius: 50%;
-        }
-        .msg-pfp{
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #000;
-        }
-        .msg-pfp:not(:first-child){
-            margin-left: -25px;
+        .wrap-pfp{
+            display: flex;
+            align-items: end;
+            margin-bottom: -2px;
+            .pfp-link{
+                border-radius: 50%;
+                height: fit-content;
+                align-items: end;
+            }
+            .msg-pfp{
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+            .msg-pfp:not(:first-child){
+                margin-left: -25px;
+            }
         }
         .me{
-            border-bottom-right-radius: 3px;
+            border-top-left-radius: 16px;
+            border-bottom-left-radius: 16px;
             background-color: #e9e4c8;
             color: #000;
-            align-self: flex-end;
         }
+        .others-wrap{
+            display: flex;
+            align-items: center;
+            .seen-dot{
+                width: 10px;
+                height: 10px;
+                border: 1px ridge #e9e4c8;
+                border-radius: 50%;
+                background: none;
+            }
+        }
+    }
+    .wrap-msg.seen{
         .seen-dot{
-            width: 10px;
-            height: 10px;
-            border: 1px ridge #e9e4c8;
-            border-radius: 50%;
-            background: none;
-        }
-        .seen-dot.seen{
             background: #e9e4c8;
+        }
+    }
+    .wrap-msg.first-msg{
+        .me{
+            border-top-right-radius: 16px;
+        }
+        .you{
+            border-top-left-radius: 16px;
+        }
+    }
+    .wrap-msg.last-msg{
+        .me{
+            border-bottom-right-radius: 16px;
+        }
+        .you{
+            border-bottom-left-radius: 16px;
         }
     }
     .inner-field{
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 4px;
         .me-wrap{
             align-self: flex-end;
         }
@@ -132,10 +160,11 @@
             }
         }
         .section-gap{
-            margin-top: 8px;
+            margin-bottom: 8px;
         }
     }
     .typing{
+        border-radius: 18px;
         height: min-content;
         padding: 8px 6px;
         img{
@@ -189,14 +218,6 @@
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
 @media (max-width: 550px){
-    .main.inbox{
-        grid-template-areas:
-        "header profile"
-        "preview preview"
-        "menu menu"
-        ;
-        grid-template-columns: 1fr 1.5fr;
-    }
     .logo{
         padding: 8px 15px;
         border-right: var(--light-border);

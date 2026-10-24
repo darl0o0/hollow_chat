@@ -99,19 +99,18 @@ function requireStrictGet(){
 }
 
 // Function that returns an HTTP response
-function ok($isOk, $response){
+function ok($isOk, $response = null){
     if($isOk){
         echo json_encode([
             'status' => 'ok',
             'response' => $response
         ]);
-        die();
     }
     else{
         echo json_encode([
             'status' => 'error',
             'response' => $response
         ]);
-        return;
     }
+    die();
 }

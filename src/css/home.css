@@ -6,7 +6,7 @@
 
 /* SEARCH BAR AND USERS LIST STYLING */
 
-.search-wrapper{
+.wrap-search{
     position: relative;
 
     .search-icon{
@@ -51,7 +51,7 @@
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
 @media (max-width: 550px){
-    .search-wrapper{
+    .wrap-search{
         .search-icon{
             left: 10px;
             font-size: 18px;

@@ -18,4 +18,8 @@ uploads/*
 node_modules/
 
 .VSCodeCounter/
-test.php
+
+/test/
+
+TODO.md
+Bugs.md

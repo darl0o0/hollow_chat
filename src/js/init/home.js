@@ -1,4 +1,4 @@
-import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
+import { UI, HTTP, Fetch, Form, Check, HTML } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
 
 // User objects
@@ -14,7 +14,7 @@ let users;
 let bufferUsers = "";
 
 // Elements
-const ElUsersList = document.querySelector('.users-list');
+const elListUsers = document.querySelector('.users-list');
 
 document.addEventListener('DOMContentLoaded', async function(){
     try{
@@ -31,35 +31,28 @@ document.addEventListener('DOMContentLoaded', async function(){
         users = apiUsers.response;
     
         users.forEach(user => {
-            const bio = user.bio ? user.bio : "No Bio."
-            const isOnline = Boolean(Number(user.isOnline)) ? 'visible' : "hidden"
-    
-            bufferUsers += `
-                <a class='user-card u-${user.id}' href='profile/?q=${user.id}'>
-                    <div class='pfp'>
-                        <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
-                        <div class='online-status' style='visibility: ${isOnline}'></div>
-                    </div>
-                    <div class='label-wrapper'>
-                        <div class='username-label'>${user.username}</div>
-                        <span class='sub-label'>${bio}</span>
-                    </div>
-                </a>
-            `;
+            bufferUsers += HTML.userCard(
+                'link',
+                user.id,
+                user.username,
+                user.img,
+                user.isOnline,
+                {text: user.bio}
+            );
         });
     }
     catch(error){
         console.error(error);
     }
 
-    ElUsersList.innerHTML = bufferUsers;
+    elListUsers.innerHTML = bufferUsers;
 });
 
 document.querySelector('.search').addEventListener('input', async (e) => {
     const query = e.target.value.trim();
 
     if(query == ''){
-        ElUsersList.innerHTML = bufferUsers;
+        elListUsers.innerHTML = bufferUsers;
         return;
     }
 
@@ -67,41 +60,37 @@ document.querySelector('.search').addEventListener('input', async (e) => {
         const searchUsers = await Fetch.searchObjectFromList(query, users, 'username');
         let bufferSearchUsers = "";
         
-        if(searchUsers){
-            searchUsers.forEach(user => {
-                
-                const bio = user.bio ? user.bio : "No Bio."
-                const isOnline = Boolean(Number(user.isOnline)) ? 'visible' : "hidden"
-        
-                bufferSearchUsers += `
-                    <a class='user-card u-${user.id}' href='profile/?q=${user.id}'>
-                        <div class='pfp'>
-                            <img class='pfp-img' src='/src/assets/pfps/${user.img}'>
-                            <div class='online-status' style='visibility: ${isOnline}'></div>
-                        </div>
-                        <div class='label-wrapper'>
-                            <div class='username-label'>${user.username}</div>
-                            <span class='sub-label'>${bio}</span>
-                        </div>
-                    </a>
-                `;
-            });
-        }
-        else{
-            bufferSearchUsers = '<center>No users found.</center>'
+        if(!searchUsers){
+            bufferSearchUsers = '<center>No users found.</center>';
+            return;
         }
 
-        ElUsersList.innerHTML = bufferSearchUsers;
+        searchUsers.forEach(user => {
+            bufferSearchUsers += HTML.userCard(
+                'link',
+                user.id,
+                user.username,
+                user.img,
+                false,
+                {text: user.bio}
+            );
+        });
+
+        elListUsers.innerHTML = bufferSearchUsers;
     }
     catch(error){
-        console.log(error);
+        console.error(error);
     }
 });
-// Listen for real-time presence changes broadcasted by server.js
+
+// Users presence
 socket.on('user_status_change', (data) => {
-    const ElOnlineStatus = document.querySelector(`.u-${data.userId} .online-status`);
+    const pfp = document.querySelector(`.u-${data.userId} .wrap-pfp`);
     
-    if(ElOnlineStatus){
-        ElOnlineStatus.style.visibility = data.isOnline ? "visible" : "hidden";
+    if(data.isOnline){
+        pfp.classList.replace('offline', 'online');
+    }
+    else{
+        pfp.classList.replace('online', 'offline');
     }
 });

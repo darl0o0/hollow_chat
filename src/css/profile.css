@@ -8,7 +8,7 @@
     justify-content: center;
     padding: 0px 20px;
 }
-.profile-wrapper{
+.wrap-profile{
     display: flex;
     width: 80%;
     gap: 20px;
@@ -37,6 +37,14 @@
                 height: 14px;
                 border-radius: 50%;
                 margin-right: 8px;
+            }
+            .is-online.online{
+                background: #e9e4c8;
+                border: 2px solid #e9e4c8;
+            }
+            .is-online.offline{
+                background: none;
+                border: 2px ridge #464646;
             }
             .is-online-label{
                 font-size: 15px;
@@ -76,7 +84,7 @@
     .profile .preview{
         padding: 0 20px;
     }
-    .profile-wrapper{
+    .wrap-profile{
         align-items: center;
         flex-direction: row;
         gap: 40px;

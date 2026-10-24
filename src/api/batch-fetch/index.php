@@ -39,7 +39,8 @@ if(is_array($q)){
                 'username' => $row_user['username'],
                 'bio' => $row_user['bio'],
                 'img' => $row_user['img'],
-                'isOnline' => filter_var($row_user['online'], FILTER_VALIDATE_BOOLEAN)
+                'isOnline' => filter_var($row_user['online'], FILTER_VALIDATE_BOOLEAN),
+                'isPrivate' => filter_var($row_user['private'], FILTER_VALIDATE_BOOLEAN),'date' => $row_user['date']
             ];
         }
         elseif($row_group){
@@ -93,7 +94,7 @@ else{
             'username' => $row_user['username'],
             'bio' => $row_user['bio'],
             'img' => $row_user['img'],
-            'isOnline' => filter_var($row_user['online'], FILTER_VALIDATE_BOOLEAN)
+            'isOnline' => filter_var($row_user['online'], FILTER_VALIDATE_BOOLEAN),'isPrivate' => filter_var($row_user['private'], FILTER_VALIDATE_BOOLEAN),'date' => $row_user['date']
         ];
     }
     elseif($row_group){

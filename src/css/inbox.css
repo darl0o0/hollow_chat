@@ -31,26 +31,6 @@
         .grp-btn:hover{
             transform: scale(1.2);
         }
-        .search-wrapper{
-            margin: 10px 0 2px 0;
-            position: relative;
-            .search-icon{
-                position: absolute;
-                left: 12px;
-                top: 50%;
-                transform: translateY(-50%);
-                background: none;
-                color: var(--placeholder-color);
-                cursor: text;
-                border: none;
-            }
-            .search{
-                margin: 0;
-                padding: 8px 0;
-                padding-left: 35px;
-                font-size: 18px;
-            }
-        }
         .list{
             overflow-y: scroll;
             .user-card{
@@ -62,7 +42,7 @@
                     height: 100%;
                     z-index: 1;
                 }
-                .btn-wrapper-inbox{
+                .wrap-btn-inbox{
                     display: flex;
                     flex-direction: row;
                     align-items: center;
@@ -100,13 +80,6 @@
                     color: #111033;
                     background: #eeefcc;
                 }
-                .pfp .sub-pfp{
-                    width: 40px;
-                    height: 40px;
-                }
-                .pfp .sub-pfp:not(:first-child){
-                    margin-left: -16px;
-                }
             }
             .nothing-here{
                 display: flex;
@@ -117,16 +90,37 @@
         }
     }
 }
-.grp-model{
+.chat-card.unseen{
+    .sub-label{
+        color: #d5d6c3;
+        font-weight: bolder;
+    }
+    .unread-msg{
+        visibility: visible;
+    }
+}
+.chat-card.seen{
+    .sub-label{
+        color: #a8a8a8;
+        font-weight: 400;
+    }
+    .unread-msg{
+        visibility: hidden;
+    }
+}
+.group-modal{
     transition: 0.1s;
     .container{
         width: 80%;
         padding: 20px 30px 18px 30px;
+        h1 i{
+            margin-right: 6px;
+        }
     }
-    .search-wrapper{
+    .wrap-search{
         margin: 14px 0 14px 0;
     }
-    .grp-members{
+    .selected-members{
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
@@ -180,13 +174,13 @@
         .dms-container{
             flex-basis: 110px;
             padding: 0 10px;
-            .search-wrapper, .title-sep-wrapper{
+            .wrap-search, .wrap-title{
                 display: none;
             }
             .list .user-card{
                 padding: 10px 0;
                 justify-content: center;
-                .btn-wrapper-inbox, .label-wrapper{
+                .wrap-btn-inbox, .wrap-label{
                     display: none;
                 }
             }
@@ -194,15 +188,19 @@
     }
 }
 @media (max-width: 550px){
+    *.grid-template-profile{
+        grid-template-areas: 
+        "header profile"
+        "preview preview"
+        "menu menu";
+        grid-template-columns: 1fr 1.5fr;
+    }
     .main .preview{
         .dms-container{
             flex-grow: 1;
         }
-        /* .chat-preview{
-            display: none;
-        } */
     }
-    .search-wrapper{
+    .wrap-search{
         margin: 5px 0 2px 0;
     }
 }

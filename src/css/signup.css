@@ -13,12 +13,12 @@ body{
 .active-form-step{
     display: inline;
 }
-.username-email-wrapper{
+.wrap-username-email{
     display: grid;
     grid-template-columns: 1fr 1.4fr;
     gap: 12px;
 }
-.bio-pfp-wrapper{
+.wrap-bio-pfp{
     display: grid;
     grid-template-columns: 1fr 1.15fr;
     gap: 16px;
@@ -86,7 +86,7 @@ body{
     .privacy{
         margin-top: 6px;
     }
-    .bio-pfp-wrapper .upload-field{
+    .wrap-bio-pfp .upload-field{
         padding: 15px 5px;
         img{
             width: 100px;

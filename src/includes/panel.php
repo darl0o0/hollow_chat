@@ -13,9 +13,9 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
     </a>
 
     <a href="/inbox/" class="panel-action inbox-action">
-        <div class="icon-wrapper">        
+        <div class="wrap-icon-count">        
             <i class="fa-solid fa-inbox"></i>
-            <div class="num-of"><?php echo $num_of_unread_messages ?></div>
+            <div class="num-of display-none"><?php echo $num_of_unread_messages ?></div>
         </div>
         <span>Inbox</span>
     </a>
@@ -24,10 +24,10 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
         <img>
     </a>
 
-    <button class="panel-action notifications-action model-show" link-model="requests-model">
-        <div class="icon-wrapper">        
+    <button class="panel-action notifications-action modal-show" link-modal="modal-requests">
+        <div class="wrap-icon-count">        
             <i class="fa-solid fa-bell"></i>
-            <div class="num-of"><?php echo $num_of_requests ?></div>
+            <div class="num-of display-none"><?php echo $num_of_requests ?></div>
         </div>
         <span>Notifications</span>
     </button>
@@ -38,7 +38,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
         <div class="pfp">
             <img>
         </div>
-        <div class="label-wrapper">
+        <div class="wrap-label">
             <div class="username-label"></div>
             <span class="sub-label">My profile</span>
         </div>

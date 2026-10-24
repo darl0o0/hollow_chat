@@ -16,7 +16,7 @@
     flex-direction: column;
     margin: 0;
 }
-.pfp-wrapper{
+.wrap-pfp{
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -52,7 +52,7 @@ input[name='img']{
 .bio::placeholder{
     white-space: pre-line;
 }
-.update-form .btn-wrapper{
+.update-form .wrap-btn{
     display: flex;
     flex-direction: row;
     gap: 16px;
@@ -71,7 +71,7 @@ input[name='img']{
 
 /* ON-SCREEN MODEL */
 
-.delete-model .checkbox{
+.modal-delete .checkbox{
     margin-top: 10px;
     max-width: 340px;
     input{
@@ -90,7 +90,7 @@ input[name='img']{
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
 @media (max-width: 550px){
-    .pfp-wrapper{
+    .wrap-pfp{
         gap: 20px;
     }
     .img-input{

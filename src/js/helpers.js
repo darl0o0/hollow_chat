@@ -22,42 +22,25 @@ export const UI = {
     },
 
     // Global elements
-    globalElements: function(numOfNot){
-        if(document.querySelector('.requests-model')) return;
-        numOfNot = (numOfNot > 0) ? `(${numOfNot})` : '';
-        const modalHTML = `
-            <div class="model requests-model">
+    globalElements: function(){
+        if(document.querySelector('.modal-requests')) return;
+        let countNot = Number(document.querySelector('.notifications-action .num-of').textContent);
+
+        countNot = (countNot > 0) ? `(${countNot})` : '';
+        const htmlNotificationsModal = `
+            <div class="model modal-requests">
                 <div class="background"></div>
                 <div class="container">
                     <h1><i class="fa-solid fa-bell"></i>Notifications</h1>
-                    <div class="title-sep-wrapper">
-                        <span class="title">Friend requests <span class="not-count">${numOfNot}</span></span>
+                    <div class="wrap-title">
+                        <span class="title">Friend requests <span class="not-count">${countNot}</span></span>
                         <div class="sep"></div>
                     </div>
                     <div class="list"></div>
                 </div>
             </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-    },
-
-    // Update notifications count
-    updateNotCount: function(count){
-        let countLabel = (count > 0) ? `(${count})` : '';
-        const countLabelEl = document.querySelector('.requests-model .not-count');
-        const notificationsBadge = document.querySelector('.notifications-action .num-of');
-
-        if(notificationsBadge){
-            if(count > 0){
-                notificationsBadge.style.display = 'flex';
-                notificationsBadge.textContent = count > 99 ? '+99' : count;
-            }
-            else{
-                notificationsBadge.style.display = 'none';
-                notificationsBadge.textContent = '0';
-            }
-        }
-        countLabelEl.textContent = countLabel;
+        document.body.insertAdjacentHTML('beforeend', htmlNotificationsModal);
     },
     
     // Hide the on-screen models
@@ -89,21 +72,20 @@ export const HTTP = {
     // Strict post request
     sendPost: async function(url, data = {}) {
         const csrfToken = Fetch.getCookie('csrf_token');
-    
+
         const headers = {
-            'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': csrfToken
         };
-    
+
         let body;
     
         if(data instanceof FormData){
             body = data;
         }
         else{
-            // Convert plain JS objects into FormData so PHP populates $_POST automatically
             body = JSON.stringify(data);
+            headers['Content-Type'] = 'application/json';
         }
     
         const response = await fetch(url, {
@@ -319,7 +301,10 @@ export const Form = {
                 }
             }
 
-            const data = this.formToJson(new FormData(form));
+            const formData = new FormData(form);
+            const hasFileInput = Boolean(form.querySelector('input[type="file"]'));
+
+            const data = hasFileInput ? formData : this.formToJson(formData);
             const res = await HTTP.sendPost(action, data);
         
             if(res.status == 'error'){
@@ -354,7 +339,15 @@ export const Form = {
         }
         catch(error){
             this.isFormEnabled(form, false);
-            UI.alert(false, error.message, undefined, elFormParent);
+
+            if(error instanceof TypeError || error instanceof SyntaxError){
+                console.error(error);
+                UI.alert(false, "An unexpected error occurred. Please try again.", undefined, elFormParent);
+            }
+            else{
+                UI.alert(false, error.message, undefined, elFormParent);
+            }
+            
             setTimeout(() => {
                 this.isFormEnabled(form, true);
             }, 5000);
@@ -379,5 +372,104 @@ export const performanceTimer = {
         const duration = (performance.now() - startTime).toFixed(2);
         console.log(`[Performance] ${label}: ${duration}ms`);
         return duration;
+    }
+}
+
+export const HTML = {
+    userCard: function(type, id, username, img, isOnline, subLabel = {}, options = {}){
+        let bufferPfps;
+        if(Array.isArray(img) && img.length > 1){
+            bufferPfps = `
+                <img src='/src/assets/pfps/${img[0]}'>
+                <img src='/src/assets/pfps/${img[1]}'>
+            `;
+        }
+        else{
+            bufferPfps = `
+                <img src='/src/assets/pfps/${img}'>
+            `;
+        }
+
+        const online = isOnline ? 'online' : 'offline';
+
+        subLabel.text = subLabel.text ? subLabel.text : 'No bio.';
+
+        let isLink = false;
+        if(type == 'link'){
+            isLink = true;
+        }
+
+        let bufferBtn = '';
+        if(options.hasBtn){
+            switch(options.btnType){
+                case 'more':
+                    bufferBtn = `
+                        <div class='wrap-btn-inbox'>
+                            <div class='unread-msg'></div>
+                            <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
+                        </div>
+                    `;
+                break;
+                case 'dilemma':
+                    bufferBtn = `
+                        <div class='wrap-btn-requests'>
+                            <form method='post' class='accept-form' data-id='${id}'>
+                                <button class='btn-requests'><i class='fa fa-check' aria-hidden='true'></i></button>
+                            </form>
+                            <form method='post' class='decline-form' data-id='${id}'>
+                                <button class='btn-requests'><i class='fa fa-times' aria-hidden='true'></i></button>
+                            </form>
+                        </div>
+                    `;
+                break;
+            }
+        }
+
+        return `
+            <${isLink ? 'a' : 'div'} class='user-card ${type} ${subLabel.isLastMsg ? (subLabel.isRead ? 'seen' : 'unseen') : ''} u-${id}'${subLabel.isLastMsg ? ` data-last-msg='${subLabel.text}'` : ''} user-id='${id}'${isLink ? ` href='profile/?q=${id}'` : ''} tabindex='0'>
+                ${options.hasPlus ? `
+                    <div class='select-indicator'>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>` : ''}
+                <div class='wrap-pfp ${online}'>
+                    ${bufferPfps}
+                    <div class='online-status'></div>
+                </div>
+                <div class='wrap-label'>
+                    <div class='username-label'>${username}</div>
+                    <span class='sub-label'>${subLabel.text}</span>
+                </div>
+                ${bufferBtn}
+            </${isLink ? 'a' : 'div'}>
+        `;
+    },
+
+    message: function(msg, isMe, boundMsg = {}, sender, isSeen, options = {}){
+        const addGap = boundMsg.isNextFromDifferentUser ? ' section-gap' : '';
+
+        if(isMe){
+            return `
+                <div class='wrap-msg me-wrap mid-${msg.id}${isSeen ? ' seen' : ''}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
+                    <div class='others-wrap'>
+                        <div class='seen-dot'></div>
+                    </div>
+                    <div class='msg me'>${msg.msg}</div>
+                </div>
+            `;
+        }
+        else{
+            const showPfp = (boundMsg.isNextFromDifferentUser || options.isLive) ? 'visible' : 'hidden';
+
+            return `
+                <div class='wrap-msg you-wrap mid-${msg.id}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
+                    <div class='wrap-pfp'>
+                        <a href='/profile/?q=${msg.sid}' class='pfp-link ${showPfp}'>
+                            <img src='/src/assets/pfps/${sender.img}' class='msg-pfp'>
+                        </a>
+                    </div>
+                    <div class='msg you'>${msg.msg}</div>
+                </div>
+            `;
+        }
     }
 }

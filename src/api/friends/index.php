@@ -79,11 +79,11 @@ foreach($friends as $row_friend){
     //         <div class='pfp'>
     //             <img class='pfp-img' src='/src/assets/pfps/".$friend[0][5]."'>
     //         </div>
-    //         <div class='label-wrapper'>
+    //         <div class='wrap-label'>
     //             <div class='username-label'>".$friend[0][1]."</div>
     //             <span class='sub-label'>$bio</span>
     //         </div>
-    //     <div class='btn-wrapper-inbox'>
+    //     <div class='wrap-btn-inbox'>
     //         <a href='/chat?r=$user2_friend' class='btn-inbox'><i class='fa fa-comment' aria-hidden='true'></i></a>
     //         <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
     //     </div>

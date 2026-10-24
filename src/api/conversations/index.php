@@ -83,16 +83,16 @@ if(count($conversations) > 0){
         $row_last_msg = mysqli_fetch_assoc($result_last_msg);
         mysqli_stmt_close($stmt_last_msg);
 
-        // $data[] = $isGroup ? 'g' : 'd';
+        $last_msg = $row_last_msg ? [
+            'sid' => $row_last_msg['sid'],
+            'msg' => $row_last_msg['msg'],
+            'isRead' => filter_var($row_last_msg['isRead'], FILTER_VALIDATE_BOOL),
+            'time' => $row_last_msg['created_at']
+        ] : null;
 
         $data[] = [
             'id' => $id_target,
-            'lastMsg' => [
-                'sid' => $row_last_msg['sid'],
-                'msg' => $row_last_msg['msg'],
-                'isRead' => filter_var($row_last_msg['isRead'], FILTER_VALIDATE_BOOL),
-                'time' => $row_last_msg['created_at']
-            ]
+            'lastMsg' => $last_msg
         ];
     }
 

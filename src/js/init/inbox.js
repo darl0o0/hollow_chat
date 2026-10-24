@@ -1,9 +1,8 @@
 // Initialization
-import { UI, HTTP, Fetch, Form, Check, performanceTimer } from "../helpers.js";
+import { UI, HTTP, Fetch, Form, Check, performanceTimer, HTML } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
-import { loadChat } from "./chat.js"
+import { loadChat, chatLoaded } from "./chat.js"
 
-const timerStart = performanceTimer.start();
 const getParams = new URLSearchParams(window.location.search);
 let resizeTimer;
 
@@ -30,11 +29,12 @@ let groupPresence = new Map();
 
 // Boolean
 let isMobile = window.innerWidth <= 550;
+let canCreateGroup = false;
 
 // Elements
-const elInboxList = document.querySelector('.inbox .list');
-const elSuggestionsList = document.querySelector('.grp-model .list');
-const elSelectedMembers = document.querySelector('.grp-members');
+const elListInbox = document.querySelector('.inbox .list');
+const elListSuggestions = document.querySelector('.group-modal .list');
+const elSelectedMembers = document.querySelector('.group-modal .selected-members');
 
 const elDmContainer = document.querySelector('.dms-container');
 const elChatPreview = document.querySelector('.chat-preview');
@@ -57,9 +57,9 @@ const targetDataReady = new Promise((resolve) => {
     resolveTargetData = resolve;
 });
 
-let resolveChatPage;
-export const chatContentLoaded = new Promise((resolve) => {
-    resolveChatPage = resolve;
+let resolveChatReadyToLoad;
+export const chatReadyToLoad = new Promise((resolve) => {
+    resolveChatReadyToLoad = resolve;
 });
 
 // Helper functions
@@ -70,14 +70,15 @@ function isViewportMobile(){
             elChatPreview.classList.remove('display-none');
         }
         else{
-            elDmContainer.classList.remove('display-none');
+            document.querySelector('.main.inbox').classList.remove('grid-template-profile');
             elChatPreview.classList.add('display-none');
+            elDmContainer.classList.remove('display-none');
         }
     }
     else{
-        console.log('desk')
         elDmContainer.classList.remove('display-none');
-    }   elChatPreview.classList.remove('display-none');
+        elChatPreview.classList.remove('display-none');
+    }
 }
 
 isViewportMobile();
@@ -94,17 +95,16 @@ document.addEventListener('DOMContentLoaded', async function(){
     // List conversations
     try{
         const getConversations = await HTTP.sendGet('/src/api/conversations/');
-    
-        if(getConversations.response && Array.isArray(getConversations.response)){
 
+        if(getConversations.response && Array.isArray(getConversations.response)){
             const srotedConversations = getConversations.response.sort((a, b) => {
-                return new Date(b.lastMsg.time) - new Date(a.lastMsg.time)
+                const timeA = a.lastMsg?.time ? new Date(a.lastMsg.time).getTime() : Date.now();
+                const timeB = b.lastMsg?.time ? new Date(b.lastMsg.time).getTime() : Date.now();
+                return timeB - timeA;
             });
             
             const conversationIds = srotedConversations.map(c => c.id);
-
             conversations = await HTTP.fetchUsersBatch(conversationIds);
-
             conversations = srotedConversations.map(conversation => {
                 const target = conversations.find(u => u && u.id == conversation.id);
                 let result;
@@ -132,44 +132,31 @@ document.addEventListener('DOMContentLoaded', async function(){
             for(const conversation of conversations){
                 let username;
                 let img;
-                let bio = conversation.bio ? conversation.bio : "No Bio."
-                let isOnline = eval(conversation.isOnline) ? 'visible' : 'hidden';
+                let isOnline;
 
-                let bufferPfps;
-    
-                let lastMsg;
-                let badgeVsibility;
-                let lastMsgColor;
-                let lastMsgWeight;
                 if(!conversation.username && !conversation.isGroup){
                     username = 'User not found.';
                     img = 'pfp.jpg';
-                    bufferPfps = `
-                        <img class='pfp-img' src='/src/assets/pfps/${img}'>
-                    `;
-                    isOnline = 'hidden';
+                    isOnline = false;
                 }
                 else if(!conversation.isGroup){
                     username = conversation.username;
                     img = conversation.img;
-                    bufferPfps = `
-                        <img class='pfp-img' src='/src/assets/pfps/${img}'>
-                        <div class='online-status ${isOnline}'></div>
-                    `;
-
+                    isOnline = conversation.isOnline;
                     relevantUsers.push(conversation);
                 }
                 else{
                     const group = conversation;
                     relevantGroups.push(group.id);
                     const membersData = await HTTP.fetchUsersBatch(group.members);
-                    const otherUsers = membersData.filter(user => {
-                        return user.username != me.username;
+                    
+                    const otherUsers = membersData.filter(u => {
+                        return u.username != me.username;
                     });
-                    otherUsers.forEach(user => {
-                        if(!Fetch.selectUserById(user.id, relevantUsers)){
-                            user = { isGroup: false, ...user };
-                            relevantUsers.push(user);
+                    otherUsers.forEach(u => {
+                        if(!Fetch.selectUserById(u.id, relevantUsers)){
+                            u = { isGroup: false, ...u };
+                            relevantUsers.push(u);
                         }
                     });
 
@@ -180,82 +167,61 @@ document.addEventListener('DOMContentLoaded', async function(){
                     }
 
                     if(!groupPresence.has(group.id)){
-                        const onlineMembers = otherUsers.filter(u => u.online).map(u => u.id);
+                        const onlineMembers = otherUsers.filter(u => u.isOnline).map(u => u.id);
                         if(onlineMembers.length > 0){
                             groupPresence.set(group.id, onlineMembers);
                         }
                     }
+                    isOnline = groupPresence.has(group.id);
 
                     if(!group.img){
-                        const memberPfp1 = otherUsers[0].img;
-                        const memberPfp2 = otherUsers[1].img;
-                        bufferPfps = `
-                            <img class='sub-pfp' src='/src/assets/pfps/${memberPfp1}'>
-                            <img class='sub-pfp' src='/src/assets/pfps/${memberPfp2}'>
-                            <div class='online-status' style='visibility: ${groupPresence.has(group.id) ? 'visible' : 'hidden'}'></div>
-                        `;
+                        img = [otherUsers[0].img, otherUsers[1].img];
                     }
                 }
-    
-                if(conversation.lastMsg.sid != id){
 
-                    lastMsg = !conversation.isGroup ? 
-                    conversation.lastMsg.msg : 
-                    `${Fetch.selectUserById(conversation.lastMsg.sid, relevantUsers).username}: ${conversation.lastMsg.msg}`;
-    
-                    if(!eval(conversation.lastMsg.isRead)){
-                        badgeVsibility = 'visible';
-                        lastMsgColor = '#d5d6c3';
-                        lastMsgWeight = 'bolder';
-                    }
-                    else{
-                        badgeVsibility = 'hidden';
-                        lastMsgColor = '#a8a8a8';
-                        lastMsgWeight = '400';
-                    }
+                let lastMsg;
+                if(conversation.lastMsg){
+                    lastMsg = conversation.lastMsg.sid == id ?
+                    `You: ${conversation.lastMsg.msg}` :
+                    (!conversation.isGroup ?
+                    conversation.lastMsg.msg :
+                    `${Fetch.selectUserById(conversation.lastMsg.sid, relevantUsers).username}: ${conversation.lastMsg.msg}`);
                 }
                 else{
-                    lastMsg = `You: ${conversation.lastMsg.msg}`;
-                    badgeVsibility = 'hidden';
+                    lastMsg = 'Start chatting now...';
                 }
     
-                bufferInbox += `
-                    <div class='user-card u-${conversation.id}' data-last-msg='${lastMsg}' data-user-id='${conversation.id}'>
-                        <div class='pfp'>
-                            ${bufferPfps}
-                        </div>
-                        <div class='label-wrapper'>
-                            <div class='username-label'>${username}</div>
-                            <span class='sub-label' style='color:${lastMsgColor}; font-weight: ${lastMsgWeight}'>${lastMsg}</span>
-                        </div>
-                        <div class='btn-wrapper-inbox'>
-                            <div class='unread-msg ${badgeVsibility}'></div>
-                            <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
-                        </div>
-                    </div>
-                `;
+                bufferInbox += HTML.userCard(
+                    'chat-card',
+                    conversation.id,
+                    username,
+                    img,
+                    isOnline,
+                    {
+                        isLastMsg: true,
+                        text: lastMsg,
+                        isRead: (conversation.lastMsg?.sid == id) || (conversation.lastMsg?.isRead)
+                    },
+                    {hasBtn: true, btnType: 'more'}
+                );
                 
-                if(conversation.username != null){
+                if(conversation.username && !conversation.isGroup){
                     suggestions.push({
                         'id': conversation.id,
                         'username': conversation.username,
                         'img': conversation.img,
                         'bio': conversation.bio
                     });
-                    bufferSuggestions += `
-                        <div class='user-card u-${conversation.id}' user-id="${conversation.id}">
-                            <div class='select-indicator'>
-                                <i class="fa-solid fa-plus"></i>
-                            </div>
-                            <div class='pfp'>
-                                <img class='pfp-img' src='/src/assets/pfps/${conversation.img}'>
-                            </div>
-                            <div class='label-wrapper'>
-                                <div class='username-label'>${username}</div>
-                                <span class='sub-label'>${bio}</span>
-                            </div>
-                        </div>
-                    `;
+
+                    bufferSuggestions += HTML.userCard(
+                        '',
+                        conversation.id,
+                        username,
+                        img,
+                        false,
+                        {text: 'Add to group chat'},
+                        {hasPlus: true}
+                    );
                 }
             }
         }
@@ -263,8 +229,8 @@ document.addEventListener('DOMContentLoaded', async function(){
             bufferInbox = "<center>Nothing here.</center>";
         }
     
-        document.querySelector('.inbox .list').innerHTML = bufferInbox;
-        document.querySelector('.grp-model .list').innerHTML = bufferSuggestions;
+        elListInbox.innerHTML = bufferInbox;
+        elListSuggestions.innerHTML = bufferSuggestions;
 
         resolveTargetData();
     }
@@ -279,12 +245,20 @@ document.addEventListener('DOMContentLoaded', async function(){
             elChatPreview.innerHTML = '';
             elChatPreview.classList.remove('flex-center');
             if(target){
-                document.querySelector(`.u-${qid}`).classList.add('highlight');
+                document.querySelector(`.u-${qid}`)?.classList.add('highlight');
                 elChatPreview.insertAdjacentHTML('beforeend', htmlChatPageContent);
             }
 
-            resolveChatPage();
+            resolveChatReadyToLoad();
             loadChat(target.isGroup);
+            try{
+                await chatLoaded;
+                const elField = document.querySelector('.field');
+                elField.scrollTop = elField.scrollHeight;
+            }
+            catch(error){
+                console.error("Chat hasn't loaded successfully.");
+            }
         }
         else{
             elChatPreview.innerHTML = '';
@@ -304,8 +278,6 @@ document.addEventListener('DOMContentLoaded', async function(){
     catch(error){
         console.error(error);
     }
-
-    performanceTimer.stop(timerStart, 'Inbox fully loaded');
     await targetDataReady;
 });
 
@@ -314,32 +286,29 @@ window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
         isViewportMobile();
-    }, 250);
+    }, 50);
 });
 
 document.addEventListener('click', (e) => {
     const elUserCard = e.target.closest('.dms-container .user-card');
-    const elGroupUserCard = e.target.closest('.grp-model .list .user-card');
-    const elSelectedMemberTag = e.target.closest('.grp-model .member-tag');
+    const elGroupUserCard = e.target.closest('.group-modal .list .user-card');
+    const elSelectedMemberTag = e.target.closest('.group-modal .member-tag');
     let selectedUserId = null;
     let selectedUser = null;
     
     switch(true){
-        case Boolean(elUserCard):;
-            const userId = elUserCard.getAttribute('data-user-id');
+        case Boolean(elUserCard):
+            const userId = elUserCard.getAttribute('user-id');
             const url = new URL(window.location.href);
             url.searchParams.set("q", userId);
             window.location.replace(url);
-
-            elChatPreview.innerHTML = `
-            `;
         break;
         case Boolean(elGroupUserCard):
             selectedUserId = elGroupUserCard.getAttribute('user-id');
             selectedUser = Fetch.selectUserById(selectedUserId, conversations);
 
             if(selectedMembers.length < 4){
-                document.querySelector(`.grp-model .list .u-${selectedUserId}`).remove();
+                document.querySelector(`.group-modal .list .u-${selectedUserId}`).remove();
         
                 suggestions = suggestions.filter(user => {
                     return user.id != selectedUserId;
@@ -352,145 +321,120 @@ document.addEventListener('click', (e) => {
             selectedUserId = elSelectedMemberTag.getAttribute('user-id');
             selectedUser = Fetch.selectUserById(selectedUserId, conversations);
 
-            document.querySelector(`.grp-model .member-tag.u-${selectedUserId}`).remove();
+            document.querySelector(`.group-modal .member-tag.u-${selectedUserId}`).remove();
             
             selectedMembers = selectedMembers.filter(user => {
                 return user.id != selectedUserId;
             });
-                
+
             suggestions.unshift(selectedUser);
         break;
     }
 
+    // Update selected members and remaining suggestions
     if(elGroupUserCard || elSelectedMemberTag){
+        if(selectedMembers.length > 1){
+            canCreateGroup = true;
+            document.querySelector('.group-modal .submit').classList.remove('btn-disabled');
+        }
+        else{
+            canCreateGroup = false;
+            document.querySelector('.group-modal .submit').classList.add('btn-disabled');
+        }
 
-        // Update selected members and remaining suggestions
         bufferSelectedMembers = "";
-        selectedMembers.forEach(tag => {
+        selectedMembers.forEach(t => {
             bufferSelectedMembers += `
-                <div class="member-tag u-${tag.id}" user-id="${tag.id}">
-                    <img src="/src/assets/pfps/${tag.img}">
-                    <span>${tag.username}</span>
+                <div class="member-tag u-${t.id}" user-id="${t.id}">
+                    <img src="/src/assets/pfps/${t.img}">
+                    <span>${t.username}</span>
                     <i class="fa-solid fa-x"></i>
                 </div>
             `;
         });
         elSelectedMembers.innerHTML = bufferSelectedMembers;
-    
+
         bufferSuggestions = "";
         suggestions.forEach(u => {
-            const bio = u.bio ? u.bio : "No Bio."
             bufferSuggestions += `
                 <div class='user-card u-${u.id}' user-id="${u.id}">
                     <div class='select-indicator'>
                         <i class="fa-solid fa-plus"></i>
                     </div>
-                    <div class='pfp'>
-                        <img class='pfp-img' src='/src/assets/pfps/${u.img}'>
+                    <div class='wrap-pfp'>
+                        <img src='/src/assets/pfps/${u.img}'>
                     </div>
-                    <div class='label-wrapper'>
+                    <div class='wrap-label'>
                         <div class='username-label'>${u.username}</div>
-                        <span class='sub-label'>${bio}</span>
+                        <span class='sub-label'>Add to group chat</span>
                     </div>
                 </div>
             `;
         });
-        document.querySelector('.grp-model .list').innerHTML = bufferSuggestions;
+        elListSuggestions.innerHTML = bufferSuggestions;
+    }
+
+    if(suggestions.length == 0){
+        elListSuggestions.innerHTML = '<center>No conversations remaining.</center>';
     }
 });
 
 document.querySelector('.inbox .search').addEventListener('input', async (e) => {
+    bufferSearchInbox = '';
     const query = e.target.value.trim();
-
     if(query == ''){
-        elInboxList.innerHTML = bufferInbox;
+        elListInbox.innerHTML = bufferInbox;
         return;
     }
 
     const searchInbox = await Fetch.searchObjectFromList(query, conversations, 'username');
-
     if(!searchInbox){
-        elInboxList.innerHTML = '<center>No conversations found.</center>';
+        elListInbox.innerHTML = '<center>No conversations found.</center>';
         return;
     }
 
     try{
         const sortedSearchInbox = searchInbox.sort((a, b) => {
-            return new Date(b.lastMsg.time) - new Date(a.lastMsg.time)
+            const timeA = a.lastMsg?.time ? new Date(a.lastMsg.time).getTime() : Date.now();
+            const timeB = b.lastMsg?.time ? new Date(b.lastMsg.time).getTime() : Date.now();
+            return timeB - timeA;
         });
 
         sortedSearchInbox.forEach(conversation => {
-            const isOnline = eval(conversation.isOnline) ? 'visible' : 'hidden';
-            let username;
-    
-            let lastMsg;
-            let badgeVsibility;
-            let lastMsgColor;
-            let lastMsgWeight;
-            
-            if(conversation.username != null){
-                username = conversation.username;
-            }
-            else{
-                username = "User not found"
-            }
-    
-            if(conversation.lastMsg.sid != id){
-                lastMsg = conversation.lastMsg.msg;
-    
-                if(!eval(conversation.lastMsg.isRead)){
-                    badgeVsibility = 'visible';
-                    lastMsgColor = '#d5d6c3';
-                    lastMsgWeight = 'bolder';
-                }
-                else{
-                    badgeVsibility = 'hidden';
-                    lastMsgColor = '#a8a8a8';
-                    lastMsgWeight = '400';
-                }
-            }
-            else{
-                lastMsg = `You: ${conversation.lastMsg.msg}`;
-                badgeVsibility = 'hidden';
-            }
-    
-            bufferSearchInbox += `
-                <div class='user-card u-${conversation.id}' data-last-msg='${lastMsg}'>
-                        <div class='pfp'>
-                            <img class='pfp-img' src='/src/assets/pfps/${conversation.img}'>
-                            <div class='online-status' style='visibility: ${isOnline}'></div>
-                        </div>
-                        <div class='label-wrapper'>
-                            <div class='username-label'>${username}</div>
-                            <span class='sub-label' style='color:${lastMsgColor}; font-weight: ${lastMsgWeight}'>${lastMsg}</span>
-                        </div>
-                    <div class='btn-wrapper-inbox'>
-                        <div class='unread-msg' style='visibility: ${badgeVsibility}'></div>
-                        <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
-                    </div>
-                </div>
-            `;
+            bufferSearchInbox += HTML.userCard(
+                '',
+                conversation.id,
+                conversation.username,
+                conversation.img,
+                conversation.isOnline,
+                {text: 'Open chat'},
+                {hasBtn: true, btnType: 'more'}
+            );
         });
 
-        elInboxList.innerHTML = bufferSearchInbox;
+        elListInbox.innerHTML = bufferSearchInbox;
     }
     catch(error){
-        console.log(error);
+        console.error(error);
     }
 });
 
-document.querySelector('.grp-model .search').addEventListener('input', async (e) => {
+document.querySelector('.group-modal .search').addEventListener('input', async (e) => {
     const query = e.target.value.trim();
-
     if(query == ''){
-        elSuggestionsList.innerHTML = bufferSuggestions;
+        if(suggestions.length == 0){
+            elListSuggestions.innerHTML = '<center>No conversations remaining.</center>';
+            return;
+        }
+
+        elListSuggestions.innerHTML = bufferSuggestions;
         return;
     }
 
     const searchSuggestions = await Fetch.searchObjectFromList(query, suggestions, 'username');
 
     if(!searchSuggestions){
-        elSuggestionsList.innerHTML = '<center>No conversations found.</center>';
+        elListSuggestions.innerHTML = '<center>No conversations found.</center>';
         return;
     }
 
@@ -498,56 +442,54 @@ document.querySelector('.grp-model .search').addEventListener('input', async (e)
         let bufferSearchSuggestions = '';
 
         searchSuggestions.forEach(conversation => {
-            const bio = conversation.bio ? conversation.bio : "No Bio."
-
-            bufferSearchSuggestions += `
-                <div class='user-card u-${conversation.id}' user-id="${conversation.id}">
-                    <div class='select-indicator'>
-                        <i class="fa-solid fa-plus"></i>
-                    </div>
-                    <div class='pfp'>
-                        <img class='pfp-img' src='/src/assets/pfps/${conversation.img}'>
-                    </div>
-                    <div class='label-wrapper'>
-                        <div class='username-label'>${conversation.username}</div>
-                        <span class='sub-label'>${bio}</span>
-                    </div>
-                </div>
-            `;
+            bufferSearchSuggestions += HTML.userCard(
+                '',
+                conversation.id,
+                conversation.username,
+                conversation.img,
+                false,
+                {text: 'Add to group chat'},
+                {hasPlus: true}
+            );
         });
-        elSuggestionsList.innerHTML = bufferSearchSuggestions;
-    }
-    catch(error){
-        console.log(error);
-    }
-});
-
-document.querySelector('.create-grp-btn').addEventListener('click', async function(){
-    if(selectedMembers.length == 0){
-        UI.alert(false, "Please select at least one member.");
-        return;
-    }
-
-    try{
-        const createGrp = await HTTP.sendPost('/src/api/conversations/create-grp.php', {
-            group_name: null,
-            members: JSON.stringify(selectedMembers)
-        });
-        if(createGrp.status == 'ok'){
-            window.location.replace(`/chat/?q=${createGrp.response.groupId}`);
-        }
+        elListSuggestions.innerHTML = bufferSearchSuggestions;
     }
     catch(error){
         console.error(error);
     }
 });
 
-// Listen for real-time presence changes broadcasted by server.js
-socket.on('user_status_change', (data) => {
-    const statusDot = document.querySelector(`.u-${data.userId} .online-status`);
+document.querySelector('.group-modal .submit').addEventListener('click', async function(){
+    if(canCreateGroup){
+        if(selectedMembers.length == 0){
+            UI.alert(false, "Please select at least one member.");
+            return;
+        }
     
-    if(statusDot){
-        statusDot.style.visibility = data.isOnline ? "visible" : "hidden";
+        try{
+            const createGrp = await HTTP.sendPost('/src/api/conversations/create-grp.php', {
+                group_name: null,
+                members: selectedMembers.map(m => m.id)
+            });
+            if(createGrp.status == 'ok'){
+                window.location.replace(`/inbox/?q=${createGrp.response.groupId}`);
+            }
+        }
+        catch(error){
+            console.error(error);
+        }
+    }
+});
+
+// Users presense
+socket.on('user_status_change', (data) => {
+    const pfp = document.querySelector(`.u-${data.userId} .wrap-pfp`);
+    
+    if(data.isOnline){
+        pfp.classList.replace('offline', 'online');
+    }
+    else if(!data.isOnline){
+        pfp.classList.replace('online', 'offline');
     }
 
     groupPresence.forEach((onlineMembers, groupId) => {
@@ -573,62 +515,125 @@ socket.on('user_status_change', (data) => {
                 groupPresence.set(groupId, []);
             }
 
-            const groupCard = document.querySelector(`.u-${groupId}`);
-            if(groupCard){
-                const groupStatusDot = groupCard.querySelector('.online-status');
-                if(groupStatusDot){
-                    groupStatusDot.style.visibility = onlineMembers.length > 0 ? 'visible' : 'hidden';
-                }
+            const groupPfp = document.querySelector(`.u-${groupId} .wrap-pfp`);
+            if(onlineMembers.length > 0){
+                groupPfp.classList.replace('offline', 'online');
+            }
+            else if(onlineMembers.length == 0){
+                groupPfp.classList.replace('online', 'offline');
             }
         }
     });
 });
 
-// When a new message is received class as yours or the other user's && as read or unread
-socket.on('new_message', (data) => {
-
-    const targetId = !data.isGroup ? (data.sid == id? data.rid : data.sid) : data.groupId;
-    const listContainer = document.querySelector('.list');
-    const elConversationCard = document.querySelector(`.u-${targetId}`);
+// New message
+socket.on('new_message', async (data) => {
+    const targetId = !data.isGroup ? (data.sid == id ? data.rid : data.sid) : data.groupId;
+    const listContainer = document.querySelector('.dms-container .list');
+    const elConversationCard = listContainer.querySelector(`.u-${targetId}`);
     
     if(elConversationCard){
         listContainer.prepend(elConversationCard);
-    
-        const elSubLabel = document.querySelector(`.u-${targetId} .sub-label`);
-        const isUnreadMsg = document.querySelector(`.u-${targetId} .unread-msg`);
-    
-        const lastMsgText = data.sid == id ? `You: ${data.msg}` : (!data.isGroup ? data.msg : `${Fetch.selectUserById(data.sid, relevantUsers).username}: ${data.msg}`);
-        elConversationCard.setAttribute('data-last-msg', lastMsgText);
-        
-        if(elSubLabel){
-            elSubLabel.innerHTML = lastMsgText;
-            if(data.sid == id){
-                isUnreadMsg.style.visibility = 'hidden';
-                elSubLabel.style.color = '#a8a8a8';
-                elSubLabel.style.fontWeight = '400';
+        const elSubLabel = elConversationCard.querySelector('.sub-label');
+
+        const lastMsg = data.sid == id ?
+        `You: ${data.msg}` :
+        (!data.isGroup ?
+            data.msg :
+            `${Fetch.selectUserById(data.sid, relevantUsers).username}: ${data.msg}`
+        );
+
+        elSubLabel.innerHTML = lastMsg;
+        elConversationCard.setAttribute('data-last-msg', lastMsg);
+
+        if(data.sid == id) elConversationCard.classList.replace('unseen', 'seen');
+        else elConversationCard.classList.replace('seen', 'unseen');
+    }
+    else{
+        const target = await HTTP.fetchUsersBatch(targetId);
+
+        let username;
+        let img;
+        let isOnline;
+        let bufferPfps;
+
+        if(!data.isGroup){
+            username = target.username;
+            img = target.img;
+            isOnline = target.isOnline ? 'online' : 'offline';
+
+            bufferPfps = `
+                <img class='pfp-img' src='/src/assets/pfps/${img}'>
+                <div class='online-status'></div>
+            `;
+
+            relevantUsers.push(target);
+        }
+        else{
+            const group = target;
+            relevantGroups.push(group.id);
+            const membersData = await HTTP.fetchUsersBatch(group.members);
+            const otherUsers = membersData.filter(user => {
+                return user.id != me.id;
+            });
+            otherUsers.forEach(user => {
+                if(!Fetch.selectUserById(user.id, relevantUsers)){
+                    user = { isGroup: false, ...user };
+                    relevantUsers.push(user);
+                }
+            });
+
+            if(!group.name){
+                username = otherUsers.map(m => {
+                    return m.username;
+                }).join(', ');
             }
-            else{
-                isUnreadMsg.style.visibility = 'visible';
-                elSubLabel.style.color = '#d5d6c3';
-                elSubLabel.style.fontWeight = 'bolder';
+
+            if(!groupPresence.has(group.id)){
+                const onlineMembers = otherUsers.filter(u => u.online).map(u => u.id);
+                if(onlineMembers.length > 0){
+                    groupPresence.set(group.id, onlineMembers);
+                }
+            }
+            isOnline = groupPresence.has(group.id) ? 'online' : 'offline';
+
+            if(!group.img){
+                const memberPfp1 = otherUsers[0].img;
+                const memberPfp2 = otherUsers[1].img;
+                bufferPfps = `
+                    <img class='sub-pfp' src='/src/assets/pfps/${memberPfp1}'>
+                    <img class='sub-pfp' src='/src/assets/pfps/${memberPfp2}'>
+                    <div class='online-status'></div>
+                `;
             }
         }
+        const lastMsg = data.sid == id ? `You: ${data.msg}` : (!data.isGroup ? data.msg : `${Fetch.selectUserById(data.sid, relevantUsers).username}: ${data.msg}`);
+        
+        listContainer.insertAdjacentHTML('afterbegin', `
+            <div class='user-card chat-card ${data.sid == id ? 'seen' : 'unseen'} u-${targetId}' data-last-msg='${lastMsg}' data-user-id='${targetId}'>
+                <div class='wrap-pfp ${isOnline}'>
+                    ${bufferPfps}
+                </div>
+                <div class='wrap-label'>
+                    <div class='username-label'>${username}</div>
+                    <span class='sub-label'>${lastMsg}</span>
+                </div>
+                <div class='wrap-btn-inbox'>
+                    <div class='unread-msg'></div>
+                    <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
+                </div>
+            </div>
+        `);
     }
 });
 
-// Class the last message as read as needed
+// Seen message
 socket.on('message_marked_read', async (data) => {
-    const elSubLabel = document.querySelector(`.u-${data.readTo} .sub-label`);
-    const isUnreadMsg = document.querySelector(`.u-${data.readTo} .unread-msg`);
-
-    if(data.readBy == id){
-        isUnreadMsg.style.visibility = 'hidden';
-        elSubLabel.style.color = '#a8a8a8';
-        elSubLabel.style.fontWeight = '400';
-    }
+    const elUserCard = document.querySelector(`.u-${data.readTo}`);
+    if(data.readBy == id && elUserCard) elUserCard.classList.replace('unseen', 'seen');
 });
 
-// When the other user is typing
+// Typing
 let typers = new Map();
 socket.on('typing_back', async (data) => {
     
@@ -664,7 +669,7 @@ socket.on('typing_back', async (data) => {
             'Typing...' : 
             (typers.get(data.typedTo).length > 1 ? 
                 `${typers.get(data.typedTo).length} are typing...` : 
-                `${Fetch.selectUserById(typers.get(data.typedTo), conversations).username} is typing...`
+                `${Fetch.selectUserById(typers.get(data.typedTo), relevantUsers).username} is typing...`
             );
         }
         else{

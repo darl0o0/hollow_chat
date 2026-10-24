@@ -7,13 +7,12 @@ if(!isset($_SESSION['id'])){
 
     if($_SERVER['REQUEST_METHOD'] == "POST"){
         checkHeadersCSRF();
-        $input = json_decode(file_get_contents('php://input'), true);
 
         //Database primary parameters
-        $username = trim($input['username']);
-        $email = trim($input['email']);
-        $password1 = trim($input['password-1']);
-        $password2 = trim($input['password-2']);
+        $username = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $password1 = trim($_POST['password-1']);
+        $password2 = trim($_POST['password-2']);
         $hashed_password = password_hash($password1, PASSWORD_DEFAULT);
             
         //Uploading a profile picture
@@ -24,8 +23,8 @@ if(!isset($_SESSION['id'])){
         move_uploaded_file($tmp_name, $file_dir);
 
         //Database secondary parameters
-        $bio = trim($input['bio']);
-        $private = $input['privacy'];
+        $bio = trim($_POST['bio']);
+        $private = $_POST['privacy'];
         $img = $raw_img['name'];
 
         if(empty($username) || empty($email) || empty($password1) || empty($password2)){
@@ -98,7 +97,7 @@ else{
                 <img src="/src/assets/logo/light_logo.png">
             </div>
             <div class="brv"></div>
-            <div class="title-or-wrapper">
+            <div class="wrap-title-link">
                 <h1>Sign up</h1>
                 <p>Or sign in to your account <a href="/signin/">here</a></p>
             </div>
@@ -106,19 +105,19 @@ else{
         <div class="alert-placeholder"></div>
         <form class="signup-form" method="post" enctype="multipart/form-data" novalidate>
             <div class="form-step step-1 active-form-step">
-                <div class="username-email-wrapper">
+                <div class="wrap-username-email">
                     <input type="username" class="input username required" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15">
                     <input type="email" class="input email required" name="email" placeholder="Email">
                 </div>
-                <div class="password-wrapper">
+                <div class="wrap-password">
                     <input type="password" class="input password pass-1 required match" name="password-1" placeholder="Password">
                     <button type="button" class="s-h s-h-1"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
-                <div class="password-wrapper">
+                <div class="wrap-password">
                     <input type="password" class="input password pass-2 required match" name="password-2" placeholder="Confirm password">
                     <button type="button" class="s-h s-h-2"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
-                <div class="btn-wrapper">
+                <div class="wrap-btn">
                     <button type="button" class="btn next primary-btn">Next<i class="fa-solid fa-arrow-right"></i></button>
                     <button class="btn google secondary-btn" type="button">
                         <img src="/src/assets/google.png"></img>
@@ -127,8 +126,8 @@ else{
                 </div>
             </div>
             <div class="form-step step-2">
-                <div class="bio-pfp-wrapper">
-                    <div class="bio-privacy-wrapper">
+                <div class="wrap-bio-pfp">
+                    <div>
                         <textarea class="input bio" name="bio" maxlength="150" placeholder="Write a short bio...&#10;(Optional)"></textarea>
                         <div class="privacy">
                             <label>Account privacy:</label>
@@ -146,7 +145,7 @@ else{
                     </div>
                     <input type="file" name="img" class="pfp" accept="image/jpg, image/jpeg, image/png">
                 </div>
-                <div class="btn-wrapper">
+                <div class="wrap-btn">
                     <button type="button" class="btn primary-btn submit">Finish<i class="fa-solid fa-right-to-bracket"></i></button>
                     <button class="btn secondary-btn back" type="button">
                         <i class="fa-solid fa-arrow-left"></i>

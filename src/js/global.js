@@ -2,9 +2,9 @@ import { UI } from "./helpers.js";
 
 // Show notifications model
 document.addEventListener('click', (e) => {
-    const modelBtn = e.target.closest('.model-show');
+    const modelBtn = e.target.closest('.modal-show');
     if(modelBtn){
-        const modelName = modelBtn.getAttribute('link-model');
+        const modelName = modelBtn.getAttribute('link-modal');
 
         const model = document.querySelector(`.${modelName}`);
         const main = document.querySelector(".main");

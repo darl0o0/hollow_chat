@@ -65,7 +65,7 @@ else{
                 <img src="/src/assets/logo/light_logo.png">
             </div>
             <div class="brv"></div>
-            <div class="title-or-wrapper">
+            <div class="wrap-title-link">
                 <h1>Sign in</h1>
                 <p>Or create an account <a href="/signup/">here</a></p>
             </div>
@@ -73,11 +73,11 @@ else{
         <div class="alert-placeholder"></div>
         <form method="post" class="signin-form" novalidate autocomplete="off">
             <input type="email" class="input email required" name="email" placeholder="Email" autocomplete="off">
-            <div class="password-wrapper">
+            <div class="wrap-password">
                 <input type="password" class="input password required" name="password" placeholder="Password">
                 <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
             </div>
-            <div class="btn-wrapper">
+            <div class="wrap-btn">
                 <button class="btn submit primary-btn" type="button">Sign in <i class="fa-solid fa-right-to-bracket"></i></button>
                 <button class="btn google  secondary-btn" type="button"><img src="/src/assets/google.png"></img>Sign in with Google</button>
             </div>

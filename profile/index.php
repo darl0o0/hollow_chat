@@ -1,8 +1,4 @@
-<?php
-//Initialization
-require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
-$qid = $_GET['q'] ?? '';
-?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php"; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +7,6 @@ $qid = $_GET['q'] ?? '';
 
     <link rel="stylesheet" href="/src/css/profile.css">
     <script type="module" src="/src/js/init/profile.js"></script>
-    <meta name="qid" content="<?php echo $qid ?>">
     <title>Hollow Chat</title>
 </head>
 <body>

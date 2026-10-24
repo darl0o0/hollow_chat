@@ -1,7 +1,4 @@
-<?php
-//Initialization
-require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
-?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php"; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,11 +13,11 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
     <div class="main">
         <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/panel.php"; ?>
         <div class="preview">
-            <div class="search-wrapper">
+            <div class="wrap-search">
                 <label for="search" class="search-icon">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </label>
-                <input type="text" class="search" id="search" placeholder="Search user...">
+                <input type="text" class="search" placeholder="Search user...">
             </div>
             <div class="users-list"></div>
         </div>

@@ -168,24 +168,24 @@ io.on('connection', (socket) => {
 
 // 5. Emit directly to room IDs instead of checking userSockets object
 app.post('/broadcast', (req, res) => {
-  const { sid, rid, msg, isGroup, groupId } = req.body;
+  const { id, sid, rid, msg, isGroup, groupId } = req.body;
 
   // Send message to all tabs/browsers of receiver
   if(!isGroup){
-    io.to(rid).emit('new_message', { sid, rid, msg });
+    io.to(rid).emit('new_message', { id, sid, rid, msg });
   }
   else{
     rid.forEach(id => {
-      io.to(id).emit('new_message', { sid, msg, isGroup, groupId});
+      io.to(id).emit('new_message', { id, sid, msg, isGroup, groupId});
     });
   }
 
   // Send back to all tabs/browsers of sender
   if(!isGroup){
-    io.to(sid).emit('new_message', { sid, rid, msg });
+    io.to(sid).emit('new_message', { id, sid, rid, msg });
   }
   else{
-    io.to(sid).emit('new_message', { sid, groupId, msg });
+    io.to(sid).emit('new_message', { id, sid, groupId, msg });
   }
 
   res.json({ status: 'success' });
