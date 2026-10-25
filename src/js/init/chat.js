@@ -45,27 +45,22 @@ export const chatLoaded = new Promise((resolve) => {
 });
 
 // Counters
-let countUnread = 0;
 let countGroupPresence = 0;
 
 // Helper functions
-function readChat(activeUserId){
-    socket.emit('mark_as_read', {
-        senderId: activeUserId,
-        receiverId: id,
-        unreadCount: countUnread
-    });
+function readChat(cid){
+    socket.emit('seen:ping', { by: id, to: cid });
 }
 
 function dataTyping(isTyping){
     const dataGroupId = isGroup ? groupId : null;
-    const dataTypedTo = isGroup ? otherUserIds : qid;
+    const to = isGroup ? otherUserIds : qid;
 
     return {
-        typedBy: id,
-        typedTo: dataTypedTo,
-        isTyping: isTyping,
-        isGroup: isGroup,
+        by: id,
+        to,
+        isTyping,
+        isGroup,
         groupId: dataGroupId
     }
 }
@@ -119,16 +114,13 @@ export async function loadChat(argIsGroup){
         }
     }
     else{
-        bufferMessages = `
-            <center>Start chatting now.</center>
-        `;
+        bufferMessages = '<center>Start chatting now.</center>';
     }
     elInnerField.innerHTML = bufferMessages;
     elField.scrollTop = elField.scrollHeight;
 }
 
 document.addEventListener('DOMContentLoaded', async function(){
-    countUnread = Number(document.querySelector('meta[name="unread-count"]')?.content);
 
     try{
         me = await userDataReady;
@@ -143,12 +135,8 @@ document.addEventListener('DOMContentLoaded', async function(){
 
         await chatReadyToLoad;
 
-        if(qid){
-            target = await HTTP.fetchUsersBatch(qid);
-            if(target){
-                readChat(qid);
-            }
-        }
+        target = qid ? (await HTTP.fetchUsersBatch(qid)) : null;
+        if(target) readChat(qid);
 
         try{
             if(!target){
@@ -257,7 +245,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
                 document.querySelector('.msg-input').value = null;
                 isTyping = false;
-                socket.emit('typing', dataTyping(false));
+                socket.emit('typing:ping', dataTyping(false));
             }
         });
 
@@ -267,12 +255,12 @@ document.addEventListener('DOMContentLoaded', async function(){
 
             if(hasText && !isTyping){
                 isTyping = true;
-                socket.emit('typing', dataTyping(true));
+                socket.emit('typing:ping', dataTyping(true));
             }
 
             else if(!hasText && isTyping){
                 isTyping = false;
-                socket.emit('typing', dataTyping(false));
+                socket.emit('typing:ping', dataTyping(false));
             }
         });
         
@@ -292,7 +280,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 });
 
 // Users presense
-socket.on('user_status_change', (data) => {
+socket.on('presence', (data) => {
 
     if(isGroup && otherUserIds.includes(data.userId)){
         if(data.isOnline && !groupPresence.includes(data.userId)){
@@ -320,7 +308,7 @@ socket.on('user_status_change', (data) => {
 });
 
 // New message
-socket.on('new_message', (msg) => {
+socket.on('message', (msg) => {
     elInnerField = document.querySelector('.inner-field');
     let isRelevantMsg = null;
     if(!isGroup){
@@ -337,13 +325,13 @@ socket.on('new_message', (msg) => {
 
     let isPreviousFromDifferentUser = true;
     if(elLastMsg){
-        const isLastMsgFromYou = elLastMsg.classList.contains('you-wrap');
+        const isLastMsgFromYou = elLastMsg.classList.contains('wrap-you');
         if(isLastMsgFromYou && msg.sid != id){
             elLastMsg.querySelector('.pfp-link').classList.replace('visible', 'hidden');
         }
         elLastMsg.classList.remove('section-gap');
     
-        isPreviousFromDifferentUser = (msg.sid == id) != (elLastMsg.classList.contains('me-wrap'));
+        isPreviousFromDifferentUser = (msg.sid == id) != (elLastMsg.classList.contains('wrap-me'));
         if(!isPreviousFromDifferentUser) elLastMsg.classList.remove('last-msg');
     }
     
@@ -361,27 +349,27 @@ socket.on('new_message', (msg) => {
 });
 
 // Seen message
-socket.on('message_marked_read', (data) => {
-    if(data.readBy === qid){
-        elInnerField.querySelectorAll('.me-wrap').forEach(el => {
+socket.on('seen:pong', (data) => {
+    if(data.by === qid){
+        elInnerField.querySelectorAll('.wrap-me').forEach(el => {
             el.classList.add('seen');
         });
     }
 });
 
 // Typing
-socket.on('typing_back', async (data) => {
-
+socket.on('typing:pong', async (data) => {
+    const { by, to, isTyping } = data;
     await targetDataReady;
 
     if(!isGroup){
 
-        if(data.typedBy == qid && data.typedTo == id){
+        if(by == qid && to == id){
 
-            if(data.isTyping){
+            if(isTyping){
                 elField.innerHTML += `
-                    <div class='you-wrap wrap-typing'>
-                        <div class='pfp-wrap'>
+                    <div class='wrap-you wrap-typing'>
+                        <div class='wrap-pfp'>
                             <a href='/profile/?q=${target.id}' class='pfp-link'>
                                 <img src='/src/assets/pfps/${target.img}' class='msg-pfp'>
                             </a>
@@ -399,17 +387,16 @@ socket.on('typing_back', async (data) => {
         }
     }
     else{
-
-        if(otherUserIds.includes(data.typedBy) && data.typedTo == groupId){
-            const typer = Fetch.selectUserById(data.typedBy, otherUsers);
+        if(otherUserIds.includes(by) && to == groupId){
+            const typer = Fetch.selectUserById(by, otherUsers);
             const wrapTyping = document.querySelector('.wrap-typing');
 
-            if(data.isTyping){
+            if(isTyping){
 
                 if(!wrapTyping){
                     elField.innerHTML += `
-                        <div class='you-wrap wrap-typing'>
-                            <div class='pfp-wrap'>
+                        <div class='wrap-you wrap-typing'>
+                            <div class='wrap-pfp'>
                                 <img src='/src/assets/pfps/${typer.img}' class='msg-pfp img-${typer.id}'>
                             </div>
                             <div class="msg you typing">
@@ -420,7 +407,7 @@ socket.on('typing_back', async (data) => {
                 }
                 else{
                     if(!wrapTyping.querySelector(`.img-${typer.id}`)){
-                        wrapTyping.querySelector('.pfp-wrap').insertAdjacentHTML('afterbegin', `
+                        wrapTyping.querySelector('.wrap-pfp').insertAdjacentHTML('afterbegin', `
                             <img src='/src/assets/pfps/${typer.img}' class='msg-pfp img-${typer.id}'>
                         `);
                     }

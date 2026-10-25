@@ -28,7 +28,7 @@ export const UI = {
 
         countNot = (countNot > 0) ? `(${countNot})` : '';
         const htmlNotificationsModal = `
-            <div class="model modal-requests">
+            <div class="modal modal-requests hidden">
                 <div class="background"></div>
                 <div class="container">
                     <h1><i class="fa-solid fa-bell"></i>Notifications</h1>
@@ -43,12 +43,12 @@ export const UI = {
         document.body.insertAdjacentHTML('beforeend', htmlNotificationsModal);
     },
     
-    // Hide the on-screen models
-    hideModel: function(){
-        document.querySelectorAll(".model").forEach(model => {
-            model.style.visibility = "hidden";
-        })
-        document.querySelector(".main").style.filter = "none";
+    // Hide the on-screen modals
+    hidemodal: function(){
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.add('hidden');
+        });
+        document.querySelector('.main').classList.remove('filter-blur');
     }
 }
 
@@ -449,7 +449,7 @@ export const HTML = {
 
         if(isMe){
             return `
-                <div class='wrap-msg me-wrap mid-${msg.id}${isSeen ? ' seen' : ''}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
+                <div class='wrap-msg wrap-me mid-${msg.id}${isSeen ? ' seen' : ''}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
                     <div class='others-wrap'>
                         <div class='seen-dot'></div>
                     </div>
@@ -461,7 +461,7 @@ export const HTML = {
             const showPfp = (boundMsg.isNextFromDifferentUser || options.isLive) ? 'visible' : 'hidden';
 
             return `
-                <div class='wrap-msg you-wrap mid-${msg.id}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
+                <div class='wrap-msg wrap-you mid-${msg.id}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
                     <div class='wrap-pfp'>
                         <a href='/profile/?q=${msg.sid}' class='pfp-link ${showPfp}'>
                             <img src='/src/assets/pfps/${sender.img}' class='msg-pfp'>

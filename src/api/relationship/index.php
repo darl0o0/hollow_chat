@@ -12,7 +12,7 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
     header('Content-Type: application/json; charset=utf-8');
     
     $data = [];
-    $qid = $_GET['user2'];
+    $qid = $_GET['qid'];
 
     $stmt_user = mysqli_prepare($con, "select * from friends where 
     (user1 = ? and user2 = ?) or 
@@ -63,7 +63,7 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     requireStrictPost();
     $input = json_decode(file_get_contents('php://input'), true);
 
-    $qid = $input['user2'];
+    $qid = $input['qid'];
 
     // Execute the action received from the profile page
     // 0 = send friend request

@@ -84,7 +84,7 @@ document.querySelector('.search').addEventListener('input', async (e) => {
 });
 
 // Users presence
-socket.on('user_status_change', (data) => {
+socket.on('presence', (data) => {
     const pfp = document.querySelector(`.u-${data.userId} .wrap-pfp`);
     
     if(data.isOnline){

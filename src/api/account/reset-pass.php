@@ -6,13 +6,14 @@ include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 header('Content-Type: application/json; charset=utf-8');
 requireStrictPost();
+$input = json_decode(file_get_contents('php://input'), true);
 
 $user_data = check_login($con);
 $id = $user_data['id'];
 
-$old_pass = $_POST['old_pass'];
-$new_pass = $_POST['new_pass'];
-$new_pass1 = $_POST['new_pass1'];
+$old_pass = $input['old_pass'];
+$new_pass = $input['new_pass'];
+$new_pass1 = $input['new_pass1'];
 
 if(empty($old_pass) || empty($new_pass) || empty($new_pass1)){
     ok(false, 'All inputs are required.');

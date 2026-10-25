@@ -93,13 +93,15 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     $mid = $common_id.$time_id;
 
     $socketData = json_encode([
-        'id' => $mid,
+        'mid' => $mid,
         'sid' => $sid,
         'rid' => json_decode($input['qid'], true) ?? $input['qid'],
         'msg' => $msg,
         'isGroup' => filter_var($is_group, FILTER_VALIDATE_BOOL),
         'groupId' => $group_id
     ]);
+
+    $internal_token = getEnvValue('INTERNAL_TOKEN');
 
     //Send a curl request to the Node.js server (server.js)
     $ch = curl_init('http://127.0.0.1:3000/broadcast');
@@ -110,7 +112,8 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     curl_setopt($ch, CURLOPT_TIMEOUT, 2);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Content-Length: ' . strlen($socketData)
+        'Content-Length: ' . strlen($socketData),
+        'X-Internal-Token: ' . $internal_token
     ]);
     curl_exec($ch);
     curl_close($ch);

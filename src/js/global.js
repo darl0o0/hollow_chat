@@ -1,34 +1,34 @@
 import { UI } from "./helpers.js";
 
-// Show notifications model
+// Show notifications modal
 document.addEventListener('click', (e) => {
-    const modelBtn = e.target.closest('.modal-show');
-    if(modelBtn){
-        const modelName = modelBtn.getAttribute('link-modal');
+    const modalBtn = e.target.closest('.modal-show');
+    if(modalBtn){
+        const modalName = modalBtn.getAttribute('link-modal');
 
-        const model = document.querySelector(`.${modelName}`);
-        const main = document.querySelector(".main");
+        const modal = document.querySelector(`.${modalName}`);
+        const main = document.querySelector('.main');
 
-        if(model) model.style.visibility = "visible";
-        if(main) main.style.filter = "blur(3px)";
+        modal.classList.remove('hidden');
+        main.classList.add('filter-blur');
     }
 
-    const hideModalBtn = e.target.closest('.model-hide');
+    const hideModalBtn = e.target.closest('.modal-hide');
     if(hideModalBtn){
-        UI.hideModel();
+        UI.hidemodal();
     }
 });
 
-// Hide notifications model
+// Hide notifications modal
 document.addEventListener('keydown', (e) =>{
-    if(e.keyCode === 27 || e.key === 'Escape'){
-        UI.hideModel();
+    if(e.key === 'Escape'){
+        UI.hidemodal();
     }
 });
 
 document.addEventListener('click', (e) => {
     if(e.target.matches('.background')){
-        UI.hideModel();
+        UI.hidemodal();
     }
 });
 

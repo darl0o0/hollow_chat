@@ -38,6 +38,9 @@
 .display-none{
     display: none !important;
 }
+.filter-blur{
+    filter: blur(3px);
+}
 html{
     height: 100%;
 }
@@ -521,9 +524,9 @@ body{
     }
 }
 
-/* ON-SCREEN MODELS */
+/* ON-SCREEN modalS */
 
-.model{
+.modal{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -533,7 +536,6 @@ body{
     top: 0;
     left: 0;
     color: var(--main-text-color);
-    visibility: hidden;
     .background{
         position: absolute;
         width: 100%;
@@ -586,7 +588,7 @@ body{
         }
     }
 }
-.model.modal-requests{
+.modal.modal-requests{
     .container{
         width: 80%;
         max-width: 380px;
@@ -686,7 +688,7 @@ center{
         --input-btn-border-radius: 15px;
         --btn-font-size: 18px;
     }
-    .alert, .model-alert{
+    .alert, .modal-alert{
         padding: 10px;
         .alert-text{
             max-width: 250px;
@@ -843,7 +845,7 @@ center{
             font-size: 16px;
         }
     }
-    .model{
+    .modal{
         .form-container{
             max-width: 350px;
             padding: 20px 25px;
@@ -858,7 +860,7 @@ center{
             }
         }
     }
-    .model.modal-requests{
+    .modal.modal-requests{
         .container{
             min-width: 330px;
             padding: 20px;

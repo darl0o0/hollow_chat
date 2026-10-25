@@ -150,10 +150,10 @@
         display: flex;
         flex-direction: column;
         gap: 4px;
-        .me-wrap{
+        .wrap-me{
             align-self: flex-end;
         }
-        .you-wrap{
+        .wrap-you{
             align-self: flex-start;
             img{
                 object-fit: cover;

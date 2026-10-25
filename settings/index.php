@@ -62,7 +62,7 @@
             </div>
         </div>
     </div>
-    <div class="modal-reset model">
+    <div class="modal modal-reset hidden">
         <div class="background"></div>
         <div class="form-container">
             <div class="logo">
@@ -90,7 +90,7 @@
             </form>
         </div>
     </div>
-    <div class="modal-delete model">
+    <div class="modal modal-delete hidden">
         <div class="background"></div>
         <div class="form-container">
             <div class="logo">
@@ -120,7 +120,7 @@
                 </div>
                 <div class="wrap-btn">
                     <button class="btn delete submit" type="button"><i class="fa-solid fa-trash"></i>Delete Account</button>
-                    <button class="btn secondary-btn model-hide" type="button">Cancel</button>
+                    <button class="btn secondary-btn modal-hide" type="button">Cancel</button>
                 </div>
             </form>
         </div>

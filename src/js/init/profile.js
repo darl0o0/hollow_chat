@@ -190,21 +190,21 @@ elPreview.addEventListener('click', (e) => {
 });
 
 // Listen for users' presence
-socket.on('user_status_change', (data) => {
+socket.on('presence', (data) => {
 
     if(!qid || data.userId != qid) return;
 
-    const statusDot = document.querySelector(".is-online");
-    const statusLabel = document.querySelector(".is-online-label");
+    const statusDot = document.querySelector('.is-online');
+    const statusLabel = document.querySelector('.is-online-label');
 
     if(data.userId == qid){
 
         if(data.isOnline){
-            statusDot.style = `background: #e9e4c8; border: 2px solid #e9e4c8`;
+            statusDot.classList.replace('offline', 'online');
             statusLabel.textContent = 'Online';
         }
         else{
-            statusDot.style = `background: none; border: 2px ridge #464646`;
+            statusDot.classList.replace('online', 'offline');
             statusLabel.textContent = 'Offline';
         }
     }

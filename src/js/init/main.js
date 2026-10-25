@@ -129,7 +129,7 @@ document.addEventListener('submit', async (e) => {
 });
 
 // New message
-socket.on('new_message', (data) => {
+socket.on('message', (data) => {
     const isChatOpen = Boolean(qid) && (qid == data.sid);
 
     if(data.sid != id && !isChatOpen){
@@ -139,9 +139,10 @@ socket.on('new_message', (data) => {
 });
 
 // Seen message
-socket.on('message_marked_read', (data) => {
+socket.on('seen:pong', (data) => {
+    console.log(data)
 
-    if(data.readBy == id){
+    if(data.by == id){
         countUnseen -= data.count;
         updateBadges();
     }

@@ -27,7 +27,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
     <button class="panel-action notifications-action modal-show" link-modal="modal-requests">
         <div class="wrap-icon-count">        
             <i class="fa-solid fa-bell"></i>
-            <div class="num-of display-none"><?php echo $num_of_requests ?></div>
+            <div class="num-of display-none"></div>
         </div>
         <span>Notifications</span>
     </button>

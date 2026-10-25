@@ -482,15 +482,11 @@ document.querySelector('.group-modal .submit').addEventListener('click', async f
 });
 
 // Users presense
-socket.on('user_status_change', (data) => {
+socket.on('presence', (data) => {
     const pfp = document.querySelector(`.u-${data.userId} .wrap-pfp`);
     
-    if(data.isOnline){
-        pfp.classList.replace('offline', 'online');
-    }
-    else if(!data.isOnline){
-        pfp.classList.replace('online', 'offline');
-    }
+    if(data.isOnline) pfp?.classList.replace('offline', 'online');
+    else if(!data.isOnline) pfp?.classList.replace('online', 'offline');
 
     groupPresence.forEach((onlineMembers, groupId) => {
         const groupConversation = conversations.find(c => c.isGroup && c.id == groupId);
@@ -527,7 +523,7 @@ socket.on('user_status_change', (data) => {
 });
 
 // New message
-socket.on('new_message', async (data) => {
+socket.on('message', async (data) => {
     const targetId = !data.isGroup ? (data.sid == id ? data.rid : data.sid) : data.groupId;
     const listContainer = document.querySelector('.dms-container .list');
     const elConversationCard = listContainer.querySelector(`.u-${targetId}`);
@@ -563,7 +559,7 @@ socket.on('new_message', async (data) => {
             isOnline = target.isOnline ? 'online' : 'offline';
 
             bufferPfps = `
-                <img class='pfp-img' src='/src/assets/pfps/${img}'>
+                <img src='/src/assets/pfps/${img}'>
                 <div class='online-status'></div>
             `;
 
@@ -628,26 +624,27 @@ socket.on('new_message', async (data) => {
 });
 
 // Seen message
-socket.on('message_marked_read', async (data) => {
+socket.on('seen:pong', async (data) => {
     const elUserCard = document.querySelector(`.u-${data.readTo}`);
     if(data.readBy == id && elUserCard) elUserCard.classList.replace('unseen', 'seen');
 });
 
 // Typing
 let typers = new Map();
-socket.on('typing_back', async (data) => {
+socket.on('typing:pong', async (data) => {
+    const { by, to, isTyping, isGroup, groupId } = data;
     
     await targetDataReady;
     let targetId;
     let isRelevant;
     
-    if(!data.isGroup){
-        targetId = (data.typedBy == id)? data.typedTo : data.typedBy;
-        isRelevant = data.typedBy == targetId && data.typedTo == id;
+    if(!isGroup){
+        targetId = (by == id)? to : by;
+        isRelevant = by == targetId && to == id;
     }
     else{
-        targetId = data.typedTo;
-        isRelevant = relevantGroups.includes(data.typedTo);
+        targetId = to;
+        isRelevant = relevantGroups.includes(to);
     }
 
     const elConversationCard = document.querySelector(`.u-${targetId}`);
@@ -655,38 +652,40 @@ socket.on('typing_back', async (data) => {
     if(isRelevant && elConversationCard){
         const elSubLabel = elConversationCard.querySelector('.sub-label');
 
-        if(data.isGroup && !typers.has(data.typedTo)){
-            typers.set(data.typedTo, []);
+        if(isGroup && !typers.has(to)){
+            typers.set(to, []);
         }
 
-        if(data.isTyping){
-
-            if(data.isGroup && !typers.get(data.typedTo).includes(data.typedBy)){
-                typers.get(data.typedTo).push(data.typedBy);
-            }
-            elSubLabel.innerHTML = 
-            !data.isGroup ? 
-            'Typing...' : 
-            (typers.get(data.typedTo).length > 1 ? 
-                `${typers.get(data.typedTo).length} are typing...` : 
-                `${Fetch.selectUserById(typers.get(data.typedTo), relevantUsers).username} is typing...`
-            );
-        }
-        else{
-
-            if(data.isGroup && typers.has(data.typedTo)){
-                const groupTypers = typers.get(data.typedTo);
-                const index = groupTypers.indexOf(data.typedBy);
-                if(index != -1) groupTypers.splice(index, 1);
-                if(groupTypers.length == 0) typers.delete(data.typedBy);
+        if(isTyping){
+            if(isGroup && !typers.get(to).includes(by)){
+                typers.get(to).push(by);
             }
             
-            elSubLabel.innerHTML = 
-            !data.isGroup ? 
-            (elConversationCard.getAttribute('data-last-msg') || '') : 
-            typers.get(data.typedTo).length < 1 ? 
-            (elConversationCard.getAttribute('data-last-msg') || '') : 
-            `${Fetch.selectUserById(typers.get(data.typedTo), conversations).username} is typing...`;
+            if(!isGroup){
+                elSubLabel.innerHTML = 'Typing...';
+            }
+            else{
+                elSubLabel.innerHTML = typers.get(to).length > 1 ? 
+                `${typers.get(to).length} are typing...` : 
+                `${Fetch.selectUserById(typers.get(to), relevantUsers).username} is typing...`;
+            }
+        }
+        else{
+            if(isGroup && typers.has(to)){
+                const groupTypers = typers.get(to);
+                const index = groupTypers.indexOf(by);
+                if(index != -1) groupTypers.splice(index, 1);
+                if(groupTypers.length == 0) typers.delete(by);
+            }
+            
+            if(!isGroup){
+                elSubLabel.innerHTML = elConversationCard.getAttribute('data-last-msg') || '';
+            }
+            else{
+                elSubLabel.innerHTML = typers.get(to).length < 1 ?
+                elConversationCard.getAttribute('data-last-msg') || '' :
+                `${Fetch.selectUserById(typers.get(to), conversations).username} is typing...`;
+            }
         }
     }
 });

@@ -12,6 +12,19 @@ document.addEventListener('DOMContentLoaded', async function(){
         console.error(error);
     }
     if(id){
-        socket.emit('register_user', id);
+        socket.emit('register', id);
     }
 });
+[
+    [
+        [
+            [
+                [
+                    [
+                        
+                    ]
+                ]
+            ]
+        ]
+    ]
+]

@@ -114,3 +114,23 @@ function ok($isOk, $response = null){
     }
     die();
 }
+
+// Read .env secret data
+function getEnvValue($key){
+    $envFile = __DIR__ . '/../../.env';
+
+    if(!file_exists($envFile)) return null;
+
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES);
+    foreach($lines as $line){
+        if(strpos(trim($line), '#') === 0) continue;
+
+        if(strpos(trim($line), '=') === false) continue;
+
+        list($name, $value) = explode('=', $line, 2);
+        if(trim($name) == $key){
+            return trim($value);
+        }
+    }
+    return null;
+}

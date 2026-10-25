@@ -2,12 +2,13 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 const db = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'hollow_chat'
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'hollow_chat'
 });
 
 const app = express();
@@ -15,180 +16,176 @@ app.use(express.json());
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" }
+    cors: { origin: "*" }
 });
+
+const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN;
 
 const activeTypingUsers = new Map();
 const disconnectTimers = new Map();
 
 io.on('connection', (socket) => {
 
-  // 1. User joins a room named after their userId
-  socket.on('register_user', async (userId) => {
-      if (!userId) return;
+    // Go online
+    socket.on('register', async (userId) => {
+        if (!userId) return;
 
-      socket.userId = userId;
-      socket.join(userId); // Join room for multi-tab support
+        socket.userId = userId;
+        socket.join(userId); // Join room for multi-tab support
 
-      if(disconnectTimers.has(userId)){
-        clearTimeout(disconnectTimers.get(userId));
-        disconnectTimers.delete(userId);
-      }
-      else{
-        await db.query('UPDATE users SET online = 1 WHERE id = ?', [userId]);
-        io.emit('user_status_change', { userId: userId, isOnline: true });
-      }
-
-      activeTypingUsers.forEach((typingData) => {
-          const { typedBy, typedTo, isTyping, isGroup, groupId } = typingData;
-          
-          if(!isGroup && typedTo == userId){
-            io.to(typedTo).emit('typing_back', {
-              typedBy: typedBy,
-              typedTo: typedTo,
-              isTyping: isTyping
-            });
-          }
-          else if(typedTo.includes(userId)){
-            typedTo.forEach(id => {
-              io.to(id).emit('typing_back', {
-                typedBy: typedBy,
-                typedTo: groupId,
-                isTyping: isTyping,
-                isGroup: isGroup
-              });
-            })
-          }
-      });
-  });
-
-  // 2. Typing indicator sent directly to the recipient's room
-  socket.on('typing', (data) => {
-    const { typedBy, typedTo, isTyping, isGroup, groupId } = data;
-
-    // Track active typing target on this socket instance
-    if(isTyping){
-      activeTypingUsers.set(typedBy, data);
-    }
-    else{
-      activeTypingUsers.delete(typedBy);
-    }
-    
-    // Sends to all tabs/devices of typedTo
-    if(!isGroup){
-      io.to(typedTo).emit('typing_back', {
-        typedBy: typedBy,
-        typedTo: typedTo,
-        isTyping: isTyping
-      });
-    }
-    else{
-      typedTo.forEach(id => {
-        io.to(id).emit('typing_back', {
-          typedBy: typedBy,
-          typedTo: groupId,
-          isTyping: isTyping,
-          isGroup: isGroup
-        });
-      })
-    }
-  });
-
-  // 3. Read receipts sent directly to the sender's room
-  socket.on('mark_as_read', async (data) => {
-    const { senderId, receiverId, unreadCount } = data;
-
-    const query = 'update messages set isRead = 1 where sid = ? and rid = ? and isRead = 0';
-    await db.query(query, [senderId, receiverId]);
-
-    // Sends to all tabs/devices of the partner
-    io.to(senderId).emit('message_marked_read', {
-      readBy: receiverId,
-      count: unreadCount
-    });
-    // Sends to all tabs/devices of the current user
-    io.to(receiverId).emit('message_marked_read', {
-      readBy: receiverId,
-      readTo: senderId,
-      count: unreadCount
-    });
-  });
-
-  // 4. Handle Disconnect (Page Reload / Tab Close)
-  socket.on('disconnect', async () => {
-      const userId = socket.userId;
-
-      if(!userId) return;
-
-      // SAFETY FIX: If this socket was mid-typing when reloaded, reset recipient's typing status immediately
-      if(activeTypingUsers.has(userId)){
-        const typingData = activeTypingUsers.get(userId);
-        const { typedTo, isGroup, groupId } = typingData;
-
-        if(!isGroup){
-          io.to(typedTo).emit('typing_back', {
-            typedBy: userId,
-            typedTo: typedTo,
-            isTyping: false
-          });
+        if(disconnectTimers.has(userId)){
+            clearTimeout(disconnectTimers.get(userId));
+            disconnectTimers.delete(userId);
         }
         else{
-          typedTo.forEach(id => {
-            io.to(id).emit('typing_back', {
-              typedBy: userId,
-              typedTo: groupId,
-              isTyping: false,
-              isGroup: isGroup
-            });
-          })
+            await db.query('UPDATE users SET online = 1 WHERE id = ?', [userId]);
+            io.emit('presence', { userId: userId, isOnline: true });
         }
-        activeTypingUsers.delete(userId);
-      }
 
-      if(disconnectTimers.has(userId)){
-        clearTimeout(disconnectTimers.get(userId));
-      }
-
-      const timer = setTimeout( async () => {
-        disconnectTimers.delete(userId);
-
-        // Check if user still has other tabs open in their room
-        const remainingSockets = await io.in(userId).fetchSockets();
-      
-        // Only set offline if no other sockets remain in this room
-        if(remainingSockets.length === 0){
-            await db.query('UPDATE users SET online = 0 WHERE id = ?', [userId]);
-            io.emit('user_status_change', { userId: userId, isOnline: false });
-        }
-      }, 3000);
-
-      disconnectTimers.set(userId, timer);
-  });
-});
-
-// 5. Emit directly to room IDs instead of checking userSockets object
-app.post('/broadcast', (req, res) => {
-  const { id, sid, rid, msg, isGroup, groupId } = req.body;
-
-  // Send message to all tabs/browsers of receiver
-  if(!isGroup){
-    io.to(rid).emit('new_message', { id, sid, rid, msg });
-  }
-  else{
-    rid.forEach(id => {
-      io.to(id).emit('new_message', { id, sid, msg, isGroup, groupId});
+        activeTypingUsers.forEach((typingData) => {
+            const { by, to, isTyping, isGroup, groupId } = typingData;
+            
+            if(!isGroup && to == userId){
+                io.to(to).emit('typing:pong', {
+                    by,
+                    to,
+                    isTyping
+                });
+            }
+            else if(Array.isArray(to) && to.includes(userId)){
+                to.forEach(id => {
+                    io.to(id).emit('typing:pong', {
+                        by,
+                        to: groupId,
+                        isTyping,
+                        isGroup
+                    });
+                });
+            }
+        });
     });
-  }
 
-  // Send back to all tabs/browsers of sender
-  if(!isGroup){
-    io.to(sid).emit('new_message', { id, sid, rid, msg });
-  }
-  else{
-    io.to(sid).emit('new_message', { id, sid, groupId, msg });
-  }
+    // Typing
+    socket.on('typing:ping', (data) => {
+        const { by, to, isTyping, isGroup, groupId } = data;
 
-  res.json({ status: 'success' });
+        if(isTyping) activeTypingUsers.set(by, data);
+        else activeTypingUsers.delete(by);
+
+        if(!isGroup) io.to(to).emit('typing:pong', { by, to, isTyping });
+        else{
+            to.forEach(id => {
+                io.to(id).emit('typing:pong', { by, to: groupId, isTyping, isGroup });
+            });
+        }
+    });
+
+    // Seen
+    socket.on('seen:ping', async (data) => {
+        const { by, to } = data;
+
+        const query = 'update messages set isRead = 1 where sid = ? and rid = ? and isRead = 0';
+        const [result] = await db.query(query, [to, by]);
+        const count = result.affectedRows;
+
+        // Send to partner
+        io.to(to).emit('seen:pong', { by, count });
+
+        // Send to current user
+        io.to(by).emit('seen:pong', { by, to, count });
+    });
+
+    // Go offline (Page Reload / Tab Close)
+    socket.on('disconnect', async () => {
+        const userId = socket.userId;
+
+        if(!userId) return;
+
+        // Reset typing status on-reload
+        if(activeTypingUsers.has(userId)){
+            const typingData = activeTypingUsers.get(userId);
+            const { to, isGroup, groupId } = typingData;
+
+            if(!isGroup) io.to(to).emit('typing:pong', { by: userId, to, isTyping: false });
+            else{
+                to.forEach(id => {
+                    io.to(id).emit('typing:pong', {
+                        by: userId,
+                        to: groupId,
+                        isTyping: false,
+                        isGroup
+                    });
+                })
+            }
+
+            activeTypingUsers.delete(userId);
+        }
+
+        if(disconnectTimers.has(userId)) clearTimeout(disconnectTimers.get(userId));
+
+        // If disconnected for 3secs set user offline
+        const timer = setTimeout(async () => {
+            disconnectTimers.delete(userId);
+
+            const remainingSockets = await io.in(userId).fetchSockets();
+            if(remainingSockets.length === 0){
+                await db.query('update users set online = 0 where id = ?', [userId]);
+                io.emit('presence', { userId: userId, isOnline: false });
+            }
+        }, 3000);
+
+        disconnectTimers.set(userId, timer);
+    });
 });
 
-server.listen(3000, () => console.log('Socket broadcaster running on port 3000'));
+// Handle messages
+app.post('/broadcast', (req, res) => {
+
+    const token = req.headers['x-internal-token'];
+    if(token !== INTERNAL_TOKEN){
+        return res.status(403).json({ status: 'error', message: 'Unauthorized' });
+    }
+
+    const { mid, sid, rid, msg, isGroup, groupId } = req.body;
+
+    // Send to partner
+    if(!isGroup) io.to(rid).emit('message', { mid, sid, rid, msg });
+    else{
+        rid.forEach(id => {
+            io.to(id).emit('message', { mid, sid, msg, isGroup, groupId});
+        });
+    }
+
+    // Send to current user
+    if(!isGroup) io.to(sid).emit('message', { mid, sid, rid, msg });
+    else io.to(sid).emit('message', { mid, sid, groupId, msg });
+
+    res.json({ status: 'success' });
+});
+
+server.listen(3000, () => console.log('Listening to sockets on port 3000'));
+
+// Handling server shutdown
+process.on('SIGINT', async () => {
+    console.log('\nShutting down server...');
+
+    server.close(async () => {
+        console.log('Socket server closed.');
+
+        try{
+            await db.end();
+            console.log('Database connection closed.');
+
+            process.exit(0);
+        }
+        catch(error){
+            console.error('Error during shutdown:', error);
+            process.exit(1);
+        }
+    });
+
+    setTimeout(() => {
+        console.error('Failed to close connection, Forcing server to shut down...');
+        process.exit(1);
+    }, 5000);
+});
