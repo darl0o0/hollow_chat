@@ -38,7 +38,7 @@ io.on('connection', (socket) => {
             disconnectTimers.delete(userId);
         }
         else{
-            await db.query('UPDATE users SET online = 1 WHERE id = ?', [userId]);
+            await db.query('update users set online = 1 where id = ?', [userId]);
             io.emit('presence', { userId: userId, isOnline: true });
         }
 
@@ -169,23 +169,31 @@ server.listen(3000, () => console.log('Listening to sockets on port 3000'));
 process.on('SIGINT', async () => {
     console.log('\nShutting down server...');
 
-    server.close(async () => {
-        console.log('Socket server closed.');
-
-        try{
-            await db.end();
-            console.log('Database connection closed.');
-
-            process.exit(0);
-        }
-        catch(error){
-            console.error('Error during shutdown:', error);
-            process.exit(1);
-        }
-    });
-
-    setTimeout(() => {
+    const forceShutdownTimer = setTimeout(() => {
         console.error('Failed to close connection, Forcing server to shut down...');
         process.exit(1);
     }, 5000);
+
+    forceShutdownTimer.unref();
+
+    try{
+        await db.query('update users set online = 0');
+        console.log('All users set to offline.');
+
+        await db.end();
+        console.log('Database connection closed.');
+
+        server.close(async () => {
+            console.log('Socket server closed.');
+            clearTimeout(forceShutdownTimer);
+            process.exit(0);
+        });
+
+        io.close();
+    }
+    catch(error){
+        console.error('Error during shutdown:', error);
+        clearTimeout(forceShutdownTimer);
+        process.exit(1);
+    }
 });

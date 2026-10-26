@@ -175,7 +175,8 @@ export const Form = {
 
     // Enable/Disable certain form
     isFormEnabled: function (form, isEnabled){
-        formState.set(form, isEnabled);
+        const currentState = formState.get(form) || {};
+        formState.set(form, { ...currentState, isEnabled });
 
         const submitBtn = form.querySelectorAll('button.submit, button.next');
         submitBtn.forEach(btn => {
@@ -187,7 +188,23 @@ export const Form = {
 
     // Check form state
     getFormState: function(form){
-        return formState.has(form) ? formState.get(form) : true;
+        const state = formState.get(form);
+        if(state && typeof state === 'object'){
+            return state.isEnabled !== undefined ? state.isEnabled : true;
+        }
+        return state !== undefined ? state : true;
+    },
+
+    setErrorCooldown: function(form, duration = 5000){
+        const currentState = formState.get(form) || {};
+        formState.set(form, { ...currentState, errorUntil: Date.now() + duration, isEnabled: false });
+        this.isFormEnabled(form, false);
+    },
+
+    isInErrorCooldown: function(form){
+        const state = formState.get(form);
+        if(!state || !state.errorUntil) return false;
+        return Date.now() < state.errorUntil;
     },
 
     // Convert formData into JSON object
@@ -234,7 +251,9 @@ export const Form = {
 
                 const isChecked = elCheckbox ? elCheckbox.checked : true;
 
-                const isEnabled = !isEmpty && !isSame && isChecked;
+                const isCooldown = this.isInErrorCooldown(form);
+
+                const isEnabled = !isEmpty && !isSame && isChecked && !isCooldown;
                 this.isFormEnabled(form, isEnabled);
             });
         
@@ -339,7 +358,7 @@ export const Form = {
             }
         }
         catch(error){
-            this.isFormEnabled(form, false);
+            this.setErrorCooldown(form);
 
             if(error instanceof TypeError || error instanceof SyntaxError){
                 console.error(error);

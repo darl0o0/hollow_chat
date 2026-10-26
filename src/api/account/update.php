@@ -15,7 +15,7 @@ $email = $_POST['email'];
 $bio = $_POST['bio'];
 
 $img = $user_data['img'];
-if($user_data['img'] !== $raw_img['name'] && !empty($raw_img['name'])){
+if(isset($_FILES['img']) && $_FILES['img']['error'] === UPLOAD_ERR_OK){
     $img = processAndSaveProfilePic($_FILES['img']);
 }
 

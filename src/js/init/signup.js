@@ -1,4 +1,4 @@
-import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
+import { UI, HTTP, Fetch, Form, Check, HTML } from "../helpers.js";
 
 let currentPreviewUrl = null;
 
@@ -44,8 +44,8 @@ function gotoStep(step){
             validateStep1();
         }
         catch(error){
-            Form.isFormEnabled(elFormSignup, false);
-            UI.alert(false, error.response);
+            Form.setErrorCooldown(elFormSignup);
+            UI.alert(false, error.message);
             setTimeout(() => {
                 Form.isFormEnabled(elFormSignup, true);
             }, 5000);
@@ -75,7 +75,7 @@ function uploadFile(file){
             URL.revokeObjectURL(currentPreviewUrl);
         }
         currentPreviewUrl = URL.createObjectURL(file);
-        elUploadField.innerHTML = `<i class='fa-solid fa-x'></i><img src='${currentPreviewUrl}'>`;
+        elUploadField.innerHTML = `<i class='fa-solid fa-x'></i><img src='${HTML.escapeHTML(currentPreviewUrl)}'>`;
     }
     catch(error){
         Form.isFormEnabled(elFormSignup, false);
