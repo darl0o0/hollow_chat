@@ -14,16 +14,9 @@ $username = $_POST['username'];
 $email = $_POST['email'];
 $bio = $_POST['bio'];
 
-//Uploading a profile picture
-$raw_img = $_FILES['img'];
-$file_name = $raw_img['name'];
-$tmp_name = $raw_img['tmp_name'];
-$file_dir = $_SERVER['DOCUMENT_ROOT']."/src/assets/pfps/".$file_name;
-move_uploaded_file($tmp_name, $file_dir);
-
 $img = $user_data['img'];
 if($user_data['img'] !== $raw_img['name'] && !empty($raw_img['name'])){
-    $img = $raw_img['name'];
+    $img = processAndSaveProfilePic($_FILES['img']);
 }
 
 if(empty($username) || empty($email)){
