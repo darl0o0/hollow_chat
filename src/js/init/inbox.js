@@ -98,8 +98,14 @@ document.addEventListener('DOMContentLoaded', async function(){
 
         if(getConversations.response && Array.isArray(getConversations.response)){
             const srotedConversations = getConversations.response.sort((a, b) => {
-                const timeA = a.lastMsg?.time ? new Date(a.lastMsg.time).getTime() : Date.now();
-                const timeB = b.lastMsg?.time ? new Date(b.lastMsg.time).getTime() : Date.now();
+                const timeA = a.lastMsg?.time ?
+                a.lastMsg.time * 1000 :
+                new Date(a.created_at.replace(' ', 'T')).getTime();
+                
+                const timeB = b.lastMsg?.time ?
+                b.lastMsg.time * 1000 :
+                new Date(b.created_at.replace(' ', 'T')).getTime();
+
                 return timeB - timeA;
             });
             
@@ -151,7 +157,7 @@ document.addEventListener('DOMContentLoaded', async function(){
                     const membersData = await HTTP.fetchUsersBatch(group.members);
                     
                     const otherUsers = membersData.filter(u => {
-                        return u.username != me.username;
+                        return u.id != me.id;
                     });
                     otherUsers.forEach(u => {
                         if(!Fetch.selectUserById(u.id, relevantUsers)){
@@ -345,9 +351,9 @@ document.addEventListener('click', (e) => {
         bufferSelectedMembers = "";
         selectedMembers.forEach(t => {
             bufferSelectedMembers += `
-                <div class="member-tag u-${t.id}" user-id="${t.id}">
-                    <img src="/src/assets/pfps/${t.img}">
-                    <span>${t.username}</span>
+                <div class="member-tag u-${HTML.escapeHTML(t.id)}" user-id="${HTML.escapeHTML(t.id)}">
+                    <img src="/src/assets/pfps/${HTML.escapeHTML(t.img)}">
+                    <span>${HTML.escapeHTML(t.username)}</span>
                     <i class="fa-solid fa-x"></i>
                 </div>
             `;
@@ -356,20 +362,15 @@ document.addEventListener('click', (e) => {
 
         bufferSuggestions = "";
         suggestions.forEach(u => {
-            bufferSuggestions += `
-                <div class='user-card u-${u.id}' user-id="${u.id}">
-                    <div class='select-indicator'>
-                        <i class="fa-solid fa-plus"></i>
-                    </div>
-                    <div class='wrap-pfp'>
-                        <img src='/src/assets/pfps/${u.img}'>
-                    </div>
-                    <div class='wrap-label'>
-                        <div class='username-label'>${u.username}</div>
-                        <span class='sub-label'>Add to group chat</span>
-                    </div>
-                </div>
-            `;
+            bufferSuggestions += HTML.userCard(
+                '',
+                u.id,
+                u.username,
+                u.img,
+                false,
+                {text: 'Add to group chat'},
+                {hasPlus: true}
+            );
         });
         elListSuggestions.innerHTML = bufferSuggestions;
     }
@@ -525,6 +526,8 @@ socket.on('presence', (data) => {
 // New message
 socket.on('message', async (data) => {
     const targetId = !data.isGroup ? (data.sid == id ? data.rid : data.sid) : data.groupId;
+    console.log(data.isGroup);
+
     const listContainer = document.querySelector('.dms-container .list');
     const elConversationCard = listContainer.querySelector(`.u-${targetId}`);
     
@@ -551,31 +554,25 @@ socket.on('message', async (data) => {
         let username;
         let img;
         let isOnline;
-        let bufferPfps;
 
         if(!data.isGroup){
             username = target.username;
             img = target.img;
-            isOnline = target.isOnline ? 'online' : 'offline';
-
-            bufferPfps = `
-                <img src='/src/assets/pfps/${img}'>
-                <div class='online-status'></div>
-            `;
-
+            isOnline = target.isOnline;
             relevantUsers.push(target);
         }
         else{
             const group = target;
             relevantGroups.push(group.id);
             const membersData = await HTTP.fetchUsersBatch(group.members);
+
             const otherUsers = membersData.filter(user => {
                 return user.id != me.id;
             });
-            otherUsers.forEach(user => {
-                if(!Fetch.selectUserById(user.id, relevantUsers)){
-                    user = { isGroup: false, ...user };
-                    relevantUsers.push(user);
+            otherUsers.forEach(u => {
+                if(!Fetch.selectUserById(u.id, relevantUsers)){
+                    u = { isGroup: false, ...u };
+                    relevantUsers.push(u);
                 }
             });
 
@@ -591,35 +588,28 @@ socket.on('message', async (data) => {
                     groupPresence.set(group.id, onlineMembers);
                 }
             }
-            isOnline = groupPresence.has(group.id) ? 'online' : 'offline';
+            isOnline = groupPresence.has(group.id);
 
             if(!group.img){
-                const memberPfp1 = otherUsers[0].img;
-                const memberPfp2 = otherUsers[1].img;
-                bufferPfps = `
-                    <img class='sub-pfp' src='/src/assets/pfps/${memberPfp1}'>
-                    <img class='sub-pfp' src='/src/assets/pfps/${memberPfp2}'>
-                    <div class='online-status'></div>
-                `;
+                img = [otherUsers[0].img, otherUsers[1].img]
             }
         }
+
         const lastMsg = data.sid == id ? `You: ${data.msg}` : (!data.isGroup ? data.msg : `${Fetch.selectUserById(data.sid, relevantUsers).username}: ${data.msg}`);
-        
-        listContainer.insertAdjacentHTML('afterbegin', `
-            <div class='user-card chat-card ${data.sid == id ? 'seen' : 'unseen'} u-${targetId}' data-last-msg='${lastMsg}' data-user-id='${targetId}'>
-                <div class='wrap-pfp ${isOnline}'>
-                    ${bufferPfps}
-                </div>
-                <div class='wrap-label'>
-                    <div class='username-label'>${username}</div>
-                    <span class='sub-label'>${lastMsg}</span>
-                </div>
-                <div class='wrap-btn-inbox'>
-                    <div class='unread-msg'></div>
-                    <button class='btn-inbox'><i class='fa fa-ellipsis-h' aria-hidden='true'></i></button>
-                </div>
-            </div>
-        `);
+
+        listContainer.insertAdjacentHTML('afterbegin', HTML.userCard(
+            'chat-card',
+            targetId,
+            username,
+            img,
+            isOnline,
+            {
+                isLastMsg: true,
+                text: lastMsg,
+                isRead: data.sid == id
+            },
+            {hasBtn: true, btnType: 'more'}
+        ));
     }
 });
 

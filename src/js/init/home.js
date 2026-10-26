@@ -58,7 +58,7 @@ document.querySelector('.search').addEventListener('input', async (e) => {
 
     try{
         const searchUsers = await Fetch.searchObjectFromList(query, users, 'username');
-        let bufferSearchUsers = "";
+        let bufferSearchUsers = '';
         
         if(!searchUsers){
             bufferSearchUsers = '<center>No users found.</center>';

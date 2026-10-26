@@ -158,7 +158,7 @@ app.post('/broadcast', (req, res) => {
 
     // Send to current user
     if(!isGroup) io.to(sid).emit('message', { mid, sid, rid, msg });
-    else io.to(sid).emit('message', { mid, sid, groupId, msg });
+    else io.to(sid).emit('message', { mid, sid, isGroup, groupId, msg });
 
     res.json({ status: 'success' });
 });

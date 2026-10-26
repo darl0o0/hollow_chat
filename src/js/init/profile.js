@@ -1,4 +1,4 @@
-import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
+import { UI, HTTP, Fetch, Form, Check, HTML } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
 
 const getParams = new URLSearchParams(window.location.search);
@@ -68,8 +68,8 @@ document.addEventListener('DOMContentLoaded', async function(){
                 
                 return `<div class="wrap-profile">
                     <div class="profile-card">
-                        <img src='/src/assets/pfps/${user.img}'>
-                        <span class="username-label">${user.username}</span>
+                        <img src='/src/assets/pfps/${HTML.escapeHTML(user.img)}'>
+                        <span class="username-label">${HTML.escapeHTML(user.username)}</span>
                         <div class="online-status">
                             <div class="is-online ${onlineClass}"></div>
                             <span class="is-online-label">${onlineLabel}</span>
@@ -78,11 +78,11 @@ document.addEventListener('DOMContentLoaded', async function(){
                     <div class="profile-details">
                         <div class="details-section date">
                             <span class="title">Member since</span>
-                            <span class="text">${user.date}</span>
+                            <span class="text">${HTML.escapeHTML(user.date)}</span>
                         </div>
                         <div class="details-section bio">
                             <span class="title">Bio</span>
-                            <span class="text">${user.bio}</span>
+                            <span class="text">${HTML.escapeHTML(user.bio)}</span>
                         </div>
                         <div class="details-section privacy">
                             <span class="title">Account privacy</span>
@@ -118,11 +118,11 @@ document.addEventListener('DOMContentLoaded', async function(){
 
                 profileActions = `
                     <div class="profile-actions">
-                        <a href="/inbox/?q=${qid}" class="btn primary-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
+                        <a href="/inbox/?q=${HTML.escapeHTML(qid)}" class="btn primary-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
                         <form
                         method="post" 
                         class="friend-action">
-                            <input type="hidden" name="qid" value="${qid}">
+                            <input type="hidden" name="qid" value="${HTML.escapeHTML(qid)}">
                             <input type="hidden" name="action" value='${stat.actionInput}'>
                             <button type="submit" class="btn secondary-btn profile-action-btn">${stat.profileActionContent}</button>
                         </form>

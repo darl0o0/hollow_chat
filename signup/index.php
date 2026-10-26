@@ -14,18 +14,11 @@ if(!isset($_SESSION['id'])){
         $password1 = trim($_POST['password-1']);
         $password2 = trim($_POST['password-2']);
         $hashed_password = password_hash($password1, PASSWORD_DEFAULT);
-            
-        //Uploading a profile picture
-        $raw_img = $_FILES['img'];
-        $file_name = $raw_img['name'];
-        $tmp_name = $raw_img['tmp_name'];
-        $file_dir = "../src/assets/pfps/".$file_name;
-        move_uploaded_file($tmp_name, $file_dir);
 
         //Database secondary parameters
         $bio = trim($_POST['bio']);
         $private = $_POST['privacy'];
-        $img = $raw_img['name'];
+        $img = processAndSaveProfilePic($_FILES['img']);
 
         if(empty($username) || empty($email) || empty($password1) || empty($password2)){
             ok(false, 'All inputs are required.');
@@ -60,7 +53,7 @@ if(!isset($_SESSION['id'])){
         }
 
         if(empty($img)){
-            $img = "pfp.jpg";
+            $img = null;
         }
         $id = bin2hex(random_bytes(8));
         $date = date('F Y');

@@ -15,7 +15,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
     <a href="/inbox/" class="panel-action inbox-action">
         <div class="wrap-icon-count">        
             <i class="fa-solid fa-inbox"></i>
-            <div class="num-of display-none"><?php echo $num_of_unread_messages ?></div>
+            <div class="num-of display-none"></div>
         </div>
         <span>Inbox</span>
     </a>

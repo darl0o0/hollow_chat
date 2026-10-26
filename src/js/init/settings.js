@@ -1,4 +1,4 @@
-import { UI, HTTP, Fetch, Form, Check } from "../helpers.js";
+import { UI, HTTP, Fetch, Form, Check, HTML } from "../helpers.js";
 import { userDataReady} from "./main.js";
 
 // User objects
@@ -46,5 +46,5 @@ document.querySelector('.img-input').addEventListener('click', () => elUpdatePfp
 
 elUpdatePfp.addEventListener('change', (e) => {
     elImg.src = URL.createObjectURL(e.target.files[0]);
-    Form.isFormEnabled(elFormUpdate)
+    Form.isFormEnabled(elFormUpdate, true);
 });

@@ -35,7 +35,7 @@
             <div class="chat-preview"></div>
         </div>
     </div>
-    <div class="modal group-modal">
+    <div class="modal group-modal hidden">
         <div class="background"></div>
         <div class="container">
             <h1>

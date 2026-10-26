@@ -158,13 +158,13 @@ document.addEventListener('DOMContentLoaded', async function(){
                 const user = target;
 
                 htmlHeader = (device) => `
-                    <a class="profile-header ${device}-header" href='/profile/?q=${qid}'>
+                    <a class="profile-header ${device}-header" href='/profile/?q=${HTML.escapeHTML(qid)}'>
                         <div class='wrap-pfp ${user.isOnline ? 'online' : 'offline'}'>
-                            <img src='/src/assets/pfps/${user.img}'>
+                            <img src='/src/assets/pfps/${HTML.escapeHTML(user.img)}'>
                             <div class='online-status'></div>
                         </div>
                         <div class="wrap-label">
-                            <div class='username-label'>${user.username}</div>
+                            <div class='username-label'>${HTML.escapeHTML(user.username)}</div>
                             <span class="sub-label">View profile</span>
                         </div>
                     </a>
@@ -198,8 +198,8 @@ document.addEventListener('DOMContentLoaded', async function(){
                 let groupImg = '';
                 if(!group.img){
                     
-                    memberPfp1 = otherUsers[0].img;
-                    memberPfp2 = otherUsers[1].img;
+                    memberPfp1 = HTML.escapeHTML(otherUsers[0].img);
+                    memberPfp2 = HTML.escapeHTML(otherUsers[1].img);
 
                     groupImg = `
                         <img src='/src/assets/pfps/${memberPfp1}'>
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', async function(){
                             <div class='online-status'></div>
                         </div>
                         <div class="wrap-label">
-                            <div class='username-label'>${groupName}</div>
+                            <div class='username-label'>${HTML.escapeHTML(groupName)}</div>
                             <span class="sub-label">View profile</span>
                         </div>
                     </a>
@@ -370,8 +370,8 @@ socket.on('typing:pong', async (data) => {
                 elField.innerHTML += `
                     <div class='wrap-you wrap-typing'>
                         <div class='wrap-pfp'>
-                            <a href='/profile/?q=${target.id}' class='pfp-link'>
-                                <img src='/src/assets/pfps/${target.img}' class='msg-pfp'>
+                            <a href='/profile/?q=${HTML.escapeHTML(target.id)}' class='pfp-link'>
+                                <img src='/src/assets/pfps/${HTML.escapeHTML(target.img)}' class='msg-pfp'>
                             </a>
                         </div>
                         <div class="msg you typing">
@@ -397,7 +397,7 @@ socket.on('typing:pong', async (data) => {
                     elField.innerHTML += `
                         <div class='wrap-you wrap-typing'>
                             <div class='wrap-pfp'>
-                                <img src='/src/assets/pfps/${typer.img}' class='msg-pfp img-${typer.id}'>
+                                <img src='/src/assets/pfps/${HTML.escapeHTML(typer.img)}' class='msg-pfp img-${HTML.escapeHTML(typer.id)}'>
                             </div>
                             <div class="msg you typing">
                                 <img src="/src/assets/typing0.gif">
@@ -408,7 +408,7 @@ socket.on('typing:pong', async (data) => {
                 else{
                     if(!wrapTyping.querySelector(`.img-${typer.id}`)){
                         wrapTyping.querySelector('.wrap-pfp').insertAdjacentHTML('afterbegin', `
-                            <img src='/src/assets/pfps/${typer.img}' class='msg-pfp img-${typer.id}'>
+                            <img src='/src/assets/pfps/${HTML.escapeHTML(typer.img)}' class='msg-pfp img-${HTML.escapeHTML(typer.id)}'>
                         `);
                     }
                 }

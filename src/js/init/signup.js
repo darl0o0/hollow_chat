@@ -79,7 +79,7 @@ function uploadFile(file){
     }
     catch(error){
         Form.isFormEnabled(elFormSignup, false);
-        UI.alert(false, error.response);
+        UI.alert(false, error.message);
         setTimeout(() => {
             Form.isFormEnabled(elFormSignup, true);
         }, 5000);

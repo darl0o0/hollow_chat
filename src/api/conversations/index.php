@@ -92,6 +92,7 @@ if(count($conversations) > 0){
 
         $data[] = [
             'id' => $id_target,
+            'created_at' => $conversation['created_at'],
             'lastMsg' => $last_msg
         ];
     }

@@ -134,3 +134,81 @@ function getEnvValue($key){
     }
     return null;
 }
+
+// Profile picture processing
+function processAndSaveProfilePic($file){
+    $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    $file_type = mime_content_type($file['tmp_name']);
+
+    if(!in_array($file_type, $allowed_types)){
+        ok(false, 'Please upload a valid image.');
+    }
+
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if(in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])){
+        $extension = 'jpg';
+    }
+
+    $unique_file_name = bin2hex(random_bytes(16)).'.'.$extension;
+    $destination = $_SERVER['DOCUMENT_ROOT'] . "/src/assets/pfps/" . $unique_file_name;
+
+    switch($file_type){
+        case 'image/jpeg':
+        case 'image/jpg':
+            $source_image = imagecreatefromjpeg($file['tmp_name']);
+        break;
+        case 'image/png':
+            $source_image = imagecreatefrompng($file['tmp_name']);
+        break;
+        case 'image/webp':
+            $source_image = imagecreatefromwebp($file['tmp_name']);
+        break;
+        default:
+            ok(false, 'Unsupported image format.');
+    }
+
+    $img_width = imagesx($source_image);
+    $img_height = imagesy($source_image);
+
+    $crop_size = min($img_width, $img_height);
+    $src_x = ($img_width - $crop_size) / 2;
+    $src_y = ($img_height - $crop_size) / 2;
+
+    $output_size = 500;
+    $square_img = imagecreatetruecolor($output_size, $output_size);
+
+    if($file_type == 'image/png' ||$file_type == 'image/webp'){
+        imagealphablending($square_img, false);
+        imagesavealpha($square_img, true);
+        $transparent = imagecolorallocatealpha($square_img, 255, 255, 255, 127);
+        imagefilledrectangle($square_img, 0, 0, $output_size, $output_size, $transparent);
+    }
+
+    imagecopyresampled(
+        $square_img, $source_image, 0, 0, (int)$src_x, (int)$src_y,
+        $output_size, $output_size, $crop_size, $crop_size
+    );
+
+    $success = false;
+    switch($file_type){
+        case 'image/jpeg':
+        case 'image/jpg':
+            $success = imagejpeg($square_img, $destination, 85);
+        break;
+        case 'image/png':
+            $success = imagepng($square_img, $destination, 6);
+        break;
+        case 'image/webp':
+            $success = imagewebp($square_img, $destination, 85);
+        break;
+    }
+
+    imagedestroy($source_image);
+    imagedestroy($square_img);
+
+    if(!$success){
+        ok(false, 'Failed process profile picture.');
+    }
+
+    return $unique_file_name;
+}

@@ -140,8 +140,6 @@ socket.on('message', (data) => {
 
 // Seen message
 socket.on('seen:pong', (data) => {
-    console.log(data)
-
     if(data.by == id){
         countUnseen -= data.count;
         updateBadges();

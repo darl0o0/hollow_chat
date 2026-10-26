@@ -1,5 +1,6 @@
 let debounceTimer;
 const formState = new WeakMap();
+const defaultProfilePic = '03cde714caceaa40df348cc8a5ff14ba.jpg';
 
 export const UI = {
 
@@ -10,7 +11,7 @@ export const UI = {
         placeholder.insertAdjacentHTML('afterend', `
             <div class="alert ${type ? 'ok' : 'error'}">
                 <div class="cooldown-circle" style='animation-duration: ${duration}s'></div>
-                <span class="alert-text">${alertText}</span>
+                <span class="alert-text">${HTML.escapeHTML(alertText)}</span>
             </div>
         `); 
 
@@ -25,8 +26,8 @@ export const UI = {
     globalElements: function(){
         if(document.querySelector('.modal-requests')) return;
         let countNot = Number(document.querySelector('.notifications-action .num-of').textContent);
+        countNot = (!isNaN(countNot) && countNot > 0) ? `(${countNot})` : '';
 
-        countNot = (countNot > 0) ? `(${countNot})` : '';
         const htmlNotificationsModal = `
             <div class="modal modal-requests hidden">
                 <div class="background"></div>
@@ -376,17 +377,24 @@ export const performanceTimer = {
 }
 
 export const HTML = {
+    escapeHTML: function(str){
+        if(!str) return '';
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    },
+
     userCard: function(type, id, username, img, isOnline, subLabel = {}, options = {}){
         let bufferPfps;
         if(Array.isArray(img) && img.length > 1){
             bufferPfps = `
-                <img src='/src/assets/pfps/${img[0]}'>
-                <img src='/src/assets/pfps/${img[1]}'>
+                <img src='/src/assets/pfps/${this.escapeHTML(img[0] ?? defaultProfilePic)}'>
+                <img src='/src/assets/pfps/${this.escapeHTML(img[1] ?? defaultProfilePic)}'>
             `;
         }
         else{
             bufferPfps = `
-                <img src='/src/assets/pfps/${img}'>
+                <img src='/src/assets/pfps/${this.escapeHTML(img ?? defaultProfilePic)}'>
             `;
         }
 
@@ -413,10 +421,10 @@ export const HTML = {
                 case 'dilemma':
                     bufferBtn = `
                         <div class='wrap-btn-requests'>
-                            <form method='post' class='accept-form' data-id='${id}'>
+                            <form method='post' class='accept-form' data-id='${this.escapeHTML(id)}'>
                                 <button class='btn-requests'><i class='fa fa-check' aria-hidden='true'></i></button>
                             </form>
-                            <form method='post' class='decline-form' data-id='${id}'>
+                            <form method='post' class='decline-form' data-id='${this.escapeHTML(id)}'>
                                 <button class='btn-requests'><i class='fa fa-times' aria-hidden='true'></i></button>
                             </form>
                         </div>
@@ -426,7 +434,12 @@ export const HTML = {
         }
 
         return `
-            <${isLink ? 'a' : 'div'} class='user-card ${type} ${subLabel.isLastMsg ? (subLabel.isRead ? 'seen' : 'unseen') : ''} u-${id}'${subLabel.isLastMsg ? ` data-last-msg='${subLabel.text}'` : ''} user-id='${id}'${isLink ? ` href='profile/?q=${id}'` : ''} tabindex='0'>
+            <${isLink ? 'a' : 'div'}
+            class='user-card ${type} ${subLabel.isLastMsg ? (subLabel.isRead ? 'seen' : 'unseen') : ''} u-${this.escapeHTML(id)}'
+            ${subLabel.isLastMsg ? ` data-last-msg='${this.escapeHTML(subLabel.text)}'` : ''} 
+            user-id='${this.escapeHTML(id)}'
+            ${isLink ? ` href='profile/?q=${this.escapeHTML(id)}'` : ''} 
+            tabindex='0'>
                 ${options.hasPlus ? `
                     <div class='select-indicator'>
                         <i class="fa-solid fa-plus"></i>
@@ -436,8 +449,8 @@ export const HTML = {
                     <div class='online-status'></div>
                 </div>
                 <div class='wrap-label'>
-                    <div class='username-label'>${username}</div>
-                    <span class='sub-label'>${subLabel.text}</span>
+                    <div class='username-label'>${this.escapeHTML(username)}</div>
+                    <span class='sub-label'>${this.escapeHTML(subLabel.text)}</span>
                 </div>
                 ${bufferBtn}
             </${isLink ? 'a' : 'div'}>
@@ -449,11 +462,11 @@ export const HTML = {
 
         if(isMe){
             return `
-                <div class='wrap-msg wrap-me mid-${msg.id}${isSeen ? ' seen' : ''}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
+                <div class='wrap-msg wrap-me mid-${this.escapeHTML(msg.id)}${isSeen ? ' seen' : ''}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
                     <div class='others-wrap'>
                         <div class='seen-dot'></div>
                     </div>
-                    <div class='msg me'>${msg.msg}</div>
+                    <div class='msg me'>${this.escapeHTML(msg.msg)}</div>
                 </div>
             `;
         }
@@ -461,13 +474,13 @@ export const HTML = {
             const showPfp = (boundMsg.isNextFromDifferentUser || options.isLive) ? 'visible' : 'hidden';
 
             return `
-                <div class='wrap-msg wrap-you mid-${msg.id}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
+                <div class='wrap-msg wrap-you mid-${this.escapeHTML(msg.id)}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
                     <div class='wrap-pfp'>
-                        <a href='/profile/?q=${msg.sid}' class='pfp-link ${showPfp}'>
-                            <img src='/src/assets/pfps/${sender.img}' class='msg-pfp'>
+                        <a href='/profile/?q=${this.escapeHTML(msg.sid)}' class='pfp-link ${showPfp}'>
+                            <img src='/src/assets/pfps/${this.escapeHTML(sender.img ?? defaultProfilePic)}' class='msg-pfp'>
                         </a>
                     </div>
-                    <div class='msg you'>${msg.msg}</div>
+                    <div class='msg you'>${this.escapeHTML(msg.msg)}</div>
                 </div>
             `;
         }
