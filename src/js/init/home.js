@@ -88,9 +88,9 @@ socket.on('presence', (data) => {
     const pfp = document.querySelector(`.u-${data.userId} .wrap-pfp`);
     
     if(data.isOnline){
-        pfp.classList.replace('offline', 'online');
+        pfp?.classList.replace('offline', 'online');
     }
     else{
-        pfp.classList.replace('online', 'offline');
+        pfp?.classList.replace('online', 'offline');
     }
 });

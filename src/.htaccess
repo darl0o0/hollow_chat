@@ -1,0 +1,9 @@
+Require all denied
+
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2)$">
+    Require all granted
+</FilesMatch>
+
+<FilesMatch "\.php$">
+    Require all granted
+</FilesMatch>

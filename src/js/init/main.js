@@ -1,5 +1,5 @@
 import { UI, HTTP, Fetch, Form, Check, HTML } from "../helpers.js";
-export const socket = io('http://localhost:3000');
+export const socket = io('https://payments-essence-notices-directory.trycloudflare.com');
 export let me = null;
 const getParams = new URLSearchParams(window.location.search);
 

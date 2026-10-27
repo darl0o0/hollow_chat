@@ -3,4 +3,36 @@ RewriteBase /
 
 # Strip index.php from any directory and redirect to the clean web URL
 RewriteCond %{THE_REQUEST} \s/(.*?)/?index\.php[\s?] [NC]
-RewriteRule ^(.*)index\.php$ /%1/ [R=301,L]
+RewriteRule ^(.*)index\.php$ /$1/ [R=301,L]
+
+<IfModule mod_headers.c>
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-vjNn4cvxtQBmMVa6BVYdLYOapCU8bMflbZYFZskftXE=' https://kit.fontawesome.com/b4672b084e.js https://cdn.socket.io/4.7.2/socket.io.min.js; style-src 'self' 'unsafe-inline' https://ka-f.fontawesome.com; font-src 'self' https://ka-f.fontawesome.com; img-src 'self' data: https://ka-f.fontawesome.com; connect-src 'self' https://ka-f.fontawesome.com http://localhost:3000 https://localhost:3000 https://payments-essence-notices-directory.trycloudflare.com wss://localhost:3000 ws://localhost:3000 wss://payments-essence-notices-directory.trycloudflare.com; frame-ancestors 'none';"
+    
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set X-Frame-Options "DENY"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+</IfModule>
+
+<Files ".env">
+    Require all denied
+</Files>
+
+<Files ".gitignore">
+    Require all denied
+</Files>
+
+<Files "package.json">
+    Require all denied
+</Files>
+
+<Files "package-lock.json">
+    Require all denied
+</Files>
+
+<Files "TODO.md">
+    Require all denied
+</Files>
+
+<Files "Bugs.md">
+    Require all denied
+</Files>

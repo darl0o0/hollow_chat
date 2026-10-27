@@ -615,8 +615,8 @@ socket.on('message', async (data) => {
 
 // Seen message
 socket.on('seen:pong', async (data) => {
-    const elUserCard = document.querySelector(`.u-${data.readTo}`);
-    if(data.readBy == id && elUserCard) elUserCard.classList.replace('unseen', 'seen');
+    const elUserCard = document.querySelector(`.u-${data.to}`);
+    if(data.by == id && elUserCard) elUserCard.classList.replace('unseen', 'seen');
 });
 
 // Typing
