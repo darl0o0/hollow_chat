@@ -20,7 +20,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
         <span>Inbox</span>
     </a>
 
-    <a class="panel-action goto-profile-mobile profile-action">
+    <a class="panel-action goto-profile-mobile profile-action wrap-pfp">
         <img>
     </a>
 
@@ -35,7 +35,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
     <a href="/settings/" class="panel-action settings-action"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
     
     <a class="panel-action goto-profile-desktop profile-action">
-        <div class="pfp">
+        <div class="wrap-pfp">
             <img>
         </div>
         <div class="wrap-label">

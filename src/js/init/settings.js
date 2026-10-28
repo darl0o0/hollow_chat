@@ -1,4 +1,4 @@
-import { UI, HTTP, Fetch, Form, Check, HTML } from "../helpers.js";
+import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic } from "../helpers.js";
 import { userDataReady} from "./main.js";
 
 // User objects
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
         elUpdateUsername.value = me.username;
         elUpdateEmail.value = me.email;
-        elImg.src = `/src/assets/pfps/${me.img}`;
+        elImg.src = `/src/assets/pfps/${me.img ?? defaultProfilePic}`;
         elUpdateBio.value = me.bio;
 
         elUpdateUsername.setAttribute('data-initial', me.username);
@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', async function(){
     catch(error){
         console.error(error);
     }
-    
 });
 
 Form.initForm(elFormUpdate, '/src/api/account/update.php', true);

@@ -1,5 +1,5 @@
 // Initialization
-import { UI, HTTP, Fetch, Form, Check, HTML } from "../helpers.js";
+import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
 import { chatReadyToLoad } from "./inbox.js";
 
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async function(){
                 htmlHeader = (device) => `
                     <a class="profile-header ${device}-header" href='/'>
                         <div class='wrap-pfp'>
-                            <img src='/src/assets/pfps/pfp.jpg'>
+                            <img src='/src/assets/pfps/${defaultProfilePic}'>
                         </div>
                         <div class="wrap-label">
                             <div class='username-label'>User not found.</div>
@@ -151,8 +151,6 @@ document.addEventListener('DOMContentLoaded', async function(){
                         </div>
                     </a>
                 `;
-
-                throw new Error('User not found.');
             }
             if(!target.isGroup){
                 const user = target;
@@ -188,9 +186,10 @@ document.addEventListener('DOMContentLoaded', async function(){
                 
                 let groupName = '';
                 if(!group.name){
-                    groupName = otherUsers.map(m => {
-                        return m.username;
-                    }).join(', ');
+                    groupName = otherUsers
+                    .slice(0, 2)
+                    .map(m => m.username)
+                    .join(', ');
                 }
 
                 let memberPfp1;

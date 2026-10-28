@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
                 if(!conversation.username && !conversation.isGroup){
                     username = 'User not found.';
-                    img = 'pfp.jpg';
+                    img = null;
                     isOnline = false;
                 }
                 else if(!conversation.isGroup){
@@ -542,7 +542,7 @@ socket.on('message', async (data) => {
             `${Fetch.selectUserById(data.sid, relevantUsers).username}: ${data.msg}`
         );
 
-        elSubLabel.innerHTML = lastMsg;
+        elSubLabel.innerHTML = HTML.escapeHTML(lastMsg);
         elConversationCard.setAttribute('data-last-msg', lastMsg);
 
         if(data.sid == id) elConversationCard.classList.replace('unseen', 'seen');
@@ -657,7 +657,7 @@ socket.on('typing:pong', async (data) => {
             else{
                 elSubLabel.innerHTML = typers.get(to).length > 1 ? 
                 `${typers.get(to).length} are typing...` : 
-                `${Fetch.selectUserById(typers.get(to), relevantUsers).username} is typing...`;
+                `${HTML.escapeHTML(Fetch.selectUserById(typers.get(to), relevantUsers).username)} is typing...`;
             }
         }
         else{
@@ -669,12 +669,12 @@ socket.on('typing:pong', async (data) => {
             }
             
             if(!isGroup){
-                elSubLabel.innerHTML = elConversationCard.getAttribute('data-last-msg') || '';
+                elSubLabel.innerHTML = HTML.escapeHTML(elConversationCard.getAttribute('data-last-msg')) || '';
             }
             else{
                 elSubLabel.innerHTML = typers.get(to).length < 1 ?
-                elConversationCard.getAttribute('data-last-msg') || '' :
-                `${Fetch.selectUserById(typers.get(to), conversations).username} is typing...`;
+                HTML.escapeHTML(elConversationCard.getAttribute('data-last-msg')) || '' :
+                `${HTML.escapeHTML(Fetch.selectUserById(typers.get(to), conversations).username)} is typing...`;
             }
         }
     }

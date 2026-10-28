@@ -1,5 +1,5 @@
-import { UI, HTTP, Fetch, Form, Check, HTML } from "../helpers.js";
-export const socket = io('https://payments-essence-notices-directory.trycloudflare.com');
+import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic } from "../helpers.js";
+export const socket = io('http://localhost:3000');
 export let me = null;
 const getParams = new URLSearchParams(window.location.search);
 
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     // My profile button
     document.querySelectorAll('.profile-action').forEach(profileAction => {
-        profileAction.querySelector('img').src = `/src/assets/pfps/${me.img}`;
+        profileAction.querySelector('img').src = `/src/assets/pfps/${me.img ?? defaultProfilePic}`;
         profileAction.href = `/profile/?q=${me.id}`
     });
     document.querySelector('.profile-action .username-label').textContent = me.username;

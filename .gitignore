@@ -20,6 +20,7 @@ node_modules/
 .VSCodeCounter/
 
 /test/
+/admin/
 
 TODO.md
 Bugs.md

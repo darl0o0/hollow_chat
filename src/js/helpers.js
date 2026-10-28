@@ -1,6 +1,6 @@
 let debounceTimer;
 const formState = new WeakMap();
-const defaultProfilePic = '03cde714caceaa40df348cc8a5ff14ba.jpg';
+export const defaultProfilePic = '03cde714caceaa40df348cc8a5ff14ba.jpg';
 
 export const UI = {
 
@@ -455,7 +455,7 @@ export const HTML = {
         return `
             <${isLink ? 'a' : 'div'}
             class='user-card ${type} ${subLabel.isLastMsg ? (subLabel.isRead ? 'seen' : 'unseen') : ''} u-${this.escapeHTML(id)}'
-            ${subLabel.isLastMsg ? ` data-last-msg='${this.escapeHTML(subLabel.text)}'` : ''} 
+            ${subLabel.isLastMsg ? ` data-last-msg="${this.escapeHTML(subLabel.text)}"` : ''} 
             user-id='${this.escapeHTML(id)}'
             ${isLink ? ` href='profile/?q=${this.escapeHTML(id)}'` : ''} 
             tabindex='0'>

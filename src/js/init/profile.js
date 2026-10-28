@@ -1,4 +1,4 @@
-import { UI, HTTP, Fetch, Form, Check, HTML } from "../helpers.js";
+import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
 
 const getParams = new URLSearchParams(window.location.search);
@@ -62,13 +62,13 @@ document.addEventListener('DOMContentLoaded', async function(){
         
         if(user){
             const wrapProfile = (forceOnline) => {
-                const onlineClass = (forceOnline || user.online) ? 'online' : 'offline';
+                const onlineClass = (forceOnline || user.isOnline) ? 'online' : 'offline';
 
-                const onlineLabel = (forceOnline || user.online) ? 'Online' : 'Offline';
+                const onlineLabel = (forceOnline || user.isOnline) ? 'Online' : 'Offline';
                 
                 return `<div class="wrap-profile">
                     <div class="profile-card">
-                        <img src='/src/assets/pfps/${HTML.escapeHTML(user.img)}'>
+                        <img src='/src/assets/pfps/${HTML.escapeHTML(user.img ?? defaultProfilePic)}'>
                         <span class="username-label">${HTML.escapeHTML(user.username)}</span>
                         <div class="online-status">
                             <div class="is-online ${onlineClass}"></div>

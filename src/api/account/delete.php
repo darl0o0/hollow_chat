@@ -6,6 +6,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 header('Content-Type: application/json; charset=utf-8');
 requireStrictPost();
+$input = json_decode(file_get_contents('php://input'), true);
 
 $user_data = check_login($con);
 $id = $user_data['id'];
@@ -13,8 +14,8 @@ $id = $user_data['id'];
 if($_SERVER['REQUEST_METHOD'] == "POST"){
 
     // Credentials
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    $email = $input['email'];
+    $password = $input['password'];
 
     if(empty($email) || empty($password)){
         ok(false, 'All inputs are required.');
