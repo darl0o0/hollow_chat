@@ -461,6 +461,47 @@ body{
     background-color: rgba(125, 125, 125, 0.15);
 }
 
+/* SKELETON CARDS */
+
+.skeleton-card{
+    display: flex;
+    align-items: center;
+    padding: 11px 13px;
+    padding-right: 8px;
+    position: relative;
+    margin-bottom: 10px;
+    .pfp{
+        opacity: 0.5;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 1.2px ridge #464646ff;
+        animation: skeleton 1s linear infinite alternate;
+    }
+    .label{
+        opacity: 0.5;
+        animation: skeleton 1s linear infinite alternate;
+    }
+    .label:first-child{
+        width: 75%;
+        height: 15px;
+        margin-bottom: 15px;
+    }
+    .label:last-child{
+        width: 60%;
+        height: 10px;
+    }
+}
+
+@keyframes skeleton{
+    0%{
+        background: #888;
+    }
+    100%{
+        background: #d8d8d8;
+    }
+}
+
 /* PROFILE PICTURES AND LABELS*/
 
 .wrap-pfp{

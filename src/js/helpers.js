@@ -476,6 +476,24 @@ export const HTML = {
         `;
     },
 
+    skeleton: function(type){
+        switch(type){
+            case 'card':
+                return `
+                    <div class='skeleton-card'>
+                        <div class='wrap-pfp'>
+                            <div class='pfp'></div>
+                        </div>
+                        <div class='wrap-label'>
+                            <div class='label'></div>
+                            <div class='label'></div>
+                        </div>
+                    </div>
+                `;
+            break;
+        }
+    },
+
     message: function(msg, isMe, boundMsg = {}, sender, isSeen, options = {}){
         const addGap = boundMsg.isNextFromDifferentUser ? ' section-gap' : '';
 

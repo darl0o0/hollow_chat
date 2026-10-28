@@ -32,6 +32,7 @@
             transform: scale(1.2);
         }
         .list{
+            flex: 1;
             overflow-y: scroll;
             .user-card{
                 .profile-link{

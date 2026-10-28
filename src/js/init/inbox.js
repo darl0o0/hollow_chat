@@ -83,6 +83,31 @@ function isViewportMobile(){
 
 isViewportMobile();
 
+const searchHeight = document.querySelector('.wrap-search').clientHeight;
+const headerHeight = document.querySelector('.wrap-title').clientHeight;
+const containerHeight = document.querySelector('.dms-container').clientHeight;
+
+const skeletonHeight = Math.floor((containerHeight - (searchHeight + headerHeight)) / 72);
+
+for(let i = 0; i < skeletonHeight; i++){
+    document.querySelector('.section.chat .list').innerHTML += HTML.skeleton('card');
+}
+
+if(!qid){
+    elChatPreview.innerHTML = '';
+    elChatPreview.classList.add('flex-center');
+    elChatPreview.insertAdjacentHTML('afterbegin', `
+        <div class="init-inbox">
+            <img src="/src/assets/logo/empty_inbox.png">
+            <div class="label-wrap">
+                <span class="label">Your direct messages.</span>
+                <span class="sub-label">Choose a chat or start a new one.</span>
+            </div>
+            <button class="btn primary-btn"><i class="fa-solid fa-comment-medical"></i> Start a new chat</button>
+        </div>
+    `);
+}
+
 document.addEventListener('DOMContentLoaded', async function(){
     try{
         me = await userDataReady;
@@ -254,7 +279,7 @@ document.addEventListener('DOMContentLoaded', async function(){
                 document.querySelector(`.u-${qid}`)?.classList.add('highlight');
                 elChatPreview.insertAdjacentHTML('beforeend', htmlChatPageContent);
             }
-
+    
             resolveChatReadyToLoad();
             loadChat(target.isGroup);
             try{
@@ -265,20 +290,6 @@ document.addEventListener('DOMContentLoaded', async function(){
             catch(error){
                 console.error("Chat hasn't loaded successfully.");
             }
-        }
-        else{
-            elChatPreview.innerHTML = '';
-            elChatPreview.classList.add('flex-center');
-            elChatPreview.insertAdjacentHTML('afterbegin', `
-                <div class="init-inbox">
-                    <img src="/src/assets/logo/empty_inbox.png">
-                    <div class="label-wrap">
-                        <span class="label">Your direct messages.</span>
-                        <span class="sub-label">Choose a chat or start a new one.</span>
-                    </div>
-                    <button class="btn primary-btn"><i class="fa-solid fa-comment-medical"></i> Start a new chat</button>
-                </div>
-            `);
         }
     }
     catch(error){
