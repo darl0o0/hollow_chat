@@ -1,15 +1,15 @@
 // Initialization
 import { UI, HTTP, Fetch, Form, Check, performanceTimer, HTML } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
-import { loadChat, chatLoaded } from "./chat.js"
+import { loadChat, chatLoaded, loadHeader, renderChat } from "./chat.js"
 
-const getParams = new URLSearchParams(window.location.search);
+let getParams = new URLSearchParams(window.location.search);
 let resizeTimer;
 
 // User objects
 let me = null;
 let id = null;
-const qid = getParams.get('q') ? (getParams.get('q').length > 0 ? getParams.get('q') : null) : null;
+let qid = getParams.get('q') ? (getParams.get('q').length > 0 ? getParams.get('q') : null) : null;
 
 // HTML Buffers
 let bufferInbox = '';
@@ -46,7 +46,7 @@ const htmlChatPageContent = `
         <div class="inner-field"></div>
     </div>
     <form class="send-form" method="post">
-        <input type="text" class="msg-input" placeholder="Type a message..." autocomplete="off" autofocus>
+        <input type="text" class="msg-input" placeholder="Type a message..." autocomplete="off">
         <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
     </form>
 `;
@@ -57,15 +57,16 @@ const targetDataReady = new Promise((resolve) => {
     resolveTargetData = resolve;
 });
 
-let resolveChatReadyToLoad;
-export const chatReadyToLoad = new Promise((resolve) => {
-    resolveChatReadyToLoad = resolve;
-});
-
 // Helper functions
-function isViewportMobile(){
+function updateQid(){
+    getParams = new URLSearchParams(window.location.search);
+    qid = getParams.get('q') ? (getParams.get('q').length > 0 ? getParams.get('q') : null) : null;
+}
+
+function isViewportMobile(argQid){
     if(isMobile){
-        if(qid){
+        if(argQid){
+            document.querySelector('.main.inbox').classList.add('grid-template-profile');
             elDmContainer.classList.add('display-none');
             elChatPreview.classList.remove('display-none');
         }
@@ -81,24 +82,9 @@ function isViewportMobile(){
     }
 }
 
-isViewportMobile();
+isViewportMobile(qid);
 
 elListInbox.skeleton('card');
-
-if(!qid){
-    elChatPreview.innerHTML = '';
-    elChatPreview.classList.add('flex-center');
-    elChatPreview.insertAdjacentHTML('afterbegin', `
-        <div class="init-inbox">
-            <img src="/src/assets/logo/empty_inbox.png">
-            <div class="label-wrap">
-                <span class="label">Your direct messages.</span>
-                <span class="sub-label">Choose a chat or start a new one.</span>
-            </div>
-            <button class="btn primary-btn"><i class="fa-solid fa-comment-medical"></i> Start a new chat</button>
-        </div>
-    `);
-}
 
 document.addEventListener('DOMContentLoaded', async function(){
     try{
@@ -184,9 +170,12 @@ document.addEventListener('DOMContentLoaded', async function(){
                     });
 
                     if(!group.name){
-                        username = otherUsers.map(m => {
-                            return m.username;
-                        }).join(', ');
+                        username = otherUsers
+                        .slice(0, 2)
+                        .map(m => m.username)
+                        .join(', ');
+
+                        if(otherUsers.length > 2) username += '...';
                     }
 
                     if(!groupPresence.has(group.id)){
@@ -261,41 +250,39 @@ document.addEventListener('DOMContentLoaded', async function(){
         console.error(error);
     }
 
-    // Preview chat
-    try{
-        if(qid){
-            const target = await HTTP.fetchUsersBatch(qid);
-            elChatPreview.innerHTML = '';
-            elChatPreview.classList.remove('flex-center');
-            if(target){
-                document.querySelector(`.u-${qid}`)?.classList.add('highlight');
-                elChatPreview.insertAdjacentHTML('beforeend', htmlChatPageContent);
-            }
-    
-            resolveChatReadyToLoad();
-            loadChat(target.isGroup);
-            try{
-                await chatLoaded;
-                const elField = document.querySelector('.field');
-                elField.scrollTop = elField.scrollHeight;
-            }
-            catch(error){
-                console.error("Chat hasn't loaded successfully.");
-            }
-        }
-    }
-    catch(error){
-        console.error(error);
-    }
     await targetDataReady;
+
+    if(qid) document.querySelector(`.chat-card.u-${qid}`)?.classList.add('highlight');
 });
 
 window.addEventListener('resize', () => {
     isMobile = window.innerWidth <= 550;
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-        isViewportMobile();
+        isViewportMobile(qid);
     }, 50);
+});
+
+window.addEventListener('popstate', async (e) => {
+    if(e.state){
+        const userId = e.state.q;
+        renderChat(userId);
+        isViewportMobile(userId);
+        updateQid();
+    }
+    else{
+        elChatPreview.classList.add('flex-center');
+        elChatPreview.innerHTML = `
+            <div class="init-inbox">
+                <img src="/src/assets/logo/empty_inbox.png">
+                <div class="label-wrap">
+                    <span class="label">Your direct messages.</span>
+                    <span class="sub-label">Choose a chat or start a new one.</span>
+                </div>
+                <button class="btn primary-btn"><i class="fa-solid fa-comment-medical"></i> Start a new chat</button>
+            </div>
+        `;
+    }
 });
 
 document.addEventListener('click', (e) => {
@@ -310,7 +297,10 @@ document.addEventListener('click', (e) => {
             const userId = elUserCard.getAttribute('user-id');
             const url = new URL(window.location.href);
             url.searchParams.set("q", userId);
-            window.location.replace(url);
+            window.history.pushState({q: userId}, 'Inbox', url);
+            renderChat(userId);
+            isViewportMobile(userId);
+            updateQid();
         break;
         case Boolean(elGroupUserCard):
             selectedUserId = elGroupUserCard.getAttribute('user-id');
@@ -529,7 +519,6 @@ socket.on('presence', (data) => {
 // New message
 socket.on('message', async (data) => {
     const targetId = !data.isGroup ? (data.sid == id ? data.rid : data.sid) : data.groupId;
-    console.log(data.isGroup);
 
     const listContainer = document.querySelector('.dms-container .list');
     const elConversationCard = listContainer.querySelector(`.u-${targetId}`);

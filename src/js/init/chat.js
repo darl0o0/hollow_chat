@@ -1,7 +1,6 @@
 // Initialization
 import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
-import { chatReadyToLoad } from "./inbox.js";
 
 const getParams = new URLSearchParams(window.location.search);
 
@@ -30,8 +29,22 @@ let elInnerField = null;
 let elAllMsg = null;
 let elInput = null;
 
+const elChatPreview = document.querySelector('.chat-preview');
+
 // HTML
 let htmlHeader = null;
+const htmlChatPageContent = `
+    <div class="wrap-field-input">
+        <div class="field">
+            <center><h1 class="not-found"></h1></center>
+            <div class="inner-field"></div>
+        </div>
+        <form class="send-form" method="post">
+            <input type="text" class="msg-input" placeholder="Type a message..." autocomplete="off">
+            <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+        </form>
+    </div>
+`;
 
 // Pormises
 let resolveTargetData;
@@ -42,6 +55,11 @@ const targetDataReady = new Promise((resolve) => {
 let resolveChatIsLoaded;
 export const chatLoaded = new Promise((resolve) => {
     resolveChatIsLoaded = resolve;
+});
+
+let resolveChatReadyToLoad;
+const chatReadyToLoad = new Promise((resolve) => {
+    resolveChatReadyToLoad = resolve;
 });
 
 // Counters
@@ -79,17 +97,18 @@ function dataMessage(msg){
 }
 
 // Load chat
-export async function loadChat(argIsGroup){
+export async function loadChat(target){
     let bufferMessages = '';
 
     elField = document.querySelector('.field');            
     elInnerField = document.querySelector('.inner-field');
     elInput = document.querySelector('.send-form input');
-    isGroup = argIsGroup;
+    elInput.focus();
+    isGroup = target.isGroup;
 
     const getMessages = await HTTP.sendGet('/src/api/messages/', {
-        qid: qid,
-        isGroup: argIsGroup
+        qid: target.id,
+        isGroup: target.isGroup
     });
     const messages = getMessages.response;
 
@@ -120,6 +139,125 @@ export async function loadChat(argIsGroup){
     elField.scrollTop = elField.scrollHeight;
 }
 
+// Load header
+export async function loadHeader(target){
+    try{
+        if(!target){
+            htmlHeader = (device) => HTML.header(device, 'User not found.', defaultProfilePic, false, 'Go to home');
+        }
+        if(!target.isGroup){
+            const user = target;
+
+            htmlHeader = (device) => HTML.header(device, user.username, user.img, user.isOnline, 'View profile');
+
+            resolveTargetData();
+        }
+        else{
+            const group = target;
+
+            const membersData = await HTTP.fetchUsersBatch(group.members);
+            otherUsers = membersData.filter(user => {
+                return user.id != me.id;
+            });
+            
+            otherUsers.forEach(u => {
+                otherUserIds.push(u.id);
+            });
+
+            groupId = group.id;
+            
+            let groupName = '';
+            if(!group.name){
+                groupName = otherUsers
+                .slice(0, 2)
+                .map(m => m.username)
+                .join(', ');
+
+                if(otherUsers.length > 2) groupName += '...';
+            }
+
+            let groupImg;
+            if(!group.img) groupImg = [otherUsers[0].img, otherUsers[1].img];
+
+            otherUsers.forEach(u => {
+                countGroupPresence += u.online ? 1 : 0;
+                if(u.online) groupPresence.push(u.id);
+            });
+
+            htmlHeader = (device) => HTML.header(device, groupName, groupImg, countGroupPresence > 0, 'View profile');
+
+            resolveTargetData();
+        }
+    }
+    catch(error){
+        console.error(error);
+
+        document.querySelector('.chat-preview').innerHTML = '<h1 class="not-found flex-center">User not found.</h1>';
+    }
+    
+    document.querySelectorAll('.profile-header').forEach(h => h?.remove());
+
+    document.querySelector('.chat-preview').insertAdjacentHTML('afterbegin', htmlHeader('desktop'));
+    document.querySelector('.logo').insertAdjacentHTML('afterend', htmlHeader('mobile'));
+}
+
+// Render chat
+export async function renderChat(targetId){
+    document.querySelectorAll('.profile-header').forEach(h => h?.remove());
+
+    document.querySelector('.chat-preview').insertAdjacentHTML('afterbegin', HTML.skeleton('header', 'desktop'));
+    document.querySelector('.logo').insertAdjacentHTML('afterend', HTML.skeleton('header', 'mobile'));
+
+    elChatPreview.querySelector('.init-inbox')?.remove();
+
+    if(targetId){
+        const target = await HTTP.fetchUsersBatch(targetId);
+        elChatPreview.querySelector('.wrap-field-input')?.remove();
+        elChatPreview.classList.remove('flex-center');
+        if(target){
+            document.querySelectorAll('.user-card.highlight').forEach(c => c.classList.remove('highlight'));
+            document.querySelector(`.u-${targetId}`)?.classList.add('highlight');
+            elChatPreview.insertAdjacentHTML('beforeend', htmlChatPageContent);
+        }
+
+        resolveChatReadyToLoad();
+        loadHeader(target);
+        loadChat(target);
+        try{
+            await chatLoaded;
+            const elField = document.querySelector('.field');
+            elField.scrollTop = elField.scrollHeight;
+        }
+        catch(error){
+            console.error("Chat hasn't loaded successfully.");
+        }
+    }
+}
+
+if(!qid){
+    elChatPreview.innerHTML = '';
+    elChatPreview.classList.add('flex-center');
+    elChatPreview.insertAdjacentHTML('afterbegin', `
+        <div class="init-inbox">
+            <img src="/src/assets/logo/empty_inbox.png">
+            <div class="label-wrap">
+                <span class="label">Your direct messages.</span>
+                <span class="sub-label">Choose a chat or start a new one.</span>
+            </div>
+            <button class="btn primary-btn"><i class="fa-solid fa-comment-medical"></i> Start a new chat</button>
+        </div>
+    `);
+}
+else{
+    // Preview chat
+    try{
+        renderChat(qid);
+    }
+    catch(error){
+        console.error(error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async function(){
 
     try{
@@ -137,103 +275,6 @@ document.addEventListener('DOMContentLoaded', async function(){
 
         target = qid ? (await HTTP.fetchUsersBatch(qid)) : null;
         if(target) readChat(qid);
-
-        try{
-            if(!target){
-                htmlHeader = (device) => `
-                    <a class="profile-header ${device}-header" href='/'>
-                        <div class='wrap-pfp'>
-                            <img src='/src/assets/pfps/${defaultProfilePic}'>
-                        </div>
-                        <div class="wrap-label">
-                            <div class='username-label'>User not found.</div>
-                            <span class="sub-label">Go to home</span>
-                        </div>
-                    </a>
-                `;
-            }
-            if(!target.isGroup){
-                const user = target;
-
-                htmlHeader = (device) => `
-                    <a class="profile-header ${device}-header" href='/profile/?q=${HTML.escapeHTML(qid)}'>
-                        <div class='wrap-pfp ${user.isOnline ? 'online' : 'offline'}'>
-                            <img src='/src/assets/pfps/${HTML.escapeHTML(user.img)}'>
-                            <div class='online-status'></div>
-                        </div>
-                        <div class="wrap-label">
-                            <div class='username-label'>${HTML.escapeHTML(user.username)}</div>
-                            <span class="sub-label">View profile</span>
-                        </div>
-                    </a>
-                `;
-
-                resolveTargetData();
-            }
-            else{
-                const group = target;
-
-                const membersData = await HTTP.fetchUsersBatch(group.members);
-                otherUsers = membersData.filter(user => {
-                    return user.id != me.id;
-                });
-                
-                otherUsers.forEach(u => {
-                    otherUserIds.push(u.id);
-                });
-
-                groupId = group.id;
-                
-                let groupName = '';
-                if(!group.name){
-                    groupName = otherUsers
-                    .slice(0, 2)
-                    .map(m => m.username)
-                    .join(', ');
-                }
-
-                let memberPfp1;
-                let memberPfp2;
-                let groupImg = '';
-                if(!group.img){
-                    
-                    memberPfp1 = HTML.escapeHTML(otherUsers[0].img);
-                    memberPfp2 = HTML.escapeHTML(otherUsers[1].img);
-
-                    groupImg = `
-                        <img src='/src/assets/pfps/${memberPfp1}'>
-                        <img src='/src/assets/pfps/${memberPfp2}'>
-                    `;
-                }
-                otherUsers.forEach(u => {
-                    countGroupPresence += u.online ? 1 : 0;
-                    if(u.online) groupPresence.push(u.id);
-                });
-
-                htmlHeader = (device) => `
-                    <a class="profile-header ${device}-header">
-                        <div class='wrap-pfp ${countGroupPresence > 0 ? 'online' : 'offline'}'>
-                            ${groupImg}
-                            <div class='online-status'></div>
-                        </div>
-                        <div class="wrap-label">
-                            <div class='username-label'>${HTML.escapeHTML(groupName)}</div>
-                            <span class="sub-label">View profile</span>
-                        </div>
-                    </a>
-                `;
-
-                resolveTargetData();
-            }
-        }
-        catch(error){
-            console.error(error);
-
-            document.querySelector('.chat-preview').innerHTML = '<h1 class="not-found flex-center">User not found.</h1>';
-        }
-        
-        document.querySelector('.chat-preview').insertAdjacentHTML('afterbegin', htmlHeader('desktop'));
-        document.querySelector('.logo').insertAdjacentHTML('afterend', htmlHeader('mobile'));
 
         // Send message
         document.querySelector('.send-form').addEventListener('submit', async function(e){

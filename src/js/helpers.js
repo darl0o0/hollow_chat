@@ -498,11 +498,11 @@ export const HTML = {
         `;
     },
 
-    skeleton: function(type){
+    skeleton: function(type, device = null){
         switch(type){
             case 'card':
             return `
-                <div class='skeleton-card'>
+                <div class='skeleton skeleton-card'>
                     <div class='wrap-pfp'>
                         <div class='pfp'></div>
                     </div>
@@ -515,7 +515,7 @@ export const HTML = {
 
             case 'post':
             return `
-                <div class='skeleton-post'>
+                <div class='skeleton skeleton-post'>
                     <div class="header">
                         <div class='wrap-pfp'>
                             <div class='pfp'></div>
@@ -527,6 +527,19 @@ export const HTML = {
                     </div>
                     <div class="content">
                         <div class="media"></div>
+                    </div>
+                </div>
+            `;
+
+            case 'header':
+            return `
+                <div class="skeleton profile-header ${device}-header">
+                    <div class='wrap-pfp'>
+                        <div class='pfp'></div>
+                    </div>
+                    <div class="wrap-label">
+                        <div class='label'></div>
+                        <div class='label'></div>
                     </div>
                 </div>
             `;
@@ -608,6 +621,36 @@ export const HTML = {
                     </button>
                 </div>
             </div>
+        `;
+    },
+
+    header: function(device, usernameLabel, img, isOnline, subLabel){
+        
+
+        let bufferPfps;
+        if(Array.isArray(img) && img.length > 1){
+            bufferPfps = `
+                <img src='/src/assets/pfps/${this.escapeHTML(img[0] ?? defaultProfilePic)}'>
+                <img src='/src/assets/pfps/${this.escapeHTML(img[1] ?? defaultProfilePic)}'>
+            `;
+        }
+        else{
+            bufferPfps = `
+                <img src='/src/assets/pfps/${this.escapeHTML(img ?? defaultProfilePic)}'>
+            `;
+        }
+
+        return `
+            <a class="profile-header ${device}-header">
+                <div class='wrap-pfp ${isOnline ? 'online' : 'offline'}'>
+                    ${bufferPfps}
+                    <div class='online-status'></div>
+                </div>
+                <div class="wrap-label">
+                    <div class='username-label'>${HTML.escapeHTML(usernameLabel)}</div>
+                    <span class="sub-label">${subLabel}</span>
+                </div>
+            </a>
         `;
     }
 }

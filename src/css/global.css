@@ -514,8 +514,9 @@ body{
                 width: 100%;
                 height: 240px;
                 object-fit: cover;
-                filter: blur(20px) brightness(0.9);
+                filter: blur(20px) brightness(0.8) saturate(0.7);
                 z-index: 1;
+                user-select: none;
             }
             .media{
                 width: 280px;
@@ -563,13 +564,7 @@ body{
 
 /* SKELETON STATES */
 
-.skeleton-card{
-    display: flex;
-    align-items: center;
-    padding: 11px 13px;
-    padding-right: 8px;
-    position: relative;
-    margin-bottom: 10px;
+.skeleton{
     .pfp{
         opacity: 0.5;
         width: 52px;
@@ -592,6 +587,14 @@ body{
         height: 10px;
     }
 }
+.skeleton-card{
+    display: flex;
+    align-items: center;
+    padding: 11px 13px;
+    padding-right: 8px;
+    position: relative;
+    margin-bottom: 10px;
+}
 .skeleton-post{
     margin-bottom: 25px;
     padding: 0 14px;
@@ -603,26 +606,6 @@ body{
         align-items: center;
         border-bottom: var(--light-border);
         padding: 14px 0 14px 4px;
-        .pfp{
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            margin-right: 6px;
-            opacity: 0.5;
-            animation: skeleton 1s linear infinite alternate;
-        }
-        .label{
-            opacity: 0.5;
-            animation: skeleton 1s linear infinite alternate;
-        }
-        .label:first-child{
-            width: 60%;
-            height: 20px;
-        }
-        .label:last-child{
-            width: 45%;
-            height: 15px;
-        }
     }
     .content{
         display: flex;

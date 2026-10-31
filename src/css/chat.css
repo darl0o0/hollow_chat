@@ -58,6 +58,12 @@
 
 /* CHAT FIELD AND MESSAGES */
 
+.wrap-field-input{
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex: 1;
+}
 .field{
     display: flex;
     flex: 1;
