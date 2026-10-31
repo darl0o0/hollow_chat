@@ -460,8 +460,108 @@ body{
 .user-card:hover{
     background-color: rgba(125, 125, 125, 0.15);
 }
+.post{
+    margin-bottom: 25px;
+    padding: 0 14px;
+    border: var(--light-border);
+    border-radius: 20px;
+    .header{
+        display: flex;
+        flex-direction: row;
+        text-decoration: none;
+        color: var(--main-text-color);
+        border-bottom: var(--light-border);
+        padding: 14px 0 14px 4px;
+        .wrap-pfp img{
+            width: 42px;
+            height: 42px;
+        }
+        .wrap-label{
+            gap: 2px;
+            .username-label{
+                font-size: 20px;
+            }
+            .sub-label{
+                font-size: 15px;
+            }
+        }
+    }
+    .content{
+        display: flex;
+        flex-direction: column;
+        padding: 18px 0 20px;
+        gap: 20px;
+        cursor: pointer;
+        p{
+            margin: 0;
+            padding: 0 5px;
+            color: #d7d7dc;
+        }
+        .wrap-media{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            .media-blur-bg{
+                display: flex;
+            }
+            .media-blur-bg img{
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 240px;
+                object-fit: cover;
+                filter: blur(20px) brightness(0.9);
+                z-index: 1;
+            }
+            .media{
+                width: 280px;
+                object-fit: cover;
+                z-index: 2;
+            }
+        }
+    }
+    .actions{
+        display: flex;
+        flex-direction: row;
+        border-top: var(--light-border);
+        padding: 15px ;
+        padding: 15px 8px;
+        button{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            font-size: 22px;
+            color: var(--main-text-color);
+            border: none;
+            padding: 5px;
+            flex: 1;
+            cursor: pointer;
+            i{
+                transition: 0.15s;
+            }
+            span{
+                font-size: 18px;
+            }
+        }
+        button:hover i{
+            transform: scale(1.15);
+        }
+        button:focus i{
+            transform: scale(1.15);
+        }
+        button:active i{
+            transform: scale(1);
+        }
+    }
+}
 
-/* SKELETON CARDS */
+/* SKELETON STATES */
 
 .skeleton-card{
     display: flex;
@@ -490,6 +590,54 @@ body{
     .label:last-child{
         width: 60%;
         height: 10px;
+    }
+}
+.skeleton-post{
+    margin-bottom: 25px;
+    padding: 0 14px;
+    border: var(--light-border);
+    border-radius: 20px;
+    .header{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-bottom: var(--light-border);
+        padding: 14px 0 14px 4px;
+        .pfp{
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            margin-right: 6px;
+            opacity: 0.5;
+            animation: skeleton 1s linear infinite alternate;
+        }
+        .label{
+            opacity: 0.5;
+            animation: skeleton 1s linear infinite alternate;
+        }
+        .label:first-child{
+            width: 60%;
+            height: 20px;
+        }
+        .label:last-child{
+            width: 45%;
+            height: 15px;
+        }
+    }
+    .content{
+        display: flex;
+        flex-direction: column;
+        padding: 20px 0;
+        .media{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 150px;
+            border-radius: 12px;
+            opacity: 0.5;
+            animation: skeleton 1s linear infinite alternate;
+        }
     }
 }
 
@@ -545,9 +693,12 @@ body{
     }
 }
 .wrap-label{
+    display: flex;
     margin-left: 12px;
     width: 0;
     flex: 1;
+    flex-direction: column;
+    gap: 5px;
     .username-label{
         font-size: var(--main-font-size);
         white-space: nowrap;
@@ -555,7 +706,6 @@ body{
     }
     .sub-label{
         display: block;
-        margin-top: 3px;
         font-size: 14px;
         color: #a8a8a8;
         max-width: 30vw;
@@ -565,7 +715,7 @@ body{
     }
 }
 
-/* ON-SCREEN modalS */
+/* ON-SCREEN MODALS */
 
 .modal{
     display: flex;

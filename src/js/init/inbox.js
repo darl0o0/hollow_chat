@@ -32,12 +32,12 @@ let isMobile = window.innerWidth <= 550;
 let canCreateGroup = false;
 
 // Elements
-const elListInbox = document.querySelector('.inbox .list');
-const elListSuggestions = document.querySelector('.group-modal .list');
-const elSelectedMembers = document.querySelector('.group-modal .selected-members');
-
 const elDmContainer = document.querySelector('.dms-container');
 const elChatPreview = document.querySelector('.chat-preview');
+
+const elListInbox = elDmContainer.querySelector('.list');
+const elListSuggestions = document.querySelector('.group-modal .list');
+const elSelectedMembers = document.querySelector('.group-modal .selected-members');
 
 // HTML
 const htmlChatPageContent = `
@@ -83,15 +83,7 @@ function isViewportMobile(){
 
 isViewportMobile();
 
-const searchHeight = document.querySelector('.wrap-search').clientHeight;
-const headerHeight = document.querySelector('.wrap-title').clientHeight;
-const containerHeight = document.querySelector('.dms-container').clientHeight;
-
-const skeletonHeight = Math.floor((containerHeight - (searchHeight + headerHeight)) / 72);
-
-for(let i = 0; i < skeletonHeight; i++){
-    document.querySelector('.section.chat .list').innerHTML += HTML.skeleton('card');
-}
+elListInbox.skeleton('card');
 
 if(!qid){
     elChatPreview.innerHTML = '';

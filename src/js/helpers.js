@@ -53,6 +53,28 @@ export const UI = {
     }
 }
 
+export const Convert = {
+    timeAgo: function(timestamp){
+
+        if(timestamp < 60) return 'Just now';
+
+        const minutesAgo = Math.floor(timestamp / 60);
+        if(minutesAgo < 60) return `${minutesAgo}m ago`;
+
+        const hoursAgo = Math.floor(minutesAgo / 60);
+        if(hoursAgo < 24) return `${hoursAgo}h ago`;
+
+        const daysAgo = Math.floor(hoursAgo / 24);
+        if(daysAgo < 30) return `${daysAgo}d ago`;
+
+        const monthsAgo = Math.floor(daysAgo / 30);
+        if(monthsAgo < 12) return `${monthsAgo}mo ago`;
+
+        const yearsAgo = Math.floor(monthsAgo / 12);
+        return `${yearsAgo}y ago`;
+    }
+}
+
 export const HTTP = {
 
     // Return multiple users data
@@ -479,8 +501,22 @@ export const HTML = {
     skeleton: function(type){
         switch(type){
             case 'card':
-                return `
-                    <div class='skeleton-card'>
+            return `
+                <div class='skeleton-card'>
+                    <div class='wrap-pfp'>
+                        <div class='pfp'></div>
+                    </div>
+                    <div class='wrap-label'>
+                        <div class='label'></div>
+                        <div class='label'></div>
+                    </div>
+                </div>
+            `;
+
+            case 'post':
+            return `
+                <div class='skeleton-post'>
+                    <div class="header">
                         <div class='wrap-pfp'>
                             <div class='pfp'></div>
                         </div>
@@ -489,8 +525,11 @@ export const HTML = {
                             <div class='label'></div>
                         </div>
                     </div>
-                `;
-            break;
+                    <div class="content">
+                        <div class="media"></div>
+                    </div>
+                </div>
+            `;
         }
     },
 
@@ -521,5 +560,75 @@ export const HTML = {
                 </div>
             `;
         }
+    },
+
+    post: function(user, post){
+        const time =  Math.floor(Date.now()/1000) - post.time;
+
+        return `
+            <div class='post'>
+                <a class="header" href="/profile?q=${user.id}">
+                    <div class='wrap-pfp'>
+                        <img src='/src/assets/pfps/${user.img}'>
+                    </div>
+                    <div class='wrap-label'>
+                        <div class='username-label'>${user.username}</div>
+                        <span class='sub-label'>${Convert.timeAgo(time)}</span>
+                    </div>
+                </a>
+                <div class="content">
+                    <p>${post.content.text}</p>
+                    <div class="wrap-media">
+                        ${post.content.hasImg ? 
+                            `
+                                <div class='media-blur-bg'>
+                                    <img src='/src/assets/posts/${post.content.img}'>
+                                </div>
+                                <img class='media' src='/src/assets/posts/${post.content.img}'>
+                            ` 
+                        : ''}
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="action like">
+                        <i class="${post.isLikedByMe ? 'fa-regular fa-solid' : 'fa-regular'} fa-heart"></i>
+                        <span>${post.count.like}</span>
+                    </button>
+                    <button class="action comment">
+                        <i class="fa-regular fa-comment"></i>
+                        <span>${post.count.comment}</span>
+                    </button>
+                    <button class="action repost">
+                        <i class="fa-solid fa-retweet"></i>
+                        <span>${post.count.repost}</span>
+                    </button>
+                    <button class="action share">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>${post.count.share}</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Skeleton screen method
+Element.prototype.skeleton = function(contentType){
+    const listHeight = this.clientHeight;
+    let elHeight;
+
+    switch(contentType){
+        case 'card':
+            elHeight = 72;
+        break;
+        case 'post':
+            elHeight = listHeight * .5;
+        break;
+    }
+
+    const count = Math.floor(listHeight / elHeight);
+
+    for(let i = 0; i < count; i++){
+        this.innerHTML += HTML.skeleton(contentType);
     }
 }

@@ -19,7 +19,7 @@
                 </label>
                 <input type="text" class="search" placeholder="Search user...">
             </div>
-            <div class="users-list"></div>
+            <div class="home-list"></div>
         </div>
     </div>
 </body>

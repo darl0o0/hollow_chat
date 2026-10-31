@@ -11,9 +11,11 @@
     flex-direction: row;
     padding: 0;
     .dms-container{
+        display: flex;
+        flex-direction: column;
         padding: 20px 15px;
         border-right: var(--light-border);
-        overflow-y: scroll;
+        overflow-y: auto;
         height: 100%;
         flex-basis: 550px;
         .grp-btn{
@@ -31,9 +33,15 @@
         .grp-btn:hover{
             transform: scale(1.2);
         }
+        .section.chat{
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
         .list{
             flex: 1;
-            overflow-y: scroll;
+            min-height: 0;
             .user-card{
                 .profile-link{
                     position: absolute;
