@@ -81,7 +81,7 @@ export const HTTP = {
     fetchUsersBatch: async function(userIds){
         if(!userIds || userIds.length == 0) return [];
 
-        const search = await this.sendPost('/src/api/batch-fetch/', {
+        const search = await this.send('/src/api/batch-fetch/', 'POST', {
             q: userIds
         });
 
@@ -91,61 +91,52 @@ export const HTTP = {
 
         return [];
     },
-    
-    // Strict post request
-    sendPost: async function(url, data = {}) {
-        const csrfToken = Fetch.getCookie('csrf_token');
 
-        const headers = {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': csrfToken
-        };
-
+    // Send strict http request
+    send: async function(url, method, data = {}, override = false){
+        let input;
+        let headers = {'X-Requested-With': 'XMLHttpRequest'};
         let body;
-    
-        if(data instanceof FormData){
-            body = data;
+
+        if(override) headers = {...headers, 'X-HTTP-METHOD-OVERRIDE': override}
+
+        if(method === 'GET'){
+            const queryString = new URLSearchParams(data).toString();
+            input = queryString ? `${url}?${queryString}` : url;
+
+            headers = {
+                ...headers
+            };
         }
         else{
-            body = JSON.stringify(data);
-            headers['Content-Type'] = 'application/json';
-        }
-    
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: body,
-            credentials: 'include'
-        });
-    
-        const text = await response.text();
+            input = url;
 
-        if(!text || !text.trim()){
-            return {};
+            headers = {
+                ...headers,
+                'X-CSRF-TOKEN': Fetch.getCookie('csrf_token')
+            };
+    
+            if(data instanceof FormData){
+                body = data;
+            }
+            else{
+                body = JSON.stringify(data);
+                headers['Content-Type'] = 'application/json';
+            }
         }
-
-        return JSON.parse(text);
-    },
-    
-    // Strict get request
-    sendGet: async function(url, data = {}) {
-        const queryString = new URLSearchParams(data).toString();
-        const fullUrl = queryString ? `${url}?${queryString}` : url;
-    
-        const response = await fetch(fullUrl, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            credentials: 'include'
-        });
-    
+        
         try{
-            return await response.json();
+            const http = await fetch(input, {
+                method,
+                headers,
+                body,
+                credentials: 'include'
+            });
+
+            return await http.json();
         }
         catch(error){
-            console.error("Server returned non-JSON response:", response);
-            throw new Error("Server returned HTML instead of JSON (likely session expired or PHP error).");
+            console.error(error);
         }
     }
 }
@@ -185,6 +176,10 @@ export const Fetch = {
                 resolve(filteredList.length > 0 ? filteredList : null);
             }, 300);
         });
+    },
+    
+    returnTargetData: function(target){
+        
     },
 
     getObjectSize: function(obj){
@@ -249,7 +244,7 @@ export const Form = {
     },
 
     // Initialize a form
-    initForm: function(form, action, updatePasswordManager, redirect){
+    initForm: function(form, method, action, updatePasswordManager, redirect){
         this.isFormEnabled(form, false);
 
         const isDistinct = form.classList.contains('distinct');
@@ -288,19 +283,19 @@ export const Form = {
                         elNextBtn.click();
                     }
                     else{
-                        this.submitForm(e, form, action, updatePasswordManager, redirect);
+                        this.submitForm(e, form, method, action, updatePasswordManager, redirect);
                     }
                 }
             });
         });
 
         elSubmitBtn.addEventListener('click', (e) => {
-            this.submitForm(e, form, action, updatePasswordManager, redirect);
+            this.submitForm(e, form, method, action, updatePasswordManager, redirect);
         });
     },
 
     // Submit a form
-    submitForm: async function(e, form, action, updatePasswordManager, redirect){
+    submitForm: async function(e, form, method, action, updatePasswordManager, redirect){
         e.preventDefault();
 
         if(!this.getFormState(form)) return;
@@ -346,11 +341,15 @@ export const Form = {
             const formData = new FormData(form);
             const hasFileInput = Boolean(form.querySelector('input[type="file"]'));
 
+            const override = (hasFileInput && method == 'POST') ? 'PUT' : false;
+
             const data = hasFileInput ? formData : this.formToJson(formData);
-            const res = await HTTP.sendPost(action, data);
+            const res = await HTTP.send(action, method, data, override);
         
             if(res.status == 'error'){
-                throw new Error(res.response);
+                const err = new Error(res.response);
+                err.isHandled = res.isHandled;
+                throw err;
             }
             else if(res.status == 'ok'){
                 UI.alert(true, res.response, 2, elFormParent);
@@ -381,9 +380,9 @@ export const Form = {
         }
         catch(error){
             this.setErrorCooldown(form);
+            console.error(error.isHandled);
 
-            if(error instanceof TypeError || error instanceof SyntaxError){
-                console.error(error);
+            if(!error.isHandled){
                 UI.alert(false, "An unexpected error occurred. Please try again.", undefined, elFormParent);
             }
             else{
@@ -553,6 +552,17 @@ export const HTML = {
             return `
                 <div class='wrap-msg wrap-me mid-${this.escapeHTML(msg.id)}${isSeen ? ' seen' : ''}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
                     <div class='others-wrap'>
+                        <div class='msg-actions interact-on-hover hidden'>
+                            <button class='msg-react'>
+                                <i class="fa-regular fa-face-grin"></i>
+                            </button>
+                            <button class='msg-reply'>
+                                <i class="fa-solid fa-reply"></i>
+                            </button>
+                            <button class='msg-more'>
+                                <i class="fa-solid fa-ellipsis"></i>
+                            </button>
+                        </div>
                         <div class='seen-dot'></div>
                     </div>
                     <div class='msg me'>${this.escapeHTML(msg.msg)}</div>
@@ -570,6 +580,19 @@ export const HTML = {
                         </a>
                     </div>
                     <div class='msg you'>${this.escapeHTML(msg.msg)}</div>
+                    <div class='others-wrap'>
+                        <div class='msg-actions interact-on-hover hidden'>
+                            <button class='msg-react'>
+                                <i class="fa-regular fa-face-grin"></i>
+                            </button>
+                            <button class='msg-reply'>
+                                <i class="fa-solid fa-reply"></i>
+                            </button>
+                            <button class='msg-more'>
+                                <i class="fa-solid fa-ellipsis"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -624,11 +647,12 @@ export const HTML = {
         `;
     },
 
-    header: function(device, usernameLabel, img, isOnline, subLabel){
+    header: function(device, usernameLabel, img, isOnline, subLabel, href = null){
         
-
+        let isGroup = false;
         let bufferPfps;
         if(Array.isArray(img) && img.length > 1){
+            isGroup = true;
             bufferPfps = `
                 <img src='/src/assets/pfps/${this.escapeHTML(img[0] ?? defaultProfilePic)}'>
                 <img src='/src/assets/pfps/${this.escapeHTML(img[1] ?? defaultProfilePic)}'>
@@ -641,7 +665,7 @@ export const HTML = {
         }
 
         return `
-            <a class="profile-header ${device}-header">
+            <a class="profile-header ${device}-header" ${href ? `href="${href}"` : ''}>
                 <div class='wrap-pfp ${isOnline ? 'online' : 'offline'}'>
                     ${bufferPfps}
                     <div class='online-status'></div>

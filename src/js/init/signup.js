@@ -86,7 +86,7 @@ function uploadFile(file){
     }
 }
 
-Form.initForm(elFormSignup, '', true, '/');
+Form.initForm(elFormSignup, 'POST', '', true, '/');
 
 elFormSignup.querySelector('.next').addEventListener('click', () => gotoStep(2));
 elFormSignup.querySelector('.back').addEventListener('click', () => gotoStep(1));

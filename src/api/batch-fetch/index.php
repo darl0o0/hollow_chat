@@ -3,7 +3,8 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
 header('Content-Type: application/json; charset=utf-8');
 
-requireStrictPost();
+guard('POST');
+
 $user_data = check_login($con);
 
 $id = $user_data['id'];

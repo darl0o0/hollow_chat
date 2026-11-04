@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     // Fetch user's data
     try{
-        const getMe = await HTTP.sendGet('/src/api/me/');
+        const getMe = await HTTP.send('/src/api/me/', 'GET');
         me = getMe.response;
         id = me.id;
         resolveUserData(me);
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     // Metadata
     countUnseen = Number(document.querySelector('meta[name="num-of-unread"]').content);
 
-    const getFriends = await HTTP.sendGet('/src/api/friends/');
+    const getFriends = await HTTP.send('/src/api/friends/', 'GET');
     const requests = getFriends.response.requests;
     countRequests = requests.incoming?.length;
     
@@ -113,7 +113,7 @@ document.addEventListener('submit', async (e) => {
         const targetId = elActiveForm.dataset.id;
         const action = elFormAccept ? 2 : 1;
 
-        await HTTP.sendPost('/src/api/relationship/', {user2: targetId, action});
+        await HTTP.send('/src/api/relationship/', 'POST', {user2: targetId, action});
 
         const elCard = document.querySelector(`.modal-requests .u-${targetId}`);
         elCard.remove();
@@ -141,7 +141,7 @@ socket.on('message', (data) => {
 // Seen message
 socket.on('seen:pong', (data) => {
     if(data.by == id){
-        countUnseen -= data.count;
+        if(countUnseen > 0) countUnseen -= data.count;
         updateBadges();
     }
 });

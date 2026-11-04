@@ -8,8 +8,7 @@ $user_data = check_login($con);
 $id = $user_data['id'];
 
 if($_SERVER['REQUEST_METHOD'] == 'GET'){
-    requireStrictGet();
-    header('Content-Type: application/json; charset=utf-8');
+    guard('GET');
 
     $data = [];
     $qid = $_GET['qid'] ?? '';
@@ -71,7 +70,7 @@ if($_SERVER['REQUEST_METHOD'] == 'GET'){
     ok(true, $data);
 }
 elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
-    requireStrictPost();
+    guard('POST');
     
     $input = json_decode(file_get_contents('php://input'), true);
 
@@ -93,7 +92,7 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     $mid = $common_id.$time_id;
 
     $socketData = json_encode([
-        'mid' => $mid,
+        'id' => $mid,
         'sid' => $sid,
         'rid' => json_decode($input['qid'], true) ?? $input['qid'],
         'msg' => $msg,

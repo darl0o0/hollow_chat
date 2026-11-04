@@ -37,9 +37,9 @@ document.addEventListener('DOMContentLoaded', async function(){
     }
 });
 
-Form.initForm(elFormUpdate, '/src/api/account/update.php', true);
-Form.initForm(elFormDelete, '/src/api/account/delete.php', false, '/');
-Form.initForm(elFormReset, '/src/api/account/reset-pass.php', false);
+Form.initForm(elFormUpdate, 'POST', '/src/api/account/update.php', true);
+Form.initForm(elFormDelete, 'DELETE', '/src/api/account/delete.php', false, '/');
+Form.initForm(elFormReset, 'PUT', '/src/api/account/reset-pass.php', false);
 
 document.querySelector('.img-input').addEventListener('click', () => elUpdatePfp.click());
 

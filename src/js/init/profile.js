@@ -18,7 +18,7 @@ async function defineState(){
 
     if(!qid) return;
 
-    const res = await HTTP.sendGet('/src/api/relationship/', {qid});
+    const res = await HTTP.send('/src/api/relationship/', 'GET', {qid}); // Should be query
     const relationship = res?.response?.relationship;
 
     switch(relationship){
@@ -153,7 +153,7 @@ elPreview.addEventListener('submit', async (e) => {
         const formData = new FormData(e.target);
         const data = Form.formToJson(formData);
 
-        await HTTP.sendPost('/src/api/relationship/', data);
+        await HTTP.send('/src/api/relationship/', 'POST', data);
         const stat = await defineState();
 
         elFriendActionForm.querySelector('[name="action"]').value = stat.actionInput;
@@ -161,8 +161,8 @@ elPreview.addEventListener('submit', async (e) => {
     }
 
     if(elLogoutForm){
-        const apiLogout = await HTTP.sendPost('/src/api/account/logout.php');
-        if(apiLogout.status == 'ok'){
+        const logout = await HTTP.send('/src/api/account/logout.php', 'POST');
+        if(logout.status == 'ok'){
             window.location.replace('/signin');
         }
     }

@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     }
 
     try{
-        const getUsers = await HTTP.sendGet('/src/api/users/');
+        const getUsers = await HTTP.send('/src/api/users/', 'GET');
         users = getUsers.response;
     }
     catch(error){

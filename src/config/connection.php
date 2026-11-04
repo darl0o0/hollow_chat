@@ -11,5 +11,5 @@ try{
 }
 catch(mysqli_sql_exception $e){
     header('Content-Type: application/json');
-    ok(false, 'Database connection failed.');
+    ok(false, 'Database connection failed.', false);
 }

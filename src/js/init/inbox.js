@@ -1,7 +1,7 @@
 // Initialization
 import { UI, HTTP, Fetch, Form, Check, performanceTimer, HTML } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
-import { loadChat, chatLoaded, loadHeader, renderChat } from "./chat.js"
+import { inboxPageState } from "./chat.js"
 
 let getParams = new URLSearchParams(window.location.search);
 let resizeTimer;
@@ -39,29 +39,11 @@ const elListInbox = elDmContainer.querySelector('.list');
 const elListSuggestions = document.querySelector('.group-modal .list');
 const elSelectedMembers = document.querySelector('.group-modal .selected-members');
 
-// HTML
-const htmlChatPageContent = `
-    <div class="field">
-        <center><h1 class="not-found"></h1></center>
-        <div class="inner-field"></div>
-    </div>
-    <form class="send-form" method="post">
-        <input type="text" class="msg-input" placeholder="Type a message..." autocomplete="off">
-        <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
-    </form>
-`;
-
 // Promises
-let resolveTargetData;
-const targetDataReady = new Promise((resolve) => {
-    resolveTargetData = resolve;
+let resolveInboxList;
+const inboxListReady = new Promise((resolve) => {
+    resolveInboxList = resolve;
 });
-
-// Helper functions
-function updateQid(){
-    getParams = new URLSearchParams(window.location.search);
-    qid = getParams.get('q') ? (getParams.get('q').length > 0 ? getParams.get('q') : null) : null;
-}
 
 function isViewportMobile(argQid){
     if(isMobile){
@@ -97,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     // List conversations
     try{
-        const getConversations = await HTTP.sendGet('/src/api/conversations/');
+        const getConversations = await HTTP.send('/src/api/conversations/', 'GET');
 
         if(getConversations.response && Array.isArray(getConversations.response)){
             const srotedConversations = getConversations.response.sort((a, b) => {
@@ -244,13 +226,11 @@ document.addEventListener('DOMContentLoaded', async function(){
         elListInbox.innerHTML = bufferInbox;
         elListSuggestions.innerHTML = bufferSuggestions;
 
-        resolveTargetData();
+        resolveInboxList();
     }
     catch(error){
         console.error(error);
     }
-
-    await targetDataReady;
 
     if(qid) document.querySelector(`.chat-card.u-${qid}`)?.classList.add('highlight');
 });
@@ -266,22 +246,12 @@ window.addEventListener('resize', () => {
 window.addEventListener('popstate', async (e) => {
     if(e.state){
         const userId = e.state.q;
-        renderChat(userId);
+        inboxPageState(true, userId);
         isViewportMobile(userId);
-        updateQid();
+        // updateQid();
     }
     else{
-        elChatPreview.classList.add('flex-center');
-        elChatPreview.innerHTML = `
-            <div class="init-inbox">
-                <img src="/src/assets/logo/empty_inbox.png">
-                <div class="label-wrap">
-                    <span class="label">Your direct messages.</span>
-                    <span class="sub-label">Choose a chat or start a new one.</span>
-                </div>
-                <button class="btn primary-btn"><i class="fa-solid fa-comment-medical"></i> Start a new chat</button>
-            </div>
-        `;
+        inboxPageState(false);
     }
 });
 
@@ -298,9 +268,9 @@ document.addEventListener('click', (e) => {
             const url = new URL(window.location.href);
             url.searchParams.set("q", userId);
             window.history.pushState({q: userId}, 'Inbox', url);
-            renderChat(userId);
+            inboxPageState(true, userId);
             isViewportMobile(userId);
-            updateQid();
+            // updateQid();
         break;
         case Boolean(elGroupUserCard):
             selectedUserId = elGroupUserCard.getAttribute('user-id');
@@ -461,7 +431,7 @@ document.querySelector('.group-modal .submit').addEventListener('click', async f
         }
     
         try{
-            const createGrp = await HTTP.sendPost('/src/api/conversations/create-grp.php', {
+            const createGrp = await HTTP.send('/src/api/conversations/create-grp.php', 'POST', {
                 group_name: null,
                 members: selectedMembers.map(m => m.id)
             });
@@ -507,10 +477,10 @@ socket.on('presence', (data) => {
 
             const groupPfp = document.querySelector(`.u-${groupId} .wrap-pfp`);
             if(onlineMembers.length > 0){
-                groupPfp.classList.replace('offline', 'online');
+                groupPfp?.classList.replace('offline', 'online');
             }
             else if(onlineMembers.length == 0){
-                groupPfp.classList.replace('online', 'offline');
+                groupPfp?.classList.replace('online', 'offline');
             }
         }
     });
@@ -616,7 +586,7 @@ let typers = new Map();
 socket.on('typing:pong', async (data) => {
     const { by, to, isTyping, isGroup, groupId } = data;
     
-    await targetDataReady;
+    await inboxListReady;
     let targetId;
     let isRelevant;
     

@@ -4,12 +4,14 @@
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
-requireStrictGet();
+
+guard('GET');
 
 $user_data = check_login($con);
 header('Content-Type: application/json; charset=utf-8');
 
 $data = [
+    'method' => $_SERVER['REQUEST_METHOD'],
     'id' => $user_data['id'],
     'username' => $user_data['username'],
     'email' => $user_data['email'],

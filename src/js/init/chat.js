@@ -7,7 +7,6 @@ const getParams = new URLSearchParams(window.location.search);
 // User objects
 let me = null;
 let target = null;
-let group = null;
 
 // IDs
 let id = null;
@@ -26,8 +25,6 @@ let isTyping = false;
 // Elements
 let elField = null;
 let elInnerField = null;
-let elAllMsg = null;
-let elInput = null;
 
 const elChatPreview = document.querySelector('.chat-preview');
 
@@ -90,26 +87,34 @@ function dataMessage(msg){
     return {
         sid: id,
         qid: to,
-        msg: msg,
-        isGroup: isGroup,
+        msg,
+        isGroup,
         groupId: dataGroupId
     }
 }
 
+function updateHeaders(desktopHeader, mobileHeader){
+    document.querySelectorAll('.profile-header').forEach(h => h?.remove());
+
+    document.querySelector('.chat-preview').insertAdjacentHTML('afterbegin', desktopHeader);
+    document.querySelector('.logo').insertAdjacentHTML('afterend', mobileHeader);
+}
+
 // Load chat
-export async function loadChat(target){
+async function loadChat(target){
     let bufferMessages = '';
 
-    elField = document.querySelector('.field');            
-    elInnerField = document.querySelector('.inner-field');
-    elInput = document.querySelector('.send-form input');
+    const elField = document.querySelector('.field');            
+    const elInnerField = document.querySelector('.inner-field');
+    const elInput = document.querySelector('.send-form input');
+
     elInput.focus();
     isGroup = target.isGroup;
 
-    const getMessages = await HTTP.sendGet('/src/api/messages/', {
+    const getMessages = await HTTP.send('/src/api/messages/', 'GET', {
         qid: target.id,
         isGroup: target.isGroup
-    });
+    }); // Should be query
     const messages = getMessages.response;
 
     if(Array.isArray(messages) && messages){
@@ -136,19 +141,19 @@ export async function loadChat(target){
         bufferMessages = '<center>Start chatting now.</center>';
     }
     elInnerField.innerHTML = bufferMessages;
-    elField.scrollTop = elField.scrollHeight;
+    scroll();
 }
 
 // Load header
-export async function loadHeader(target){
+async function loadHeader(target){
     try{
         if(!target){
-            htmlHeader = (device) => HTML.header(device, 'User not found.', defaultProfilePic, false, 'Go to home');
+            throw new Error('User not found');
         }
         if(!target.isGroup){
             const user = target;
 
-            htmlHeader = (device) => HTML.header(device, user.username, user.img, user.isOnline, 'View profile');
+            htmlHeader = (device) => HTML.header(device, user.username, user.img, user.isOnline, 'View profile', `/profile/?q=${user.id}`);
 
             resolveTargetData();
         }
@@ -180,11 +185,11 @@ export async function loadHeader(target){
             if(!group.img) groupImg = [otherUsers[0].img, otherUsers[1].img];
 
             otherUsers.forEach(u => {
-                countGroupPresence += u.online ? 1 : 0;
-                if(u.online) groupPresence.push(u.id);
+                countGroupPresence += u.isOnline ? 1 : 0;
+                if(u.isOnline) groupPresence.push(u.id);
             });
 
-            htmlHeader = (device) => HTML.header(device, groupName, groupImg, countGroupPresence > 0, 'View profile');
+            htmlHeader = (device) => HTML.header(device, groupName, groupImg, countGroupPresence > 0, 'Manage chat');
 
             resolveTargetData();
         }
@@ -192,70 +197,79 @@ export async function loadHeader(target){
     catch(error){
         console.error(error);
 
+        htmlHeader = (device) => HTML.header(device, 'User not found.', defaultProfilePic, false, 'Go to home', '/');
         document.querySelector('.chat-preview').innerHTML = '<h1 class="not-found flex-center">User not found.</h1>';
     }
     
-    document.querySelectorAll('.profile-header').forEach(h => h?.remove());
-
-    document.querySelector('.chat-preview').insertAdjacentHTML('afterbegin', htmlHeader('desktop'));
-    document.querySelector('.logo').insertAdjacentHTML('afterend', htmlHeader('mobile'));
+    updateHeaders(htmlHeader('desktop'), htmlHeader('mobile'));
 }
 
 // Render chat
-export async function renderChat(targetId){
-    document.querySelectorAll('.profile-header').forEach(h => h?.remove());
+async function renderChat(targetId){
+    target = await HTTP.fetchUsersBatch(targetId);
 
-    document.querySelector('.chat-preview').insertAdjacentHTML('afterbegin', HTML.skeleton('header', 'desktop'));
-    document.querySelector('.logo').insertAdjacentHTML('afterend', HTML.skeleton('header', 'mobile'));
-
-    elChatPreview.querySelector('.init-inbox')?.remove();
-
-    if(targetId){
-        const target = await HTTP.fetchUsersBatch(targetId);
-        elChatPreview.querySelector('.wrap-field-input')?.remove();
-        elChatPreview.classList.remove('flex-center');
-        if(target){
-            document.querySelectorAll('.user-card.highlight').forEach(c => c.classList.remove('highlight'));
-            document.querySelector(`.u-${targetId}`)?.classList.add('highlight');
-            elChatPreview.insertAdjacentHTML('beforeend', htmlChatPageContent);
-        }
-
-        resolveChatReadyToLoad();
-        loadHeader(target);
-        loadChat(target);
-        try{
-            await chatLoaded;
-            const elField = document.querySelector('.field');
-            elField.scrollTop = elField.scrollHeight;
-        }
-        catch(error){
-            console.error("Chat hasn't loaded successfully.");
-        }
-    }
-}
-
-if(!qid){
-    elChatPreview.innerHTML = '';
-    elChatPreview.classList.add('flex-center');
-    elChatPreview.insertAdjacentHTML('afterbegin', `
-        <div class="init-inbox">
-            <img src="/src/assets/logo/empty_inbox.png">
-            <div class="label-wrap">
-                <span class="label">Your direct messages.</span>
-                <span class="sub-label">Choose a chat or start a new one.</span>
-            </div>
-            <button class="btn primary-btn"><i class="fa-solid fa-comment-medical"></i> Start a new chat</button>
-        </div>
-    `);
-}
-else{
-    // Preview chat
+    resolveChatReadyToLoad();
+    loadHeader(target);
+    loadChat(target);
     try{
-        renderChat(qid);
+        await chatLoaded;
+        readChat(target.id);
+        const elField = document.querySelector('.field');
+        scroll();
     }
     catch(error){
-        console.error(error);
+        console.error("Chat hasn't loaded successfully.");
     }
+}
+
+// Scroll down
+function scroll(){
+    elField = document.querySelector('.field');
+    elField.scrollTop = elField.scrollHeight;
+}
+
+export async function inboxPageState(isActiveChat, chatId = null){
+    document.querySelectorAll('.user-card.highlight').forEach(c => c.classList.remove('highlight'));
+    elChatPreview.querySelector('.wrap-field-input')?.remove();
+
+    if(isActiveChat && chatId){
+        updateHeaders(HTML.skeleton('header', 'desktop'), HTML.skeleton('header', 'mobile'));
+        elChatPreview.querySelector('.init-inbox')?.remove();
+        document.querySelector(`.chat-card.u-${chatId}`)?.classList.add('highlight');
+
+        elChatPreview.classList.remove('flex-center');
+        elChatPreview.insertAdjacentHTML('beforeend', htmlChatPageContent);
+        
+        // Preview chat
+        try{
+            renderChat(chatId);
+        }
+        catch(error){
+            console.error(error);
+        }
+    }
+    else{
+        document.querySelectorAll('.user-card.highlight').forEach(c => c.classList.remove('highlight'));
+        elChatPreview.innerHTML = '';
+        elChatPreview.classList.add('flex-center');
+        elChatPreview.insertAdjacentHTML('afterbegin', `
+            <div class="init-inbox">
+                <img src="/src/assets/logo/empty_inbox.png">
+                <div class="label-wrap">
+                    <span class="label">Your direct messages.</span>
+                    <span class="sub-label">Choose a chat or start a new one.</span>
+                </div>
+                <button class="btn primary-btn"><i class="fa-solid fa-comment-medical"></i> Start a new chat</button>
+            </div>
+        `);
+    }
+}
+
+if(qid){
+    inboxPageState(true, qid);
+}
+else{
+    inboxPageState(false);
 }
 
 document.addEventListener('DOMContentLoaded', async function(){
@@ -272,16 +286,13 @@ document.addEventListener('DOMContentLoaded', async function(){
         if(!id) return;
 
         await chatReadyToLoad;
-
-        target = qid ? (await HTTP.fetchUsersBatch(qid)) : null;
-        if(target) readChat(qid);
-
+        
         // Send message
-        document.querySelector('.send-form').addEventListener('submit', async function(e){
+        document.querySelector('.send-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const msgText = document.querySelector('.msg-input').value;
             if(msgText.trim().length > 0){
-                await HTTP.sendPost('/src/api/messages/', dataMessage(msgText));
+                await HTTP.send('/src/api/messages/', 'POST', dataMessage(msgText));
 
                 document.querySelector('.msg-input').value = null;
                 isTyping = false;
@@ -290,6 +301,7 @@ document.addEventListener('DOMContentLoaded', async function(){
         });
 
         // When typing
+        const elInput = document.querySelector('.send-form input');
         elInput.addEventListener('input', () => {
             const hasText = elInput.value.trim().length > 0;
 
@@ -316,6 +328,51 @@ document.addEventListener('DOMContentLoaded', async function(){
     }
     catch(error){
         console.error('An error occured while trying to load chat: ', error);
+    }
+});
+
+document.addEventListener('click', (e) => {
+    const elReactBtn = e.target.closest('.msg-react');
+    const isReactMenuClicked = e.target.closest('.wrap-react-menu');
+
+    if(!elReactBtn && !isReactMenuClicked){
+        document.querySelectorAll('.wrap-react-menu').forEach(el => el.remove());
+
+        document.querySelectorAll('.msg-actions').forEach(el => {
+            el.classList.replace('visible', 'hidden');
+            el.classList.add('interact-on-hover');
+        });
+        return;
+    }
+
+    if(!elReactBtn) return;
+
+    const elMsgActions = elReactBtn.parentElement;
+    const elReactMenu = elMsgActions.querySelector('.wrap-react-menu');
+
+    if(elReactMenu){
+        elReactMenu.remove();
+        elMsgActions.classList.replace('visible', 'hidden');
+        elMsgActions.classList.add('interact-on-hover');
+    }
+    else{
+        document.querySelectorAll('.wrap-react-menu').forEach(el => el.remove());
+        document.querySelectorAll('.msg-actions').forEach(el => {
+            el.classList.replace('visible', 'hidden');
+            el.classList.add('interact-on-hover');
+        });
+
+        elMsgActions.insertAdjacentHTML('afterbegin', `
+            <div class='wrap-react-menu'>
+                <div class='react-menu'>
+                    <button class='heart'>❤️</button>
+                    <button class='laugh'>😂</button>
+                    <button class='cute'>🥺</button>
+                </div>
+            </div>
+        `);
+        elMsgActions.classList.replace('hidden', 'visible');
+        elMsgActions.classList.remove('interact-on-hover');
     }
 });
 
@@ -378,14 +435,14 @@ socket.on('message', (msg) => {
     elInnerField.innerHTML += HTML.message(
         msg,
         msg.sid == id,
-        {isPreviousFromDifferentUser: isPreviousFromDifferentUser, isNextFromDifferentUser: true},
+        {isPreviousFromDifferentUser, isNextFromDifferentUser: true},
         !isGroup ? target : Fetch.selectUserById(msg.sid, otherUsers),
         false,
         {isLive: true}
     );
 
     if(msg.sid != id) readChat(qid);
-    elField.scrollTop = elField.scrollHeight;
+    scroll();
 });
 
 // Seen message
@@ -401,6 +458,8 @@ socket.on('seen:pong', (data) => {
 socket.on('typing:pong', async (data) => {
     const { by, to, isTyping } = data;
     await targetDataReady;
+
+    elField = document.querySelector('.field');
 
     if(!isGroup){
 
@@ -419,7 +478,7 @@ socket.on('typing:pong', async (data) => {
                         </div>
                     </div>
                 `;
-                elField.scrollTop = elField.scrollHeight;
+                scroll();
             }
             else{
                 document.querySelector('.wrap-typing').remove();
@@ -452,7 +511,7 @@ socket.on('typing:pong', async (data) => {
                         `);
                     }
                 }
-                elField.scrollTop = elField.scrollHeight;
+                scroll();
             }
             else{
 

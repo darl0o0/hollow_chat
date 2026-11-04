@@ -146,19 +146,19 @@ app.post('/broadcast', (req, res) => {
         return res.status(403).json({ status: 'error', message: 'Unauthorized' });
     }
 
-    const { mid, sid, rid, msg, isGroup, groupId } = req.body;
+    const { id, sid, rid, msg, isGroup, groupId } = req.body;
 
     // Send to partner
-    if(!isGroup) io.to(rid).emit('message', { mid, sid, rid, msg });
+    if(!isGroup) io.to(rid).emit('message', { id, sid, rid, msg });
     else{
         rid.forEach(id => {
-            io.to(id).emit('message', { mid, sid, msg, isGroup, groupId});
+            io.to(id).emit('message', { id, sid, msg, isGroup, groupId});
         });
     }
 
     // Send to current user
-    if(!isGroup) io.to(sid).emit('message', { mid, sid, rid, msg });
-    else io.to(sid).emit('message', { mid, sid, isGroup, groupId, msg });
+    if(!isGroup) io.to(sid).emit('message', { id, sid, rid, msg });
+    else io.to(sid).emit('message', { id, sid, isGroup, groupId, msg });
 
     res.json({ status: 'success' });
 });

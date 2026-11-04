@@ -14,7 +14,7 @@ if(!isset($_SESSION['id'])){
         $password = trim($input['password']);
 
         if(empty($email) || empty($password)){
-            ok(false, 'All inputs are required.');
+            ok(false, 'All inputs are required.', );
         }
 
         if(!filter_var($email, FILTER_VALIDATE_EMAIL)){

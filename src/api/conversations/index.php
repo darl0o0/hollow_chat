@@ -4,8 +4,8 @@
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
-requireStrictGet();
-header('Content-Type: application/json; charset=utf-8');
+
+guard('GET');
 
 $user_data = check_login($con);
 $id = $user_data['id'];

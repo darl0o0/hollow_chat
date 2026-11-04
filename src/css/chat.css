@@ -93,7 +93,7 @@
     }
     .wrap-msg, .wrap-typing{
         display: flex;
-        gap: 10px;
+        gap: 10px; 
         .wrap-pfp{
             display: flex;
             align-items: end;
@@ -122,15 +122,58 @@
         .others-wrap{
             display: flex;
             align-items: center;
+            gap: 4px;
             .seen-dot{
                 width: 10px;
                 height: 10px;
                 border: 1px ridge #e9e4c8;
                 border-radius: 50%;
                 background: none;
+                margin-left: 10px;
+            }
+            .msg-actions{
+                transition: 0s;
+                .wrap-react-menu{
+                    position: relative;
+                }
+                .react-menu{
+                    display: flex;
+                    flex-direction: row;
+                    position: absolute;
+                    top: 0;
+                    transform: translate(-20%, -120%);
+                    padding: 5px 8px;
+                    border-radius: 25px;
+                    background-color: #252525;
+                    border: var(--light-border);
+                    button{
+                        font-size: 22px;
+                    }
+                }
+                button{
+                    background: none;
+                    border: none;
+                    font-size: 18px;
+                    color: #989898;
+                    cursor: pointer;
+                    transition: 0.1s;
+                }
+                button:hover{
+                    transform: scale(1.15);
+                }
+                button:focus{
+                    transform: scale(1.15);
+                }
+                button:active{
+                    transform: scale(1);
+                }
             }
         }
     }
+    .wrap-msg:hover .msg-actions.interact-on-hover{
+        visibility: visible;
+    }
+
     .wrap-msg.seen{
         .seen-dot{
             background: #e9e4c8;

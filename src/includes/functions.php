@@ -47,59 +47,47 @@ function verifyCsrfToken($submittedToken){
 
 // Check headers and CSRF token
 function checkHeadersCSRF(){
-    header('Content-Type: application/json; charset=utf-8');
+    // header('Content-Type: application/json; charset=utf-8');
 
-    $headers = getallheaders();
-    $requestHeader = $headers['X-Requested-With'] ?? $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+    // $headers = getallheaders();
+    // $requestHeader = $headers['X-Requested-With'] ?? $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
 
-    if ($requestHeader !== 'XMLHttpRequest'){
-        http_response_code(403);
-        exit(json_encode(['status' => 'error', 'message' => 'Direct access forbidden']));
-    }
+    // if ($requestHeader !== 'XMLHttpRequest'){
+    //     ok(false, 'Direct access forbidden', false);
+    //     http_response_code(403);
+    //     exit(json_encode(['status' => 'error', 'message' => 'Direct access forbidden']));
+    // }
     
     $clientToken = $headers['X-CSRF-TOKEN'] 
             ?? $headers['x-csrf-token'] 
             ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
-            ?? $_POST['csrf_token'] 
             ?? '';
 
     if (!verifyCsrfToken($clientToken)){
-        http_response_code(403);
-        exit(json_encode(['status' => 'error', 'message' => 'Invalid or missing CSRF token']));
+        ok(false, 'Invalid or missing CSRF token', false);
     }
 }
 
-// Strict POST Guard
-// Validates custom header AND CSRF token
-function requireStrictPost(){
-    if($_SERVER['REQUEST_METHOD'] !== 'POST'){
-        http_response_code(405);
-        die(json_encode(['status' => 'error', 'message' => 'Method Not Allowed']));
-    }
-    checkHeadersCSRF();
-}
-
-// Strict GET Guard
-// Validates custom header AND CSRF token
-function requireStrictGet(){
+// Guard API endpoints
+function guard($method){
     header('Content-Type: application/json; charset=utf-8');
-    
-    if($_SERVER['REQUEST_METHOD'] !== 'GET'){
-        http_response_code(405);
-        die(json_encode(['status' => 'error', 'message' => 'Method Not Allowed']));
+
+    if($_SERVER['REQUEST_METHOD'] !== $method){
+        ok(false, 'Method not allowed', false);
     }
 
     $headers = getallheaders();
     $requestHeader = $headers['X-Requested-With'] ?? $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
 
-    if ($requestHeader !== 'XMLHttpRequest') {
-        http_response_code(403);
-        exit(json_encode(['status' => 'error', 'message' => 'Direct access forbidden']));
+    if($requestHeader !== 'XMLHttpRequest'){
+        ok(false, 'Direct access forbidden', false);
     }
+
+    if($_SERVER['REQUEST_METHOD'] !== 'GET') checkHeadersCSRF();
 }
 
-// Function that returns an HTTP response
-function ok($isOk, $response = null){
+// Returns an HTTP response
+function ok($isOk, $response = null, $isHandled = true){
     if($isOk){
         echo json_encode([
             'status' => 'ok',
@@ -109,6 +97,7 @@ function ok($isOk, $response = null){
     else{
         echo json_encode([
             'status' => 'error',
+            'is_handled' => $isHandled,
             'response' => $response
         ]);
     }
