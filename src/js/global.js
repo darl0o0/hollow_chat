@@ -45,3 +45,13 @@ document.querySelectorAll('.s-h').forEach(btn => {
         icon.classList.toggle('fa-eye-slash', isPassword);
     });
 });
+
+// Custom select input
+document.querySelectorAll('.option').forEach(op => {
+    op.addEventListener('click', (e) => {
+        const option = e.target;
+
+        option.parentElement.querySelector('.option.active')?.classList.remove('active');
+        option.classList.add('active');
+    });
+});

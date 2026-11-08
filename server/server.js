@@ -19,7 +19,7 @@ const io = new Server(server, {
     cors: { origin: "*" }
 });
 
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN;
+const CURL_NODE_TOKEN = process.env.CURL_NODE_TOKEN;
 
 const activeTypingUsers = new Map();
 const disconnectTimers = new Map();
@@ -142,7 +142,7 @@ io.on('connection', (socket) => {
 app.post('/broadcast', (req, res) => {
 
     const token = req.headers['x-internal-token'];
-    if(token !== INTERNAL_TOKEN){
+    if(token !== CURL_NODE_TOKEN){
         return res.status(403).json({ status: 'error', message: 'Unauthorized' });
     }
 

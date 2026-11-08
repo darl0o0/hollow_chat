@@ -62,7 +62,7 @@ else{
     <div class="register-container signin-container">
         <div class="register-header">
             <div class="register-logo">
-                <img src="/src/assets/logo/light_logo.png">
+                <img class="asset" src="/src/assets/logo/light_logo.png">
             </div>
             <div class="brv"></div>
             <div class="wrap-title-link">

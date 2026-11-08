@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', async function(){
         elUpdateUsername.setAttribute('data-initial', me.username);
         elUpdateEmail.setAttribute('data-initial', me.email);
         elUpdateBio.setAttribute('data-initial', me.bio);
+
+        document.querySelector(`.group-theme .option[value="${me.theme}"]`).classList.add('active');
     }
     catch(error){
         console.error(error);
@@ -46,4 +48,11 @@ document.querySelector('.img-input').addEventListener('click', () => elUpdatePfp
 elUpdatePfp.addEventListener('change', (e) => {
     elImg.src = URL.createObjectURL(e.target.files[0]);
     Form.isFormEnabled(elFormUpdate, true);
+});
+
+document.querySelectorAll('.group-theme .option').forEach(op => {
+    op.addEventListener('click', async () => {
+        document.body.setAttribute('theme', op.value);
+        await HTTP.send('/src/api/account/theme.php', 'PUT', {theme: op.value});
+    });
 });

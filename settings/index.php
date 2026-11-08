@@ -5,6 +5,8 @@
     <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/head.php"; ?>
     <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main-head.php"; ?>
     
+
+    <meta name="page" content="settings">
     <link rel="stylesheet" href="/src/css/settings.css">
     <script type="module" src="/src/js/init/settings.js"></script>
     <title>Hollow Chat</title>
@@ -26,7 +28,7 @@
                             <i class="fa-solid fa-camera"></i>
                         </div>
                         <input type="file" name="img" accept="image/jpg, image/jpeg, image/png">
-                        <div>
+                        <div class="wrap-username-email">
                             <input
                             type="username"
                             class="input username required distinct"
@@ -47,27 +49,42 @@
                     name="bio"
                     maxlength="150"
                     placeholder="Write a short bio...&#10;(Optional)"></textarea>
-                    <div class="wrap-btn">
-                        <button type="button" class="btn primary-btn submit">Apply<i class="fa-solid fa-check"></i></button>
-                        <button type="button" class="btn secondary-btn change modal-show" link-modal="modal-reset">Change password</button>
-                    </div>
+                    <button type="button" class="btn primary-btn submit">Apply<i class="fa-solid fa-check"></i></button>
                 </form>
-                <button class="btn delete modal-show" link-modal="modal-delete">Delete account</button>
+                <div class="wrap-btn wrap-reset-delete">
+                    <button type="button" class="btn secondary-btn change modal-show" link-modal="modal-reset"><i class="fa-solid fa-key"></i>Reset password</button>
+                    <button class="btn delete modal-show" link-modal="modal-delete"><i class="fa-solid fa-trash"></i>Delete account</button>
+                </div>
             </div>
             <div class="appearance section">
                 <div class="wrap-title">
                     <span class="title">Appearance settings</span>
                     <div class="sep"></div>
                 </div>
+                <div class="group-theme">
+                    <span>Theme:</span>
+                    <form>
+                        <div class="select">
+                            <option value="light" class="option">Light mode</option>
+                            <option value="dark" class="option">Dark mode</option>
+                            <input type="hidden" name="mode" class="seg-value">
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
+        <div class="right-panel">
+            <img class="asset" src="/src/assets/logo/under_maintenance.png">
+            <h1>Coming soon...</h1>
+        </div>
     </div>
-    <div class="modal modal-reset hidden">
+    <div class="modal modal-reset modal-form hidden">
         <div class="background"></div>
-        <div class="form-container">
+        <div class="container">
             <div class="logo">
-                <img src="/src/assets/logo/light_logo.png">
+                <img class="asset" src="/src/assets/logo/light_logo.png">
             </div>
+            <div class="br"></div>
             <h1>Reset your password:</h1>
             <div class="alert-placeholder"></div>
             <form method="post" autocomplete="off" class="reset-form">
@@ -90,12 +107,13 @@
             </form>
         </div>
     </div>
-    <div class="modal modal-delete hidden">
+    <div class="modal modal-delete modal-form hidden">
         <div class="background"></div>
-        <div class="form-container">
+        <div class="container">
             <div class="logo">
-                <img src="/src/assets/logo/light_logo.png">
+                <img class="asset" src="/src/assets/logo/light_logo.png">
             </div>
+            <div class="br"></div>
             <h1>Delete your account:</h1>
             <div class="alert-placeholder"></div>
             <form method="post" autocomplete="off" class="delete-form"
@@ -116,7 +134,7 @@
                 </div>
                 <div class="checkbox">
                     <input type="checkbox" class="input agree required" name="agree" required>
-                    <label for="agree">I unserstand that my account will be permanently deleted</label>
+                    <span>I unserstand that my account will be permanently deleted</span>
                 </div>
                 <div class="wrap-btn">
                     <button class="btn delete submit" type="button"><i class="fa-solid fa-trash"></i>Delete Account</button>

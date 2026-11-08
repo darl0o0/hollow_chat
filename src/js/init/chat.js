@@ -38,7 +38,7 @@ const htmlChatPageContent = `
         </div>
         <form class="send-form" method="post">
             <input type="text" class="msg-input" placeholder="Type a message..." autocomplete="off">
-            <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+            <button type="submit" class='primary-btn'><i class="fa-solid fa-paper-plane"></i></button>
         </form>
     </div>
 `;
@@ -254,8 +254,8 @@ export async function inboxPageState(isActiveChat, chatId = null){
         elChatPreview.classList.add('flex-center');
         elChatPreview.insertAdjacentHTML('afterbegin', `
             <div class="init-inbox">
-                <img src="/src/assets/logo/empty_inbox.png">
-                <div class="label-wrap">
+                <img class="asset" src="/src/assets/logo/empty_inbox.png">
+                <div class="wrap-label">
                     <span class="label">Your direct messages.</span>
                     <span class="sub-label">Choose a chat or start a new one.</span>
                 </div>

@@ -1,76 +1,51 @@
 @import url(/src/css/global.css);
 
-.home-action{
-    background-color: rgba(125, 125, 125, 0.15);
+.main .preview{
+    padding: 0 50px;
 }
 
 /* SEARCH BAR AND USERS LIST STYLING */
 
-.wrap-search{
-    position: relative;
-    .search-icon{
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: var(--input-font-size);
-        background: none;
-        color: var(--placeholder-color);
-        cursor: text;
-        border: none;
-    }
-    .search{
-        width: 100%;
-        padding: 8px;
-        padding-left: 42px;
-        border: 1px ridge #404040;
-        font-size: var(--main-font-size);
-        border-radius: var(--input-btn-border-radius);
-        background-color: var(--input-bg);
-        color: var(--main-text-color);
-        margin: 15px 0;
-        transition: 0.1s;
-    }
-    .search::placeholder{
-        color: var(--placeholder-color);
-    }
-    .search:focus{
-        outline: none;
-        border-color: #b2ad7f;
-    }
-}
-.search-dropdown{
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 10;
-    padding: 8px;
-    background: #0f0f0f;
-    border: var(--light-border);
-    border-radius: 20px;
-    max-height: 250px;
-    overflow-y: auto;
-}
 .home-list{
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     overflow-y: auto;
     list-style: none;
-    padding: 10px 5px 0 0;
+    padding: 10px 20px;
+    width: 100%;
     min-height: 0;
+    margin-top: 30px;
 }
 
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
+@media (min-width: 1100px){
+    .main{
+        grid-template-areas: 
+            "header preview right-panel"
+            "menu preview right-panel";
+        grid-template-columns: 250px auto 350px;
+        .preview{
+            padding: 0 30px;
+        }
+    }
+    .right-panel{
+        display: flex;
+    }
+}
 @media (max-width: 550px){
+    .main .preview{
+        padding: 0 10px;
+    }
     .wrap-search{
         .search-icon{
-            left: 10px;
             font-size: 18px;
         }
         .search{
             padding: 10px;
-            padding-left: 34px;
+            padding-left: 40px;
             font-size: 19px;
         }
     }

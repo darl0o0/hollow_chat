@@ -100,19 +100,19 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
         'groupId' => $group_id
     ]);
 
-    $internal_token = getEnvValue('INTERNAL_TOKEN');
+    $curl_node_token = getEnvValue('CURL_NODE_TOKEN');
 
     //Send a curl request to the Node.js server (server.js)
     $ch = curl_init('http://127.0.0.1:3000/broadcast');
 
-    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POST, true); 
     curl_setopt($ch, CURLOPT_POSTFIELDS, $socketData);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 2);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
         'Content-Length: ' . strlen($socketData),
-        'X-Internal-Token: ' . $internal_token
+        'X-Internal-Token: ' .$curl_node_token
     ]);
     curl_exec($ch);
     curl_close($ch);
@@ -126,6 +126,7 @@ elseif($_SERVER['REQUEST_METHOD'] == 'POST'){
     $row_count = mysqli_fetch_row($result_msg_count);
     $num_of_msg = $row_count[0];
     mysqli_stmt_close($stmt_msg_count);
+
     if($num_of_msg == 0){
         $stmt_insert_conversation = mysqli_prepare($con, "insert into conversations (user1, user2, is_group) values (?, ?, 0)");
         mysqli_stmt_bind_param($stmt_insert_conversation, "ss", $sid, $rid);

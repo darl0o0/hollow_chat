@@ -86,6 +86,9 @@ function uploadFile(file){
     }
 }
 
+const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+document.body.setAttribute('theme', isDarkMode ? 'dark' : 'light');
+
 Form.initForm(elFormSignup, 'POST', '', true, '/');
 
 elFormSignup.querySelector('.next').addEventListener('click', () => gotoStep(2));

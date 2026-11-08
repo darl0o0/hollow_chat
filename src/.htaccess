@@ -1,4 +1,4 @@
-Require all denied
+# Require all denied
 
 <FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2)$">
     Require all granted

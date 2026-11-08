@@ -343,7 +343,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-document.querySelector('.inbox .search').addEventListener('input', async (e) => {
+elDmContainer.querySelector('.search').addEventListener('input', async (e) => {
     bufferSearchInbox = '';
     const query = e.target.value.trim();
     if(query == ''){
@@ -492,6 +492,8 @@ socket.on('message', async (data) => {
 
     const listContainer = document.querySelector('.dms-container .list');
     const elConversationCard = listContainer.querySelector(`.u-${targetId}`);
+
+    console.log(elConversationCard)
     
     if(elConversationCard){
         listContainer.prepend(elConversationCard);

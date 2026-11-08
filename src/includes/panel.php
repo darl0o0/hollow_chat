@@ -3,10 +3,16 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
 ?>
 <a class="logo" href="/">
-    <img src="/src/assets/logo/light_logo.png">
-    <img src="/src/assets/logo/hollow_icon_light.png">
+    <img class="asset" src="/src/assets/logo/light_logo.png">
+    <img class="asset" src="/src/assets/logo/hollow_icon_light.png">
 </a>
 <div class="panel">
+    <div class="wrap-search">
+        <label for="search" class="search-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </label>
+        <input type="text" class="search" placeholder="Search">
+    </div>
     <a href="/" class="panel-action home-action">
         <i class="fa-solid fa-house"></i>
         <span>Home</span>
@@ -15,7 +21,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
     <a href="/inbox/" class="panel-action inbox-action">
         <div class="wrap-icon-count">        
             <i class="fa-solid fa-inbox"></i>
-            <div class="num-of display-none"></div>
+            <div class="count display-none"></div>
         </div>
         <span>Inbox</span>
     </a>
@@ -27,7 +33,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
     <button class="panel-action notifications-action modal-show" link-modal="modal-requests">
         <div class="wrap-icon-count">        
             <i class="fa-solid fa-bell"></i>
-            <div class="num-of display-none"></div>
+            <div class="count display-none"></div>
         </div>
         <span>Notifications</span>
     </button>

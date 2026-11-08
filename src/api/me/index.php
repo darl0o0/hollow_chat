@@ -11,13 +11,13 @@ $user_data = check_login($con);
 header('Content-Type: application/json; charset=utf-8');
 
 $data = [
-    'method' => $_SERVER['REQUEST_METHOD'],
     'id' => $user_data['id'],
     'username' => $user_data['username'],
     'email' => $user_data['email'],
     'bio' => $user_data['bio'],
     'img' => $user_data['img'],
-    'isPrivate' => filter_var($user_data['private'], FILTER_VALIDATE_BOOLEAN)
+    'isPrivate' => filter_var($user_data['private'], FILTER_VALIDATE_BOOLEAN),
+    'theme' => $user_data['theme']
 ];
 
 ok(true, $data);

@@ -5,6 +5,8 @@
     <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/head.php"; ?>
     <?php include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main-head.php"; ?>
 
+
+    <meta name="page" content="inbox">
     <link rel="stylesheet" href="/src/css/chat.css">
     <link rel="stylesheet" href="/src/css/inbox.css">
     <script type="module" src="/src/js/init/inbox.js"></script>
@@ -35,7 +37,7 @@
             <div class="chat-preview"></div>
         </div>
     </div>
-    <div class="modal group-modal hidden">
+    <div class="modal group-modal modal-form hidden">
         <div class="background"></div>
         <div class="container">
             <h1>

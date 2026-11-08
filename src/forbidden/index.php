@@ -45,7 +45,7 @@
         .br{
             width: 100%;
             height: 1px;
-            background-color: #464646ff;
+            background: #464646ff;
             margin: 10px 0;
         }
         .container h1{
@@ -67,12 +67,12 @@
             transition: 0.05s;
         }
         .container a:hover{
-            background-color: #e9e4c8;
+            background: #e9e4c8;
             color: #161B37;
         }
         .container a:active{
             border: 2px solid #b7b39d;
-            background-color: #b7b39d;
+            background: #b7b39d;
             color: #161B37;
         }
     </style>

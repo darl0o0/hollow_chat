@@ -36,3 +36,7 @@ RewriteRule ^(.*)index\.php$ /$1/ [R=301,L]
 <Files "Bugs.md">
     Require all denied
 </Files>
+
+<Files "admin/">
+    Require all denied
+</Files>

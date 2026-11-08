@@ -25,8 +25,8 @@ function updateBadges(){
     countNotifications = countUnseen + countRequests;
     document.title = countNotifications > 0 ? `(${countNotifications}) Hollow Chat` : "Hollow Chat";
 
-    const inboxBadge = document.querySelector('.inbox-action .num-of');
-    const NotificationsBadge = document.querySelector('.notifications-action .num-of');
+    const inboxBadge = document.querySelector('.inbox-action .count');
+    const NotificationsBadge = document.querySelector('.notifications-action .count');
     const elNotificationsCountLabel = document.querySelector('.modal-requests .not-count');
     
     inboxBadge.textContent = countUnseen;
@@ -35,7 +35,7 @@ function updateBadges(){
     const notificationsCountLabel = (countRequests > 0) ? `(${countRequests})` : '';
     elNotificationsCountLabel.textContent = notificationsCountLabel;
 
-    document.querySelectorAll('.num-of').forEach(numOf => {
+    document.querySelectorAll('.count').forEach(numOf => {
         const val = Number(numOf.textContent);
         if(val == 0){
             numOf.classList.add('display-none');
@@ -49,6 +49,13 @@ function updateBadges(){
     });
 }
 
+const page = document.querySelector('meta[name="page"]')?.content;
+if(page) document.querySelector(`.panel .${page}-action`).classList.add('highlight');
+
+// document.body.setAttribute('theme', 'light');
+const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+document.body.setAttribute('theme', isDarkMode ? 'dark' : 'light');
+
 document.addEventListener('DOMContentLoaded', async function(){
 
     // Fetch user's data
@@ -56,6 +63,15 @@ document.addEventListener('DOMContentLoaded', async function(){
         const getMe = await HTTP.send('/src/api/me/', 'GET');
         me = getMe.response;
         id = me.id;
+
+        if(me.theme === 'default'){
+            const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.body.setAttribute('theme', isDarkMode ? 'dark' : 'light');
+        }
+        else{
+            document.body.setAttribute('theme', me.theme);
+        }
+
         resolveUserData(me);
 
     }
@@ -73,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async function(){
     document.querySelector('.profile-action .username-label').textContent = me.username;
 
     // Metadata
-    countUnseen = Number(document.querySelector('meta[name="num-of-unread"]').content);
+    countUnseen = Number(document.querySelector('meta[name="count-unread"]').content);
 
     const getFriends = await HTTP.send('/src/api/friends/', 'GET');
     const requests = getFriends.response.requests;

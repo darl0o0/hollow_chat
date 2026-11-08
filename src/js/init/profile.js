@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async function(){
                 elPreview.insertAdjacentHTML('afterbegin', wrapProfile(true));
     
                 profileActions = `
-                    <div class="profile-actions">
+                    <div class="wrap-btn profile-actions">
                         <button class="btn primary-btn share-profile">
                         <i class="fa-solid fa-share"></i>
                         Share profile
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async function(){
                 const stat = await defineState();
 
                 profileActions = `
-                    <div class="profile-actions">
+                    <div class="wrap-btn profile-actions">
                         <a href="/inbox/?q=${HTML.escapeHTML(qid)}" class="btn primary-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
                         <form
                         method="post" 

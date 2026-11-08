@@ -25,7 +25,7 @@ export const UI = {
     // Global elements
     globalElements: function(){
         if(document.querySelector('.modal-requests')) return;
-        let countNot = Number(document.querySelector('.notifications-action .num-of').textContent);
+        let countNot = Number(document.querySelector('.notifications-action .count').textContent);
         countNot = (!isNaN(countNot) && countNot > 0) ? `(${countNot})` : '';
 
         const htmlNotificationsModal = `
@@ -176,10 +176,6 @@ export const Fetch = {
                 resolve(filteredList.length > 0 ? filteredList : null);
             }, 300);
         });
-    },
-    
-    returnTargetData: function(target){
-        
     },
 
     getObjectSize: function(obj){
@@ -613,20 +609,17 @@ export const HTML = {
                     </div>
                 </a>
                 <div class="content">
-                    <p>${post.content.text}</p>
+                    ${post.content.text ? `<p>${post.content.text}</p>` : ''}
                     <div class="wrap-media">
-                        ${post.content.hasImg ? 
+                        ${post.content.img ? 
                             `
-                                <div class='media-blur-bg'>
-                                    <img src='/src/assets/posts/${post.content.img}'>
-                                </div>
                                 <img class='media' src='/src/assets/posts/${post.content.img}'>
                             ` 
                         : ''}
                     </div>
                 </div>
                 <div class="actions">
-                    <button class="action like">
+                    <button class="action like${post.isLikedByMe ? ' liked' : ''}">
                         <i class="${post.isLikedByMe ? 'fa-regular fa-solid' : 'fa-regular'} fa-heart"></i>
                         <span>${post.count.like}</span>
                     </button>

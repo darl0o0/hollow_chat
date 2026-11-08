@@ -1,26 +1,31 @@
 @import url(/src/css/global.css);
 
-.inbox-action{
-    background-color: rgba(125, 125, 125, 0.15);
+:root{
+    --unseen-msg-color: #535353;
+    --unread-badge-bg: #7a97ee;
 }
 
-/* PREVIEW AND USER CARD CUSTOMIZATION */
+body[theme='dark']{
+    --unseen-msg-color: #fdffe1;
+    --unread-badge-bg: #fdffe1;
+}
 
 .main .preview{
     display: flex;
     flex-direction: row;
     padding: 0;
     .dms-container{
-        display: flex;
         flex-direction: column;
         padding: 20px 15px;
-        border-right: var(--light-border);
         overflow-y: auto;
         height: 100%;
         flex-basis: 550px;
+        box-shadow: var(--box-shadow-sides);
+        background: var(--logo-panel-bg);
+        border-right: var(--light-border);
+        z-index: 1;
         .grp-btn{
             background: none;
-            color: #fdffe1;
             font-size: 20px;
             font-weight: 600;
             padding: 8px;
@@ -29,6 +34,7 @@
             margin: 0 2px;
             cursor: pointer;
             transition: 0.1s;
+            color: var(--body-color);
         }
         .grp-btn:hover{
             transform: scale(1.2);
@@ -66,8 +72,8 @@
                     }
                 }
                 .btn-inbox{
+                    color: var(--body-color);
                     background: none;
-                    color: #fdffe1;
                     font-size: 20px;
                     font-weight: 600;
                     padding: 8px;
@@ -86,8 +92,7 @@
                     height: 12px;
                     border-radius: 50%;
                     margin-right: 10px;
-                    color: #111033;
-                    background: #eeefcc;
+                    background: var(--unread-badge-bg);
                 }
             }
             .nothing-here{
@@ -101,8 +106,8 @@
 }
 .chat-card.unseen{
     .sub-label{
-        color: #d5d6c3;
         font-weight: bolder;
+        color: var(--unseen-msg-color);
     }
     .unread-msg{
         visibility: visible;
@@ -110,8 +115,8 @@
 }
 .chat-card.seen{
     .sub-label{
-        color: #a8a8a8;
         font-weight: 400;
+        color: var(--secondary-label-color);
     }
     .unread-msg{
         visibility: hidden;
@@ -121,13 +126,9 @@
     transition: 0.1s;
     .container{
         width: 80%;
-        padding: 20px 30px 18px 30px;
         h1 i{
             margin-right: 6px;
         }
-    }
-    .wrap-search{
-        margin: 14px 0 14px 0;
     }
     .selected-members{
         display: flex;
@@ -160,6 +161,9 @@
             font-size: 12px;
         }
     }
+    .wrap-title{
+        margin-top: 20px;
+    }
     .list{
         max-height: 222px;
         width: 100%;
@@ -178,7 +182,7 @@
 
 /* MEDIA QUERIES FOR MOBILES AND TABLETS */
 
-@media (min-width: 550px) and (max-width: 700px){
+@media (min-width: 550px) and (max-width: 740px){
     .main .preview{
         .dms-container{
             flex-basis: 110px;
