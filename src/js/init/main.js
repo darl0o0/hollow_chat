@@ -53,8 +53,8 @@ const page = document.querySelector('meta[name="page"]')?.content;
 if(page) document.querySelector(`.panel .${page}-action`).classList.add('highlight');
 
 // document.body.setAttribute('theme', 'light');
-const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-document.body.setAttribute('theme', isDarkMode ? 'dark' : 'light');
+// const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+// document.body.setAttribute('theme', isDarkMode ? 'dark' : 'light');
 
 document.addEventListener('DOMContentLoaded', async function(){
 

@@ -56,7 +56,7 @@ body{
             width: 120px;
             height: 120px;
             border-radius: 10px;
-            border: var(--light-border);
+            border: var(--soft-border-dark);
             margin: auto auto;
         }
         .fa-x{

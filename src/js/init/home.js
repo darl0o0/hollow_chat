@@ -34,11 +34,11 @@ const post = {
     }
 }
 
-// elListUsers.skeleton('post');
+elListUsers.skeleton('post');
 
 setTimeout(async () => {
+    elListUsers.innerHTML = HTML.post(await HTTP.fetchUsersBatch(post.author_id), post);
 }, 400);
-elListUsers.innerHTML = HTML.post(await HTTP.fetchUsersBatch(post.author_id), post);
 
 document.addEventListener('DOMContentLoaded', async function(){
     try{

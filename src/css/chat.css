@@ -30,7 +30,7 @@ body[theme="dark"]{
     padding: 12px;
     background: var(--logo-panel-bg);
     box-shadow: var(--box-shadow);
-    border-bottom: var(--light-border);
+    border-bottom: var(--soft-border-dark);
     .wrap-pfp{
         img{
             width: 50px;
@@ -48,7 +48,7 @@ body[theme="dark"]{
 .mobile-header{
     display: none;
     grid-area: profile;
-    border-left: var(--light-border);
+    border-left: var(--soft-border-dark);
 }
 .chat-preview{
     display: flex;
@@ -120,7 +120,7 @@ body[theme="dark"]{
         background: var(--msg-you-bg);
         color: var(--msg-you-color);
         box-shadow: var(--msg-you-box-shadow);
-        border: var(--light-border);
+        border: var(--soft-border-dark);
     }
     .wrap-msg, .wrap-typing{
         display: flex;
@@ -171,7 +171,7 @@ body[theme="dark"]{
                     border-radius: 25px;
                     background: var(--logo-panel-bg);
                     box-shadow: var(--msg-me-box-shadow);
-                    border: var(--light-border);
+                    border: var(--soft-border-dark);
                     button{
                         font-size: 22px;
                     }
@@ -259,7 +259,7 @@ body[theme="dark"]{
         font-size: 23px;
         padding: 10px 8px 14px 8px;
         background: var(--input-bg);
-        border-top: var(--light-border);
+        border-top: var(--soft-border-dark);
         color: var(--body-color);
     }
     input::placeholder{
@@ -268,7 +268,7 @@ body[theme="dark"]{
     input:focus{
         outline: none;
         border: none;
-        border-top: var(--light-border);
+        border-top: var(--soft-border-dark);
     }
     button{
         border-radius: 0;
@@ -279,7 +279,7 @@ body[theme="dark"]{
         height: 100%;
         transition: 0.1s;
         border: none;
-        border-top: var(--light-border);
+        border-top: var(--soft-border-dark);
     }
 }
 
@@ -288,7 +288,7 @@ body[theme="dark"]{
 @media (max-width: 550px){
     .logo{
         padding: 8px 15px;
-        border-right: var(--light-border);
+        border-right: var(--soft-border-dark);
         img{
             width: 100%;
         }

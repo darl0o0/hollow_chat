@@ -344,7 +344,7 @@ export const Form = {
         
             if(res.status == 'error'){
                 const err = new Error(res.response);
-                err.isHandled = res.isHandled;
+                err.isHandled = res.is_handled;
                 throw err;
             }
             else if(res.status == 'ok'){
@@ -376,10 +376,10 @@ export const Form = {
         }
         catch(error){
             this.setErrorCooldown(form);
-            console.error(error.isHandled);
 
             if(!error.isHandled){
                 UI.alert(false, "An unexpected error occurred. Please try again.", undefined, elFormParent);
+                console.error(error);
             }
             else{
                 UI.alert(false, error.message, undefined, elFormParent);
@@ -474,8 +474,7 @@ export const HTML = {
             class='user-card ${type} ${subLabel.isLastMsg ? (subLabel.isRead ? 'seen' : 'unseen') : ''} u-${this.escapeHTML(id)}'
             ${subLabel.isLastMsg ? ` data-last-msg="${this.escapeHTML(subLabel.text)}"` : ''} 
             user-id='${this.escapeHTML(id)}'
-            ${isLink ? ` href='profile/?q=${this.escapeHTML(id)}'` : ''} 
-            tabindex='0'>
+            ${isLink ? ` href='profile/?q=${this.escapeHTML(id)}'` : ''} >
                 ${options.hasPlus ? `
                     <div class='select-indicator'>
                         <i class="fa-solid fa-plus"></i>
@@ -672,9 +671,18 @@ export const HTML = {
     }
 }
 
+export const Get = {
+    urlKey: function(key){
+        const getParams = new URLSearchParams(window.location.search);
+        let value = getParams.get(key) ? (getParams.get(key).length > 0 ? getParams.get(key) : null) : null;
+        return value;
+    }
+}
+
 // Skeleton screen method
 Element.prototype.skeleton = function(contentType){
     const listHeight = this.clientHeight;
+
     let elHeight;
 
     switch(contentType){

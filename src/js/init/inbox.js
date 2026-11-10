@@ -264,13 +264,15 @@ document.addEventListener('click', (e) => {
     
     switch(true){
         case Boolean(elUserCard):
-            const userId = elUserCard.getAttribute('user-id');
-            const url = new URL(window.location.href);
-            url.searchParams.set("q", userId);
-            window.history.pushState({q: userId}, 'Inbox', url);
-            inboxPageState(true, userId);
-            isViewportMobile(userId);
-            // updateQid();
+            const elMoreBtn = e.target.closest('.user-card .btn-inbox');
+            if(!elMoreBtn){
+                const userId = elUserCard.getAttribute('user-id');
+                const url = new URL(window.location.href);
+                url.searchParams.set("q", userId);
+                window.history.pushState({q: userId}, 'Inbox', url);
+                inboxPageState(true, userId);
+                isViewportMobile(userId);
+            }
         break;
         case Boolean(elGroupUserCard):
             selectedUserId = elGroupUserCard.getAttribute('user-id');
@@ -493,8 +495,6 @@ socket.on('message', async (data) => {
     const listContainer = document.querySelector('.dms-container .list');
     const elConversationCard = listContainer.querySelector(`.u-${targetId}`);
 
-    console.log(elConversationCard)
-    
     if(elConversationCard){
         listContainer.prepend(elConversationCard);
         const elSubLabel = elConversationCard.querySelector('.sub-label');

@@ -1,8 +1,6 @@
 // Initialization
-import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic } from "../helpers.js";
+import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic, Get } from "../helpers.js";
 import { socket, userDataReady} from "./main.js";
-
-const getParams = new URLSearchParams(window.location.search);
 
 // User objects
 let me = null;
@@ -10,7 +8,7 @@ let target = null;
 
 // IDs
 let id = null;
-const qid = getParams.get('q') ? (getParams.get('q').length > 0 ? getParams.get('q') : null) : null;
+let qid = Get.urlKey('q');
 let groupId = null;
 
 // Lists of objects
@@ -47,16 +45,6 @@ const htmlChatPageContent = `
 let resolveTargetData;
 const targetDataReady = new Promise((resolve) => {
     resolveTargetData = resolve;
-});
-
-let resolveChatIsLoaded;
-export const chatLoaded = new Promise((resolve) => {
-    resolveChatIsLoaded = resolve;
-});
-
-let resolveChatReadyToLoad;
-const chatReadyToLoad = new Promise((resolve) => {
-    resolveChatReadyToLoad = resolve;
 });
 
 // Counters
@@ -105,43 +93,48 @@ async function loadChat(target){
     let bufferMessages = '';
 
     const elField = document.querySelector('.field');            
-    const elInnerField = document.querySelector('.inner-field');
+    const elInnerField = elField.querySelector('.inner-field');
     const elInput = document.querySelector('.send-form input');
 
     elInput.focus();
     isGroup = target.isGroup;
 
-    const getMessages = await HTTP.send('/src/api/messages/', 'GET', {
-        qid: target.id,
-        isGroup: target.isGroup
-    }); // Should be query
-    const messages = getMessages.response;
-
-    if(Array.isArray(messages) && messages){
-
-        for(let i = 0; i < messages.length; i++){
-            const message = messages[i];
-
-            const nextMsg = messages[i + 1];
-            const isNextFromDifferentUser = !nextMsg || message.sid != nextMsg.sid;
-
-            const previousMsg = messages[i - 1];
-            const isPreviousFromDifferentUser = !previousMsg || message.sid != previousMsg.sid;
-            
-            bufferMessages += HTML.message(
-                message,
-                message.sid == id,
-                {isPreviousFromDifferentUser, isNextFromDifferentUser},
-                message.user,
-                message.isRead
-            );
+    try{
+        const getMessages = await HTTP.send('/src/api/messages/', 'GET', {
+            qid: target.id,
+            isGroup: target.isGroup
+        }); // Should be query
+        const messages = getMessages.response;
+    
+        if(Array.isArray(messages) && messages){
+    
+            for(let i = 0; i < messages.length; i++){
+                const message = messages[i];
+    
+                const nextMsg = messages[i + 1];
+                const isNextFromDifferentUser = !nextMsg || message.sid != nextMsg.sid;
+    
+                const previousMsg = messages[i - 1];
+                const isPreviousFromDifferentUser = !previousMsg || message.sid != previousMsg.sid;
+                
+                bufferMessages += HTML.message(
+                    message,
+                    message.sid == id,
+                    {isPreviousFromDifferentUser, isNextFromDifferentUser},
+                    message.user,
+                    message.isRead
+                );
+            }
         }
+        else{
+            bufferMessages = '<center>Start chatting now.</center>';
+        }
+
+        elInnerField.innerHTML = bufferMessages;
     }
-    else{
-        bufferMessages = '<center>Start chatting now.</center>';
+    catch(error){
+        console.error("Messages failed to fetch or render.\n", error)
     }
-    elInnerField.innerHTML = bufferMessages;
-    scroll();
 }
 
 // Load header
@@ -206,15 +199,12 @@ async function loadHeader(target){
 
 // Render chat
 async function renderChat(targetId){
-    target = await HTTP.fetchUsersBatch(targetId);
-
-    resolveChatReadyToLoad();
-    loadHeader(target);
-    loadChat(target);
     try{
-        await chatLoaded;
+        target = await HTTP.fetchUsersBatch(targetId);
+        await loadHeader(target);
+
+        await loadChat(target);
         readChat(target.id);
-        const elField = document.querySelector('.field');
         scroll();
     }
     catch(error){
@@ -228,7 +218,55 @@ function scroll(){
     elField.scrollTop = elField.scrollHeight;
 }
 
+function initSendForm(){
+    const elFormSend = document.querySelector('.send-form');
+    const elInput = elFormSend.querySelector('input');
+    const elBtnSend = elFormSend.querySelector('button[type="submit"]');
+
+    // Prevent keyboard from hiding
+    elBtnSend.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+    });
+
+    // Send message
+    elFormSend.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msgText = document.querySelector('.msg-input').value;
+        if(msgText.trim().length > 0){
+            await HTTP.send('/src/api/messages/', 'POST', dataMessage(msgText));
+
+            document.querySelector('.msg-input').value = null;
+            isTyping = false;
+            socket.emit('typing:ping', dataTyping(false));
+        }
+    });
+
+    // When typing
+    elInput.addEventListener('input', () => {
+        const hasText = elInput.value.trim().length > 0;
+
+        if(hasText && !isTyping){
+            isTyping = true;
+            socket.emit('typing:ping', dataTyping(true));
+        }
+
+        else if(!hasText && isTyping){
+            isTyping = false;
+            socket.emit('typing:ping', dataTyping(false));
+        }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) || document.activeElement.isContentEditable) return;
+
+        if(e.ctrlKey || e.metaKey || e.altKey || (e.key.length > 1 && e.key !== 'Backspace')) return;
+
+        elInput.focus();
+    });
+}
+
 export async function inboxPageState(isActiveChat, chatId = null){
+    qid = Get.urlKey('q');
     document.querySelectorAll('.user-card.highlight').forEach(c => c.classList.remove('highlight'));
     elChatPreview.querySelector('.wrap-field-input')?.remove();
 
@@ -239,6 +277,7 @@ export async function inboxPageState(isActiveChat, chatId = null){
 
         elChatPreview.classList.remove('flex-center');
         elChatPreview.insertAdjacentHTML('beforeend', htmlChatPageContent);
+        initSendForm();
         
         // Preview chat
         try{
@@ -273,61 +312,12 @@ else{
 }
 
 document.addEventListener('DOMContentLoaded', async function(){
-
     try{
         me = await userDataReady;
         id = me.id;
     }
     catch(error){
         console.error(error);
-    }
-
-    try{
-        if(!id) return;
-
-        await chatReadyToLoad;
-        
-        // Send message
-        document.querySelector('.send-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const msgText = document.querySelector('.msg-input').value;
-            if(msgText.trim().length > 0){
-                await HTTP.send('/src/api/messages/', 'POST', dataMessage(msgText));
-
-                document.querySelector('.msg-input').value = null;
-                isTyping = false;
-                socket.emit('typing:ping', dataTyping(false));
-            }
-        });
-
-        // When typing
-        const elInput = document.querySelector('.send-form input');
-        elInput.addEventListener('input', () => {
-            const hasText = elInput.value.trim().length > 0;
-
-            if(hasText && !isTyping){
-                isTyping = true;
-                socket.emit('typing:ping', dataTyping(true));
-            }
-
-            else if(!hasText && isTyping){
-                isTyping = false;
-                socket.emit('typing:ping', dataTyping(false));
-            }
-        });
-        
-        document.addEventListener('keydown', (e) => {
-            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) || document.activeElement.isContentEditable) return;
-
-            if(e.ctrlKey || e.metaKey || e.altKey || (e.key.length > 1 && e.key !== 'Backspace')) return;
-
-            elInput.focus();
-        });
-        
-        resolveChatIsLoaded();
-    }
-    catch(error){
-        console.error('An error occured while trying to load chat: ', error);
     }
 });
 

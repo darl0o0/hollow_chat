@@ -6,7 +6,7 @@
 
 /* SETTINGS FORM AND BUTTONS */
 .main .preview{
-    padding: 0 25px;
+    padding: 0 5%;
     overflow-y: auto;
 }
 .preview form{
@@ -62,8 +62,10 @@ input[name='img']{
     flex-direction: row;
     gap: 12px;
     margin-top: 20px;
+    button{
+        font-size: 16px;
+    }
 }
-
 .group-theme{
     display: flex;
     margin-top: 25px;
@@ -106,9 +108,9 @@ input[name='img']{
     }
 }
 @media (max-width: 550px){
-    .main .preview{
-        padding: 15px;
-    }
+    /* .main .preview{
+        padding: 0 25px;
+    } */
     .wrap-pfp{
         gap: 20px;
     }

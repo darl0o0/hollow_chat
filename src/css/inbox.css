@@ -22,7 +22,7 @@ body[theme='dark']{
         flex-basis: 550px;
         box-shadow: var(--box-shadow-sides);
         background: var(--logo-panel-bg);
-        border-right: var(--light-border);
+        border-right: var(--soft-border-dark);
         z-index: 1;
         .grp-btn{
             background: none;
@@ -44,6 +44,7 @@ body[theme='dark']{
             flex-direction: column;
             flex: 1;
             min-height: 0;
+            height: 100%;
         }
         .list{
             flex: 1;

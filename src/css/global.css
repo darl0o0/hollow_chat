@@ -25,8 +25,10 @@
     --delete-btn-bg: #c43c3c;
     --delete-btn-color: #faf5f0;
 
-    --light-border: none;
+    --soft-border-dark: none;
+    --soft-border-light: 1px ridge #919191;
     --sep-bg: #929292;
+    --dynamic-border: var(--soft-border-light);
     
     --primary-label-color: #3f3f3f;
     --secondary-label-color: #747474;
@@ -73,8 +75,9 @@ body[theme='dark']{
     --delete-btn-bg: #c43c3c;
     --delete-btn-color: #faf5f0;
     
-    --light-border: 1px ridge #464646;
+    --soft-border-dark: 1px ridge #464646;
     --sep-bg: #464646;
+    --dynamic-border: var(--soft-border-dark);
 
     --primary-label-color: #e9e4c8;
     --secondary-label-color: #a8a8a8;
@@ -224,7 +227,7 @@ body{
     font-size: var(--input-font-size);
     transition: 0.1s;
     background: var(--input-bg);
-    border: var(--light-border);
+    border: var(--soft-border-dark);
     box-shadow: var(--input-box-shadow);
     color: var(--body-color);
 }
@@ -321,7 +324,7 @@ body{
     background: var(--select-bg);
     padding: 6px 7px;
     gap: 6px;
-    border: var(--light-border);
+    border: var(--soft-border-dark);
     box-shadow: var(--card-box-shadow);
     option{
         padding: 12px 13px;
@@ -405,7 +408,7 @@ body{
     .logo, .panel{
         box-shadow: var(--box-shadow-sides);
         background: var(--logo-panel-bg);
-        border-right: var(--light-border);
+        border-right: var(--soft-border-dark);
         z-index: 2;
     }
     .logo{
@@ -414,7 +417,7 @@ body{
         padding: 10px 0;
         width: 100%;
         grid-area: header;
-        border-bottom: var(--light-border);
+        border-bottom: var(--dynamic-border);
         img:first-child{
             width: 100%;
             max-width: 150px;
@@ -553,7 +556,8 @@ body{
         border-radius: var(--input-btn-border-radius);
         transition: 0.1s;
         background: var(--input-bg);
-        border: var(--light-border);
+        color: var(--body-color);
+        border: var(--soft-border-dark);
         box-shadow: var(--input-box-shadow);
     }
     .search::placeholder{
@@ -575,6 +579,9 @@ body{
         border-radius: 20px;
         max-height: 250px;
         overflow-y: auto;
+        background: var(--card-bg);
+        border: var(--soft-border-dark);
+        box-shadow: var(--card-box-shadow);
     }
 }
 .wrap-title{
@@ -630,7 +637,7 @@ body{
     box-shadow: var(--card-box-shadow);
     flex: 1;
     background: var(--card-bg);
-    border: var(--light-border);
+    border: var(--soft-border-dark);
     .header{
         display: flex;
         flex-direction: row;
@@ -655,8 +662,8 @@ body{
         flex-direction: column;
         position: relative;
         cursor: pointer;
-        border-top: var(--light-border);
-        border-bottom: var(--light-border);
+        border-top: var(--dynamic-border);
+        border-bottom: var(--dynamic-border);
         p{
             margin: 0;
             margin-top: 10px;
@@ -781,15 +788,20 @@ body{
     margin-bottom: 10px;
 }
 .skeleton-post{
+    display: flex;
+    flex-direction: column;
+    max-width: 550px; 
+    flex: 1;
+    width: 100%;
     margin-bottom: 25px;
     padding: 0 14px;
-    border: var(--light-border);
+    border: var(--soft-border-dark);
     border-radius: 20px;
     .header{
         display: flex;
         flex-direction: row;
         align-items: center;
-        border-bottom: var(--light-border);
+        border-bottom: var(--soft-border-dark);
         padding: 14px 0 14px 4px;
     }
     .content{
@@ -829,7 +841,7 @@ body{
         width: 52px;
         height: 52px;
         border-radius: 50%;
-        border: var(--light-border);
+        border: var(--dynamic-border);
     }
     .online-status{
         width: 18px;
@@ -889,7 +901,7 @@ body{
     height: 100%;
     box-shadow: var(--box-shadow-sides);
     background: var(--logo-panel-bg);
-    border-left: var(--light-border);
+    border-left: var(--soft-border-dark);
     img{
         width: 250px;
         filter: saturate(0.1) invert(--filter-invert);
@@ -930,7 +942,7 @@ body{
         transition: 0.15s;
         background: var(--body-bg);
         box-shadow: var(--box-shadow);
-        border: var(--light-border);
+        border: var(--soft-border-dark);
         .logo{
             text-align: center;
             img{
@@ -1150,7 +1162,7 @@ center{
             border-right: none;
             padding: 6px 3px;
             z-index: 2;
-            border-top: var(--light-border);
+            border-top: var(--soft-border-dark);
             form{
                 display: flex;
                 width: 100%;
