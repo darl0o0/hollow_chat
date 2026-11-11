@@ -3,10 +3,21 @@
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 
-if(!isset($_SESSION['id'])){
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
 
-    if($_SERVER['REQUEST_METHOD'] == "POST"){
-        checkHeadersCSRF();
+set_error_handler(function($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+
+if(isset($_SESSION['id'])){
+    header("Location: /");
+    return;
+}
+
+if($_SERVER['REQUEST_METHOD'] == "POST"){
+    try{
+        guard('POST');
 
         //Database primary parameters
         $username = trim($_POST['username']);
@@ -21,23 +32,23 @@ if(!isset($_SESSION['id'])){
         $img = processAndSaveProfilePic($_FILES['img']);
 
         if(empty($username) || empty($email) || empty($password1) || empty($password2)){
-            ok(false, 'All inputs are required.');
+            respondError('All inputs are required.', 400);
         }
 
         if(str_contains($username, " ")){
-            ok(false, 'Username cannot contain space.');
+            respondError('Username cannot contain space.', 400);
         }
 
         if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            ok(false, 'Please enter a valid email.');
+            respondError('Please enter a valid email.', 400);
         }
 
         if(strlen($password1) < 8){
-            ok(false, 'Please provide an 8 characters long password.');
+            respondError('Please provide an 8 characters long password.', 400);
         }
 
         if($password1 !== $password2){
-            ok(false, 'Passwords do not match.');
+            respondError('Passwords do not match.', 400);
         }
 
         $stmt_user = mysqli_prepare($con, "select * from users where username = ? or email = ?");
@@ -49,7 +60,8 @@ if(!isset($_SESSION['id'])){
         mysqli_stmt_close($stmt_user);
 
         if(count($row_user) > 0){
-            ok(false, 'Cannot use the provided credentials.');
+            writeLog(json_encode([$row_user]));
+            respondError('Cannot use the provided credentials.', 400);
         }
 
         if(empty($img)){
@@ -67,11 +79,13 @@ if(!isset($_SESSION['id'])){
         include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
         
         $_SESSION['id'] = $id;
-        ok(true, 'Redirecting...');
+        respondOk('Redirecting...');
     }
-}
-else{
-    header("Location: /");
+    catch(Throwable $e){
+        writeLog("API Error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+
+        respondError("Internal Server Error.", 500);
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -96,18 +110,18 @@ else{
             </div>
         </div>
         <div class="alert-placeholder"></div>
-        <form class="signup-form" method="post" enctype="multipart/form-data" novalidate>
+        <form class="signup-form" method="post" enctype="multipart/form-data" novalidate autocomplete="off">
             <div class="form-step step-1 active-form-step">
                 <div class="wrap-username-email">
-                    <input type="username" class="input username required" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15">
-                    <input type="email" class="input email required" name="email" placeholder="Email">
+                    <input type="username" class="input username required" name="username" placeholder="Username" pattern="[A-Za-z0-9_]+" maxlength="15" readonly>
+                    <input type="email" class="input email required" name="email" placeholder="Email" readonly>
                 </div>
                 <div class="wrap-password">
-                    <input type="password" class="input password pass-1 required match" name="password-1" placeholder="Password">
+                    <input type="password" class="input password pass-1 required match" name="password-1" placeholder="Password" readonly>
                     <button type="button" class="s-h s-h-1"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="wrap-password">
-                    <input type="password" class="input password pass-2 required match" name="password-2" placeholder="Confirm password">
+                    <input type="password" class="input password pass-2 required match" name="password-2" placeholder="Confirm password" readonly>
                     <button type="button" class="s-h s-h-2"><i class="fa fa-eye" aria-hidden="true"></i></button>
                 </div>
                 <div class="wrap-btn">

@@ -162,7 +162,7 @@ elPreview.addEventListener('submit', async (e) => {
 
     if(elLogoutForm){
         const logout = await HTTP.send('/src/api/account/logout.php', 'POST');
-        if(logout.status == 'ok'){
+        if(logout.ok){
             window.location.replace('/signin');
         }
     }

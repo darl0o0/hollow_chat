@@ -1,52 +1,64 @@
 <?php
-
 //Initialization
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 
-header('Content-Type: application/json; charset=utf-8');
-// guard('GET');
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+
+set_error_handler(function($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
 
 $user_data = check_login($con);
 $id = $user_data['id'];
+
 $data = [];
 
-// All revalent groups
-$stmt_my_groups = mysqli_prepare($con, "
-    select id from groups 
-    where admin = ? or m1 = ? or m2 = ? or m3 = ? or m4 = ?
-");
-mysqli_stmt_bind_param($stmt_my_groups, "sssss", $id, $id, $id, $id, $id);
-mysqli_stmt_execute($stmt_my_groups);
-$result_my_groups = mysqli_stmt_get_result($stmt_my_groups);
+try{
+    guard('GET');
 
-$group_ids = [];
-while($g = mysqli_fetch_assoc($result_my_groups)){
-    $group_ids[] = $g['id'];
-}
-mysqli_stmt_close($stmt_my_groups);
+    // All revalent groups
+    $stmt_my_groups = mysqli_prepare($con, "
+        select id from groups 
+        where admin = ? or m1 = ? or m2 = ? or m3 = ? or m4 = ?
+    ");
+    mysqli_stmt_bind_param($stmt_my_groups, "sssss", $id, $id, $id, $id, $id);
+    mysqli_stmt_execute($stmt_my_groups);
+    $result_my_groups = mysqli_stmt_get_result($stmt_my_groups);
 
-//List of conversations
-$group_placeholders = !empty($group_ids) ? implode(',', array_fill(0, count($group_ids), '?')) : 'null';
-$query = "select * from conversations where (is_group = 0 and (user1 = ? or user2 = ?)) or (is_group = 1 and user1 in ($group_placeholders))";
+    $group_ids = [];
+    while($g = mysqli_fetch_assoc($result_my_groups)) $group_ids[] = $g['id'];
+    
+    mysqli_stmt_close($stmt_my_groups);
 
-$stmt_conversations = mysqli_prepare($con, $query);
-if(!empty($group_ids)){
-    $types = "ss" . str_repeat('s', count($group_ids));
-    $params = array_merge([$id, $id], $group_ids);
-    mysqli_stmt_bind_param($stmt_conversations, $types, ...$params);
-}
-else{
-    mysqli_stmt_bind_param($stmt_conversations, 'ss', $id, $id);
-}
-mysqli_stmt_execute($stmt_conversations);
-$result_conversations = mysqli_stmt_get_result($stmt_conversations);
+    //List of conversations
+    $group_placeholders = !empty($group_ids) ? implode(',', array_fill(0, count($group_ids), '?')) : 'null';
+    $query = "select * from conversations where (is_group = 0 and (user1 = ? or user2 = ?)) or (is_group = 1 and user1 in ($group_placeholders))";
 
-$conversations = mysqli_fetch_all($result_conversations, MYSQLI_ASSOC);
-mysqli_stmt_close($stmt_conversations);
+    $stmt_conversations = mysqli_prepare($con, $query);
+    if(!empty($group_ids)){
+        $types = "ss" . str_repeat('s', count($group_ids));
+        $params = array_merge([$id, $id], $group_ids);
+        mysqli_stmt_bind_param($stmt_conversations, $types, ...$params);
+    }
+    else{
+        mysqli_stmt_bind_param($stmt_conversations, 'ss', $id, $id);
+    }
+    mysqli_stmt_execute($stmt_conversations);
+    $result_conversations = mysqli_stmt_get_result($stmt_conversations);
 
-if(count($conversations) > 0){
+    $conversations = mysqli_fetch_all($result_conversations, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt_conversations);
+
+    if(count($conversations) == 0){
+        $data = null;
+        respondOk($data);
+        
+        return;
+    }
+
     $seen_ids = [];
 
     foreach($conversations as $conversation){
@@ -60,9 +72,8 @@ if(count($conversations) > 0){
             $id_target = ($conversation['user1'] == $id) ? $conversation['user2'] : $conversation['user1'];
         }
 
-        if(isset($seen_ids[$id_target])){
-            continue;
-        }
+        if(isset($seen_ids[$id_target])) continue;
+        
         $seen_ids[$id_target] = true;
 
         if(!$isGroup){
@@ -98,9 +109,10 @@ if(count($conversations) > 0){
         ];
     }
 
+    respondOk($data);
 }
-else{
-    $data = null;
-}
+catch(Throwable $e){
+    writeLog("API Error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
 
-ok(true, $data);
+    respondError("Internal Server Error.", 500);
+}

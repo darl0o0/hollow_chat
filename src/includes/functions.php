@@ -47,17 +47,6 @@ function verifyCsrfToken($submittedToken){
 
 // Check headers and CSRF token
 function checkHeadersCSRF(){
-    // header('Content-Type: application/json; charset=utf-8');
-
-    // $headers = getallheaders();
-    // $requestHeader = $headers['X-Requested-With'] ?? $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
-
-    // if ($requestHeader !== 'XMLHttpRequest'){
-    //     ok(false, 'Direct access forbidden', false);
-    //     http_response_code(403);
-    //     exit(json_encode(['status' => 'error', 'message' => 'Direct access forbidden']));
-    // }
-    
     $clientToken = $headers['X-CSRF-TOKEN'] 
             ?? $headers['x-csrf-token'] 
             ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
@@ -87,6 +76,24 @@ function guard($method){
 }
 
 // Returns an HTTP response
+function respondJson($data, $code = 200){
+    http_response_code($code);
+    echo json_encode($data);
+    die();
+}
+function respondOk($response = null){
+    respondJson([
+        'ok' => true,
+        'response' => $response
+    ]);
+}
+function respondError($msg, $code){
+    respondJson([
+        'ok' => false,
+        'code' => $code,
+        'response' => $msg
+    ]);
+}
 function ok($isOk, $response = null, $isHandled = true){
     if($isOk){
         echo json_encode([
@@ -192,12 +199,23 @@ function processAndSaveProfilePic($file){
         break;
     }
 
-    imagedestroy($source_image);
-    imagedestroy($square_img);
-
     if(!$success){
         ok(false, 'Failed process profile picture.');
     }
 
     return $unique_file_name;
+}
+
+// Write to log files
+function writeLog($msg, $lvl = 'ERROR'){
+    $logFile = $_SERVER['DOCUMENT_ROOT'] . '/src/logs/errors.log';
+    $logDir = dirname($logFile);
+    if(!is_dir($logDir)){
+        mkdir($logDir, 0755, true);
+    }
+
+    $timestamp = date('Y-m-d H:i:s');
+    $log = "[{$timestamp}] [PHP] [{$lvl}] {$msg}" . PHP_EOL;
+
+    error_log($log, 3, $logFile);
 }

@@ -18,10 +18,10 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
         <span>Home</span>
     </a>
 
-    <a href="/inbox/" class="panel-action inbox-action">
+    <a href="/inbox/" class="panel-action inbox-action has-invisible-border-child">
         <div class="wrap-icon-count">        
             <i class="fa-solid fa-inbox"></i>
-            <div class="count display-none"></div>
+            <div class="count invisible-border display-none"></div>
         </div>
         <span>Inbox</span>
     </a>
@@ -30,10 +30,10 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
         <img>
     </a>
 
-    <button class="panel-action notifications-action modal-show" link-modal="modal-requests">
+    <button class="panel-action notifications-action modal-show has-invisible-border-child" link-modal="modal-requests">
         <div class="wrap-icon-count">        
             <i class="fa-solid fa-bell"></i>
-            <div class="count display-none"></div>
+            <div class="count invisible-border display-none"></div>
         </div>
         <span>Notifications</span>
     </button>

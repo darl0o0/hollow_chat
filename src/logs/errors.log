@@ -1,0 +1,13 @@
+[2026-11-11 02:02:58] [PHP] [ERROR] API Error: Function imagedestroy() is deprecated since 8.5, as it has no effect since PHP 8.0 in C:\xampp\htdocs\src\includes\functions.php on line 202
+[2026-11-11 02:10:37] [PHP] [ERROR] API Error: Array to string conversion in C:\xampp\htdocs\src\includes\functions.php on line 218
+[2026-11-11 02:11:07] [PHP] [ERROR] 
+[2026-11-11 02:11:41] [PHP] [ERROR] [[{"id":"a4604349b3a0ce06","username":"user","email":"f@gmail.com","password":"$2y$10$sYRDGAsmp9MemL\/3\/byn8e4QWHwfckw.BueOLQ3mYWdWjNy3SJ3T2","bio":"","img":"3bd08889c9ab25a3f86539b5822dae49.jpg","online":0,"private":0,"date":"October 2026","created_at":"2026-10-25 23:47:36","theme":"default"}]]
+[2026-11-11 02:17:47] [PHP] [ERROR] 1
+[2026-11-11 02:39:10] [PHP] [ERROR] API Error: Undefined array key "qid" in C:\xampp\htdocs\src\api\relationship\index.php on line 73
+[2026-11-11 02:39:30] [PHP] [ERROR] API Error: Undefined array key "qid" in C:\xampp\htdocs\src\api\relationship\index.php on line 73
+[2026-11-11 02:42:03] [PHP] [ERROR] API Error: Undefined array key "qid" in C:\xampp\htdocs\src\api\relationship\index.php on line 73
+[2026-11-11 02:46:50] [PHP] [ERROR] API Error: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in C:\xampp\htdocs\src\api\messages\index.php on line 126
+[2026-11-11 02:47:20] [PHP] [ERROR] API Error: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in C:\xampp\htdocs\src\api\messages\index.php on line 126
+[2026-11-11 02:47:36] [PHP] [ERROR] API Error: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in C:\xampp\htdocs\src\api\messages\index.php on line 126
+[2026-11-11 02:48:05] [PHP] [ERROR] API Error: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in C:\xampp\htdocs\src\api\messages\index.php on line 126
+[2026-11-11 02:48:18] [PHP] [ERROR] API Error: Function curl_close() is deprecated since 8.5, as it has no effect since PHP 8.0 in C:\xampp\htdocs\src\api\messages\index.php on line 126

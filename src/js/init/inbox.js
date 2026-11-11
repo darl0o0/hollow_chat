@@ -437,7 +437,7 @@ document.querySelector('.group-modal .submit').addEventListener('click', async f
                 group_name: null,
                 members: selectedMembers.map(m => m.id)
             });
-            if(createGrp.status == 'ok'){
+            if(createGrp.ok){
                 window.location.replace(`/inbox/?q=${createGrp.response.groupId}`);
             }
         }

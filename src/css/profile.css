@@ -22,7 +22,7 @@
             object-fit: cover;
             border-radius: 50%;
             margin-bottom: 14px;
-            border: var(--soft-border-dark);
+            border: var(--dynamic-border);
         }
         .username-label{
             font-size: var(--primary-font-size);

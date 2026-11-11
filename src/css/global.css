@@ -42,6 +42,14 @@
     --count-badge-bg: #C82A4D;
     --count-badge-color: #ffffff;
 
+    --error-bg: #fac2c2;
+    --error-color: #dc1919;
+    --error-border: #bc8b8b;
+
+    --ok-bg: #9eda98;
+    --ok-color: #2d8719;
+    --ok-border: #749b73;
+
     --online-badge-bg: #3fa12d;
 
     --filter-invert: 100%;
@@ -90,6 +98,14 @@ body[theme='dark']{
     
     --count-badge-bg: #fdffe1;
     --count-badge-color: #0f0f0f;
+
+    --error-bg: #2a1215;
+    --error-color: #e57373;
+    --error-border: #5c2329;
+
+    --ok-bg: #182a12;
+    --ok-color: #73e584;
+    --ok-border: #255c23;
 
     --online-badge-bg: #fdffe1;
 
@@ -147,7 +163,7 @@ body{
 
 /* ERROR */
 
-.alert{
+.form-alert{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -161,20 +177,23 @@ body{
         max-width: 300px;
     }
 }
-.alert.error{
-    background: #2a1215;
-    color: #e57373;
-    border: 1px solid #5c2329;
+.form-alert.error{
+    background: var(--error-bg);
+    color: var(--error-color);
+    border: 1px solid var(--error-border);
     .cooldown-circle{
-        background: conic-gradient(#e7766c var(--angle), transparent var(--angle));
+        background: conic-gradient(var(--error-color) var(--angle), transparent var(--angle));
     }
 }
-.alert.ok{
-    background: #182a12;
+.form-alert.ok{
+    /* background: #182a12;
     color: #73e584;
-    border: 1px solid #255c23;
+    border: 1px solid #255c23; */
+    background: var(--ok-bg);
+    color: var(--ok-color);
+    border: 1px solid var(--ok-border);
     .cooldown-circle{
-        background: conic-gradient(#76e76c var(--angle), transparent var(--angle));
+        background: conic-gradient(var(--ok-color) var(--angle), transparent var(--angle));
     }
 }
 @property --angle {

@@ -91,6 +91,12 @@ document.body.setAttribute('theme', isDarkMode ? 'dark' : 'light');
 
 Form.initForm(elFormSignup, 'POST', '', true, '/');
 
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('focus', () => {
+        input.removeAttribute('readonly');
+    });
+});
+
 elFormSignup.querySelector('.next').addEventListener('click', () => gotoStep(2));
 elFormSignup.querySelector('.back').addEventListener('click', () => gotoStep(1));
 elFormSignup.querySelector('.submit').addEventListener('click', (e) => {

@@ -1,5 +1,6 @@
 import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic } from "../helpers.js";
-export const socket = io('http://localhost:3000');
+// export const socket = io('http://localhost:3000');
+export const socket = io('https://orange-content-debut-addressed.trycloudflare.com');
 export let me = null;
 const getParams = new URLSearchParams(window.location.search);
 
@@ -129,7 +130,7 @@ document.addEventListener('submit', async (e) => {
         const targetId = elActiveForm.dataset.id;
         const action = elFormAccept ? 2 : 1;
 
-        await HTTP.send('/src/api/relationship/', 'POST', {user2: targetId, action});
+        await HTTP.send('/src/api/relationship/', 'POST', {qid: targetId, action});
 
         const elCard = document.querySelector(`.modal-requests .u-${targetId}`);
         elCard.remove();

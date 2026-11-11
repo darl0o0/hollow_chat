@@ -204,6 +204,7 @@ async function renderChat(targetId){
         await loadHeader(target);
 
         await loadChat(target);
+        elInnerField = document.querySelector('.inner-field');
         readChat(target.id);
         scroll();
     }
@@ -464,7 +465,7 @@ socket.on('typing:pong', async (data) => {
                             </a>
                         </div>
                         <div class="msg you typing">
-                            <img src="/src/assets/typing0.gif">
+                            <img class='asset' src="/src/assets/typing0.gif">
                         </div>
                     </div>
                 `;
@@ -489,7 +490,7 @@ socket.on('typing:pong', async (data) => {
                                 <img src='/src/assets/pfps/${HTML.escapeHTML(typer.img)}' class='msg-pfp img-${HTML.escapeHTML(typer.id)}'>
                             </div>
                             <div class="msg you typing">
-                                <img src="/src/assets/typing0.gif">
+                                <img class='asset' src="/src/assets/typing0.gif">
                             </div>
                         </div>
                     `;

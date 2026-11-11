@@ -9,13 +9,13 @@ export const UI = {
 
         const placeholder = container.querySelector('.alert-placeholder');
         placeholder.insertAdjacentHTML('afterend', `
-            <div class="alert ${type ? 'ok' : 'error'}">
+            <div class="form-alert ${type ? 'ok' : 'error'}">
                 <div class="cooldown-circle" style='animation-duration: ${duration}s'></div>
                 <span class="alert-text">${HTML.escapeHTML(alertText)}</span>
             </div>
         `); 
 
-        const alert = container.querySelector('.alert');
+        const alert = container.querySelector('.form-alert');
 
         setTimeout(() => {
             alert.remove();
@@ -85,7 +85,7 @@ export const HTTP = {
             q: userIds
         });
 
-        if(search.status == 'ok'){
+        if(search.ok){
             return search.response;
         }
 
@@ -342,42 +342,33 @@ export const Form = {
             const data = hasFileInput ? formData : this.formToJson(formData);
             const res = await HTTP.send(action, method, data, override);
         
-            if(res.status == 'error'){
+            if(!res.ok){
                 const err = new Error(res.response);
-                err.isHandled = res.is_handled;
+                if(res.code == 400) err.isFormFailure = true;
+
                 throw err;
             }
-            else if(res.status == 'ok'){
-                UI.alert(true, res.response, 2, elFormParent);
-                this.isFormEnabled(form, false);
 
-                if(isDistinct){
-                    const elDistinctInputs = form.querySelectorAll('.distinct');
-                    elDistinctInputs.forEach(input => {
-                        input.setAttribute('data-initial', input.value.trim());
-                    });
-                }
-                
-                if(updatePasswordManager && window.PasswordCredential){
-                    const elPassword = form.querySelector('.password');
-                    const password = elPassword.value.trim();
-                    const cred = new PasswordCredential({
-                        id: email,
-                        password: password
-                    });
-                    navigator.credentials.store(cred);
-                }
-                if(redirect){
-                    setTimeout(() => {
-                        window.location.replace(redirect);
-                    }, 2000);
-                }
+            UI.alert(true, res.response, 2, elFormParent);
+            this.isFormEnabled(form, false);
+
+            if(isDistinct){
+                const elDistinctInputs = form.querySelectorAll('.distinct');
+                elDistinctInputs.forEach(input => {
+                    input.setAttribute('data-initial', input.value.trim());
+                });
+            }
+
+            if(redirect){
+                setTimeout(() => {
+                    window.location.replace(redirect);
+                }, 2000);
             }
         }
         catch(error){
             this.setErrorCooldown(form);
 
-            if(!error.isHandled){
+            if(!error.isFormFailure){
                 UI.alert(false, "An unexpected error occurred. Please try again.", undefined, elFormParent);
                 console.error(error);
             }

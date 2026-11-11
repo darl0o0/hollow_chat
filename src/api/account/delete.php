@@ -5,25 +5,31 @@ include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 
-guard('DELETE');
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
 
-$input = json_decode(file_get_contents('php://input'), true);
+set_error_handler(function($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
 
 $user_data = check_login($con);
 $id = $user_data['id'];
 
-if($_SERVER['REQUEST_METHOD'] == "POST"){
+try{
+    guard('DELETE');
+
+    $input = json_decode(file_get_contents('php://input'), true);
 
     // Credentials
     $email = $input['email'];
     $password = $input['password'];
 
     if(empty($email) || empty($password)){
-        ok(false, 'All inputs are required.');
+        respondError('All inputs are required.', 400);
     }
 
     if($email !== $user_data['email'] || !password_verify($password, $user_data['password'])){
-        ok(false, 'Invalid email or password.');
+        respondError('Invalid email or password.', 400);
     }
 
     //Delete user
@@ -54,5 +60,10 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
         );
     }
     session_destroy();
-    ok(true, 'Account Deleted.');
+    respondOk('Account Deleted.');
+}
+catch(Throwable $e){
+    writeLog("API Error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+
+    respondError("Internal Server Error.", 500);
 }

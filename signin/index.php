@@ -3,10 +3,21 @@
 include $_SERVER['DOCUMENT_ROOT'] . "/src/config/connection.php";
 include $_SERVER['DOCUMENT_ROOT'] . "/src/includes/functions.php";
 
-if(!isset($_SESSION['id'])){
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
 
-    if($_SERVER['REQUEST_METHOD'] == "POST"){
-        checkHeadersCSRF();
+set_error_handler(function($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+
+if(isset($_SESSION['id'])){
+    header("Location: /");
+    return;
+}
+
+if($_SERVER['REQUEST_METHOD'] == "POST"){
+    try{
+        guard('POST');
         $input = json_decode(file_get_contents('php://input'), true);
         
         // Credentials
@@ -14,11 +25,11 @@ if(!isset($_SESSION['id'])){
         $password = trim($input['password']);
 
         if(empty($email) || empty($password)){
-            ok(false, 'All inputs are required.', );
+            respondError('All inputs are required.', 400);
         }
 
         if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            ok(false, 'Please enter a valid email.');
+            respondError('Please enter a valid email.', 400);
         }
 
         $stmt_user = mysqli_prepare($con, "select id, password from users where email = ?");
@@ -30,7 +41,7 @@ if(!isset($_SESSION['id'])){
         mysqli_stmt_close($stmt_user);
 
         if(!$row_user || !password_verify($password, $row_user['password'])){
-            ok(false, 'Invalid email or password.');
+            respondError('Invalid email or password.', 400);
         }
 
         //Login
@@ -42,11 +53,13 @@ if(!isset($_SESSION['id'])){
         include $_SERVER['DOCUMENT_ROOT'] . "/src/config/session.php";
         $_SESSION['id'] = $row_user['id'];
         
-        ok(true, 'Redirecting...');
+        respondOk('Redirecting...');
     }
-}
-else{
-    header("Location: /");
+    catch(Throwable $e){
+        writeLog("API Error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+
+        respondError("Internal Server Error.", 500);
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -72,9 +85,9 @@ else{
         </div>
         <div class="alert-placeholder"></div>
         <form method="post" class="signin-form" novalidate autocomplete="off">
-            <input type="email" class="input email required" name="email" placeholder="Email" autocomplete="off">
+            <input type="email" class="input email required" name="email" placeholder="Email" autocomplete="email">
             <div class="wrap-password">
-                <input type="password" class="input password required" name="password" placeholder="Password">
+                <input type="password" class="input password required" name="password" placeholder="Password" autocomplete="password">
                 <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
             </div>
             <div class="wrap-btn">

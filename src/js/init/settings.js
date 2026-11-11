@@ -17,6 +17,7 @@ const elFormDelete = document.querySelector('.delete-form');
 
 const elFormReset = document.querySelector('.reset-form');
 
+const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 document.addEventListener('DOMContentLoaded', async function(){
 
@@ -32,7 +33,13 @@ document.addEventListener('DOMContentLoaded', async function(){
         elUpdateEmail.setAttribute('data-initial', me.email);
         elUpdateBio.setAttribute('data-initial', me.bio);
 
-        document.querySelector(`.group-theme .option[value="${me.theme}"]`).classList.add('active');
+        if(me.theme){
+            document.querySelector(`.group-theme .option[value="${me.theme}"]`).classList.add('active');
+        }
+        // else{
+        //     const defaultTheme = isDarkMode ? 'dark' : 'light';
+        //     document.querySelector(`.group-theme .option[value="${defaultTheme}"]`).classList.add('active');
+        // }
     }
     catch(error){
         console.error(error);
