@@ -55,13 +55,22 @@
                     <button type="button" class="btn secondary-btn change modal-show" link-modal="modal-reset"><i class="fa-solid fa-key"></i>Reset password</button>
                     <button class="btn delete modal-show" link-modal="modal-delete"><i class="fa-solid fa-trash"></i>Delete account</button>
                 </div>
+                <div class="group group-link">
+                    <span>Link:</span>
+                    <div class="wrap-btn">
+                        <button class="btn google secondary-btn" type="button">
+                            <img src="/src/assets/google.png"></img>
+                            <span>Link with Google</span>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="appearance section">
                 <div class="wrap-title">
                     <span class="title">Appearance settings</span>
                     <div class="sep"></div>
                 </div>
-                <div class="group-theme">
+                <div class="group group-theme">
                     <span>Theme:</span>
                     <form>
                         <div class="select">

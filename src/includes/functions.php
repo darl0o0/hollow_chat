@@ -53,7 +53,7 @@ function checkHeadersCSRF(){
             ?? '';
 
     if (!verifyCsrfToken($clientToken)){
-        ok(false, 'Invalid or missing CSRF token', false);
+        respondError('Invalid or missing CSRF token', 401);
     }
 }
 
@@ -62,14 +62,14 @@ function guard($method){
     header('Content-Type: application/json; charset=utf-8');
 
     if($_SERVER['REQUEST_METHOD'] !== $method){
-        ok(false, 'Method not allowed', false);
+        respondError('Method not allowed', 505);
     }
 
     $headers = getallheaders();
     $requestHeader = $headers['X-Requested-With'] ?? $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
 
     if($requestHeader !== 'XMLHttpRequest'){
-        ok(false, 'Direct access forbidden', false);
+        respondError('Direct access forbidden', 401);
     }
 
     if($_SERVER['REQUEST_METHOD'] !== 'GET') checkHeadersCSRF();
@@ -93,22 +93,6 @@ function respondError($msg, $code){
         'code' => $code,
         'response' => $msg
     ]);
-}
-function ok($isOk, $response = null, $isHandled = true){
-    if($isOk){
-        echo json_encode([
-            'status' => 'ok',
-            'response' => $response
-        ]);
-    }
-    else{
-        echo json_encode([
-            'status' => 'error',
-            'is_handled' => $isHandled,
-            'response' => $response
-        ]);
-    }
-    die();
 }
 
 // Read .env secret data
@@ -137,7 +121,7 @@ function processAndSaveProfilePic($file){
     $file_type = mime_content_type($file['tmp_name']);
 
     if(!in_array($file_type, $allowed_types)){
-        ok(false, 'Please upload a valid image.');
+        respondError('Please upload a valid image.', 400);
     }
 
     $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -160,7 +144,7 @@ function processAndSaveProfilePic($file){
             $source_image = imagecreatefromwebp($file['tmp_name']);
         break;
         default:
-            ok(false, 'Unsupported image format.');
+            respondError('Unsupported image format.', 400);
     }
 
     $img_width = imagesx($source_image);
@@ -200,7 +184,7 @@ function processAndSaveProfilePic($file){
     }
 
     if(!$success){
-        ok(false, 'Failed process profile picture.');
+        respondError('Failed process profile picture.', 500);
     }
 
     return $unique_file_name;
@@ -215,7 +199,7 @@ function writeLog($msg, $lvl = 'ERROR'){
     }
 
     $timestamp = date('Y-m-d H:i:s');
-    $log = "[{$timestamp}] [PHP] [{$lvl}] {$msg}" . PHP_EOL;
+    $log = PHP_EOL . "[{$timestamp}] [PHP] [{$lvl}] {$msg}" . PHP_EOL;
 
     error_log($log, 3, $logFile);
 }

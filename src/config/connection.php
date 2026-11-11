@@ -1,5 +1,4 @@
 <?php
-
 // Connect to database
 $dbhost = "localhost";
 $dbuser = "root";
@@ -11,5 +10,5 @@ try{
 }
 catch(mysqli_sql_exception $e){
     header('Content-Type: application/json');
-    ok(false, 'Database connection failed.', false);
+    respondError('Database connection failed.', 503);
 }

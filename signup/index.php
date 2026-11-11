@@ -60,7 +60,6 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
         mysqli_stmt_close($stmt_user);
 
         if(count($row_user) > 0){
-            writeLog(json_encode([$row_user]));
             respondError('Cannot use the provided credentials.', 400);
         }
 

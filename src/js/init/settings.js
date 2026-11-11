@@ -17,6 +17,8 @@ const elFormDelete = document.querySelector('.delete-form');
 
 const elFormReset = document.querySelector('.reset-form');
 
+const elBtnGoogle = document.querySelector('.btn.google');
+
 const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 document.addEventListener('DOMContentLoaded', async function(){
@@ -40,6 +42,11 @@ document.addEventListener('DOMContentLoaded', async function(){
         //     const defaultTheme = isDarkMode ? 'dark' : 'light';
         //     document.querySelector(`.group-theme .option[value="${defaultTheme}"]`).classList.add('active');
         // }
+
+        if(me.is_google_linked){
+            elBtnGoogle.classList.add('btn-disabled');
+            elBtnGoogle.querySelector('span').textContent = 'Linked with Google';
+        }
     }
     catch(error){
         console.error(error);

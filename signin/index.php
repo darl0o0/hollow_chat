@@ -69,6 +69,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     
     <link rel="stylesheet" href="/src/css/signin.css">
     <script type="module" src="/src/js/init/signin.js" defer></script>
+    <script type="module" src="/src/js/init/auth-google.js" defer></script>
     <title>Sign in</title>
 </head>
 <body>
@@ -92,7 +93,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
             </div>
             <div class="wrap-btn">
                 <button class="btn submit primary-btn" type="button">Sign in <i class="fa-solid fa-right-to-bracket"></i></button>
-                <button class="btn google  secondary-btn" type="button"><img src="/src/assets/google.png"></img>Sign in with Google</button>
+                <button class="btn google secondary-btn" type="button"><img src="/src/assets/google.png"></img>Sign in with Google</button>
             </div>
         </form>
     </div>

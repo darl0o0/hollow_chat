@@ -20,6 +20,7 @@ try{
         'id' => $user_data['id'],
         'username' => $user_data['username'],
         'email' => $user_data['email'],
+        'is_google_linked' => filter_var($user_data['is_google_linked'], FILTER_VALIDATE_BOOLEAN),
         'bio' => $user_data['bio'],
         'img' => $user_data['img'],
         'isPrivate' => filter_var($user_data['private'], FILTER_VALIDATE_BOOLEAN),
