@@ -1,6 +1,6 @@
 import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic } from "../helpers.js";
-// export const socket = io('http://localhost:3000');
-export const socket = io('https://orange-content-debut-addressed.trycloudflare.com');
+export const socket = io('http://localhost:3000');
+// export const socket = io('https://send-address-vocal-sensors.trycloudflare.com');
 export let me = null;
 const getParams = new URLSearchParams(window.location.search);
 
@@ -8,10 +8,16 @@ const getParams = new URLSearchParams(window.location.search);
 let id = null;
 const qid = getParams.get('q') ? (getParams.get('q').length > 0 ? getParams.get('q') : null) : null;
 
+// Elements
+const elPanel = document.querySelector('.panel');
+
 // Counters
 let countRequests = 0;
 let countUnseen = 0;
 let countNotifications = 0;
+
+// Timers
+let debounceTimer;
 
 // Pormises
 let resolveUserData;
@@ -94,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     const getFriends = await HTTP.send('/src/api/friends/', 'GET');
     const requests = getFriends.response.requests;
-    countRequests = requests.incoming?.length;
+    countRequests = requests.incoming?.length ?? 0;
     
     // Universal notifications list
     UI.globalElements();
@@ -117,6 +123,83 @@ document.addEventListener('DOMContentLoaded', async function(){
     }
     else{
         document.querySelector('.modal-requests .list').innerHTML = "<center>Nothing here.</center>";
+    }
+});
+
+elPanel.querySelector('.search').addEventListener('input', async (e) => {
+    const elWrapSearch = elPanel.querySelector('.wrap-search');
+    const elSearchDropdown = elWrapSearch.querySelector('.search-dropdown');
+    const query = e.target.value.trim();
+
+    try{
+        let searchUsers;
+        clearTimeout(debounceTimer);
+
+        debounceTimer = setTimeout(async () => {
+
+            if(query == ''){
+                if(elSearchDropdown) elSearchDropdown.remove();
+                return;
+            }
+            
+            searchUsers = (await HTTP.send('/src/api/users/', 'GET', { q: query })).response;
+            let bufferSearchUsers = '';
+    
+            if(searchUsers){
+                searchUsers.forEach(user => {
+                    bufferSearchUsers += HTML.userCard(
+                        'link',
+                        user.id,
+                        user.username,
+                        user.img,
+                        false,
+                        {text: user.bio}
+                    );
+                });
+            }
+            else{
+                bufferSearchUsers = '<center>No users found.</center>';
+            }
+    
+            if(elSearchDropdown){
+                elSearchDropdown.querySelector('.list').innerHTML = bufferSearchUsers;
+            }
+            else{
+                elWrapSearch.insertAdjacentHTML('beforeend', `
+                    <div class="search-dropdown">
+                        <div class="list">
+                            ${bufferSearchUsers}
+                        </div>
+                    </div>
+                `);
+            }
+        }, 300);
+
+    }
+    catch(error){
+        console.error(error);
+    }
+});
+
+elPanel.querySelector('.search').addEventListener('blur', () => {
+    const elWrapSearch = document.querySelector('.wrap-search');
+    const elSearchDropdown = elWrapSearch.querySelector('.search-dropdown');
+
+    setTimeout(() => {
+        if(elSearchDropdown) elSearchDropdown.classList.add('display-none');
+    }, 200);
+});
+
+elPanel.querySelector('.search').addEventListener('click', (e) => {
+    const elWrapSearch = elPanel.querySelector('.wrap-search');
+    if(elWrapSearch){
+        const elSearchDropdown = elWrapSearch.querySelector('.search-dropdown');
+        const isSearchClicked = e.target.closest('.search');
+    
+        if(elSearchDropdown){
+            if(!isSearchClicked) elSearchDropdown.classList.add('display-none');
+            else elSearchDropdown.classList.remove('display-none');
+        }
     }
 });
 

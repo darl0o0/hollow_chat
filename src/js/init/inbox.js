@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', async function(){
                     {
                         isLastMsg: true,
                         text: lastMsg,
-                        isRead: (conversation.lastMsg?.sid == id) || (conversation.lastMsg?.isRead)
+                        seen: (conversation.lastMsg?.sid == id) || (conversation.lastMsg?.seen)
                     },
                     {hasBtn: true, btnType: 'more'}
                 );
@@ -570,7 +570,7 @@ socket.on('message', async (data) => {
             {
                 isLastMsg: true,
                 text: lastMsg,
-                isRead: data.sid == id
+                seen: data.sid == id
             },
             {hasBtn: true, btnType: 'more'}
         ));

@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
     socket.on('seen:ping', async (data) => {
         const { by, to } = data;
 
-        const query = 'update messages set isRead = 1 where sid = ? and rid = ? and isRead = 0';
+        const query = 'update messages set seen = 1 where sid = ? and rid = ? and seen = 0';
         const [result] = await db.query(query, [to, by]);
         const count = result.affectedRows;
 
@@ -93,6 +93,15 @@ io.on('connection', (socket) => {
 
         // Send to current user
         io.to(by).emit('seen:pong', { by, to, count });
+    });
+
+    // React
+    socket.on('react', (data) => {
+        const { chatters, by, mid, emoji } = data;
+
+        chatters.forEach(to => {
+            io.to(to).emit('react', { mid, emoji, by });
+        });
     });
 
     // Go offline (Page Reload / Tab Close)

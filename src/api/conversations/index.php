@@ -97,8 +97,8 @@ try{
 
         $last_msg = $row_last_msg ? [
             'sid' => $row_last_msg['sid'],
-            'msg' => $row_last_msg['msg'],
-            'isRead' => filter_var($row_last_msg['isRead'], FILTER_VALIDATE_BOOL),
+            'text' => $row_last_msg['text'],
+            'seen' => filter_var($row_last_msg['seen'], FILTER_VALIDATE_BOOL),
             'time' => $row_last_msg['created_at']
         ] : null;
 

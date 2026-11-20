@@ -309,6 +309,9 @@ body{
 .btn:hover{
     transform: scale(1.02);
 }
+.btn:active{
+    transform: scale(1);
+}
 .primary-btn{
     background: var(--primary-btn-bg);
     color: var(--primary-btn-color);
@@ -331,7 +334,7 @@ body{
     opacity: 0.6;
     cursor: default;
 }
-.btn-disabled:hover{
+.btn-disabled:hover, .btn-disabled:active{
     transform: none;
 }
 
@@ -359,7 +362,10 @@ body{
 }
 
 .asset{
-    filter: invert(var(--filter-invert));
+    display: inline-block;
+    background: var(--body-color);
+    -webkit-mask: var(--asset-url) no-repeat center / contain;
+    mask: var(--asset-url) no-repeat center / contain;
 }
 /* REGISTER CONTAINERS */
 
@@ -436,13 +442,14 @@ body{
         width: 100%;
         grid-area: header;
         border-bottom: var(--dynamic-border);
-        img:first-child{
+        .asset:first-child{
             width: 100%;
             max-width: 150px;
-            height: auto;
+            height: 70px;
         }
-        img:last-child{
+        .asset:last-child{
             width: 40px;
+            height: 40px;
             display: none;
         }
     }
@@ -920,9 +927,9 @@ body{
     box-shadow: var(--box-shadow-sides);
     background: var(--logo-panel-bg);
     border-left: var(--soft-border-dark);
-    img{
+    .asset{
         width: 250px;
-        filter: saturate(0.1) invert(--filter-invert);
+        height: 250px;
     }
     h1{
         margin: 0;
@@ -1061,10 +1068,10 @@ center{
 
 @media (max-width: 800px){
     .main .logo{
-        img:first-child{
+        .asset:first-child{
             display: none;
         }
-        img:last-child{
+        .asset:last-child{
             display: inline;
         }
     }
@@ -1164,13 +1171,13 @@ center{
             padding: 10px 0;
             border-right: none;
             max-width: none;
-            img:first-child{
+            .asset:first-child{
                 display: inline;
             }
-            img:last-child{
+            .asset:last-child{
                 display: none;
             }
-            img{
+            .asset{
                 width: 100%;
                 max-width: 240px;
             }

@@ -16,9 +16,12 @@ let otherUsers = [];
 let otherUserIds = [];
 let groupPresence = [];
 
+let chatters;
+
 // Booleans
 let isGroup = false;
 let isTyping = false;
+let isInTab = true;
 
 // Elements
 let elField = null;
@@ -36,7 +39,7 @@ const htmlChatPageContent = `
         </div>
         <form class="send-form" method="post">
             <input type="text" class="msg-input" placeholder="Type a message..." autocomplete="off">
-            <button type="submit" class='primary-btn'><i class="fa-solid fa-paper-plane"></i></button>
+            <button type="submit" class='primary-btn submit'><i class="fa-solid fa-paper-plane"></i></button>
         </form>
     </div>
 `;
@@ -87,7 +90,6 @@ function updateHeaders(desktopHeader, mobileHeader){
     document.querySelector('.chat-preview').insertAdjacentHTML('afterbegin', desktopHeader);
     document.querySelector('.logo').insertAdjacentHTML('afterend', mobileHeader);
 }
-
 // Load chat
 async function loadChat(target){
     let bufferMessages = '';
@@ -112,17 +114,18 @@ async function loadChat(target){
                 const message = messages[i];
     
                 const nextMsg = messages[i + 1];
-                const isNextFromDifferentUser = !nextMsg || message.sid != nextMsg.sid;
+                const isNextFromDifferentUser = !nextMsg ? null : message.sid != nextMsg.sid;
     
                 const previousMsg = messages[i - 1];
                 const isPreviousFromDifferentUser = !previousMsg || message.sid != previousMsg.sid;
+
+                console.log(message)
                 
                 bufferMessages += HTML.message(
-                    message,
+                    { ...message, sender: Fetch.selectUserById(message.sid, chatters) },
                     message.sid == id,
                     {isPreviousFromDifferentUser, isNextFromDifferentUser},
-                    message.user,
-                    message.isRead
+                    { reactor_img: Fetch.selectUserById(message.react.reactor, chatters)?.img }
                 );
             }
         }
@@ -148,12 +151,16 @@ async function loadHeader(target){
 
             htmlHeader = (device) => HTML.header(device, user.username, user.img, user.isOnline, 'View profile', `/profile/?q=${user.id}`);
 
+            chatters = [me, user];
+
             resolveTargetData();
         }
         else{
             const group = target;
 
             const membersData = await HTTP.fetchUsersBatch(group.members);
+            chatters = membersData;
+
             otherUsers = membersData.filter(user => {
                 return user.id != me.id;
             });
@@ -230,15 +237,27 @@ function initSendForm(){
     });
 
     // Send message
+    let isAbleToSend = true;
     elFormSend.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const msgText = document.querySelector('.msg-input').value;
-        if(msgText.trim().length > 0){
-            await HTTP.send('/src/api/messages/', 'POST', dataMessage(msgText));
 
-            document.querySelector('.msg-input').value = null;
-            isTyping = false;
-            socket.emit('typing:ping', dataTyping(false));
+        if(isAbleToSend){
+            const msgText = document.querySelector('.msg-input').value;
+            if(msgText.trim().length > 0){
+                const res = await HTTP.send('/src/api/messages/', 'POST', dataMessage(msgText));
+    
+                if(res.ok){
+                    isAbleToSend = false;
+                    Form.isFormEnabled(elFormSend, false);
+                    setTimeout(() => {
+                        isAbleToSend = true;
+                        Form.isFormEnabled(elFormSend, true);
+                    }, 1000);
+                    document.querySelector('.msg-input').value = null;
+                    isTyping = false;
+                    socket.emit('typing:ping', dataTyping(false));
+                }
+            }
         }
     });
 
@@ -264,6 +283,22 @@ function initSendForm(){
 
         elInput.focus();
     });
+}
+
+function MsgReact(mid, emoji, by){
+    const elWrapMsg = document.querySelector(`.mid-${mid}`);
+    elWrapMsg.classList.add('has-reaction');
+
+    elWrapMsg.insertAdjacentHTML('beforeend', `
+        <div class='wrap-reaction-tag'>
+            <div class='reaction-tag'>
+                <img src='/src/assets/pfps/${Fetch.selectUserById(by, chatters).img}'>
+                <span>${emoji}</span>
+            </div>
+        </div>
+    `);
+    
+    scroll();
 }
 
 export async function inboxPageState(isActiveChat, chatId = null){
@@ -294,7 +329,7 @@ export async function inboxPageState(isActiveChat, chatId = null){
         elChatPreview.classList.add('flex-center');
         elChatPreview.insertAdjacentHTML('afterbegin', `
             <div class="init-inbox">
-                <img class="asset" src="/src/assets/logo/empty_inbox.png">
+                <span class="asset" style="--asset-url: url('/src/assets/logo/empty-inbox.svg')"></span>
                 <div class="wrap-label">
                     <span class="label">Your direct messages.</span>
                     <span class="sub-label">Choose a chat or start a new one.</span>
@@ -305,29 +340,47 @@ export async function inboxPageState(isActiveChat, chatId = null){
     }
 }
 
-if(qid){
-    inboxPageState(true, qid);
-}
-else{
-    inboxPageState(false);
-}
-
 document.addEventListener('DOMContentLoaded', async function(){
     try{
         me = await userDataReady;
         id = me.id;
+
+        if(qid){
+            inboxPageState(true, qid);
+        }
+        else{
+            inboxPageState(false);
+        }
     }
     catch(error){
         console.error(error);
     }
 });
 
-document.addEventListener('click', (e) => {
-    const elReactBtn = e.target.closest('.msg-react');
-    const isReactMenuClicked = e.target.closest('.wrap-react-menu');
+document.addEventListener('click', async (e) => {
+    const elBtnEmojiPicker = e.target.closest('.msg-action.react');
+    const isReactMenuClicked = e.target.closest('.wrap-emoji-picker');
+    const elBtnEmoji = e.target.closest('.emoji-picker button');
 
-    if(!elReactBtn && !isReactMenuClicked){
-        document.querySelectorAll('.wrap-react-menu').forEach(el => el.remove());
+    if(!elBtnEmojiPicker && !isReactMenuClicked || elBtnEmoji){
+
+        if(elBtnEmoji){
+            const elContainerMsg = elBtnEmoji.closest('.wrap-msg');
+
+            const data = {
+                mid: elContainerMsg.getAttribute('mid'),
+                emoji: elBtnEmoji.textContent,
+                by: id,
+                chatters: chatters.map(m => m.id)
+            }
+            
+            const res = await HTTP.send('/src/api/messages/react.php', 'PUT', data);
+            if(res.ok){
+                socket.emit('react', data);
+            }
+        }
+        
+        document.querySelectorAll('.wrap-emoji-picker').forEach(el => el.remove());
 
         document.querySelectorAll('.msg-actions').forEach(el => {
             el.classList.replace('visible', 'hidden');
@@ -336,34 +389,62 @@ document.addEventListener('click', (e) => {
         return;
     }
 
-    if(!elReactBtn) return;
-
-    const elMsgActions = elReactBtn.parentElement;
-    const elReactMenu = elMsgActions.querySelector('.wrap-react-menu');
-
-    if(elReactMenu){
-        elReactMenu.remove();
-        elMsgActions.classList.replace('visible', 'hidden');
-        elMsgActions.classList.add('interact-on-hover');
-    }
-    else{
-        document.querySelectorAll('.wrap-react-menu').forEach(el => el.remove());
-        document.querySelectorAll('.msg-actions').forEach(el => {
-            el.classList.replace('visible', 'hidden');
-            el.classList.add('interact-on-hover');
-        });
-
-        elMsgActions.insertAdjacentHTML('afterbegin', `
-            <div class='wrap-react-menu'>
-                <div class='react-menu'>
-                    <button class='heart'>❤️</button>
-                    <button class='laugh'>😂</button>
-                    <button class='cute'>🥺</button>
+    if(elBtnEmojiPicker){
+        const elMsgActions = elBtnEmojiPicker.parentElement;
+        const elReactMenu = elMsgActions.querySelector('.wrap-emoji-picker');
+    
+        if(elReactMenu){
+            elReactMenu.remove();
+            elMsgActions.classList.replace('visible', 'hidden');
+            elMsgActions.classList.add('interact-on-hover');
+        }
+        else{
+            document.querySelectorAll('.wrap-emoji-picker').forEach(el => el.remove());
+            document.querySelectorAll('.msg-actions').forEach(el => {
+                el.classList.replace('visible', 'hidden');
+                el.classList.add('interact-on-hover');
+            });
+    
+            elMsgActions.insertAdjacentHTML('afterbegin', `
+                <div class='wrap-emoji-picker'>
+                    <div class='emoji-picker'>
+                        <button class='heart'>❤️</button>
+                        <button class='laugh'>😂</button>
+                        <button class='cute'>🥺</button>
+                    </div>
                 </div>
-            </div>
-        `);
-        elMsgActions.classList.replace('hidden', 'visible');
-        elMsgActions.classList.remove('interact-on-hover');
+            `);
+            elMsgActions.classList.replace('hidden', 'visible');
+            elMsgActions.classList.remove('interact-on-hover');
+        }
+    }
+});
+
+document.addEventListener('dblclick', async (e) => {
+    const elMsg = e.target.closest('.msg')
+
+    if(elMsg){
+        const elContainerMsg = elMsg.closest('.wrap-msg');
+
+        const data = {
+            mid: elContainerMsg.getAttribute('mid'),
+            emoji: '❤️',
+            by: id,
+            chatters: chatters.map(m => m.id) 
+        }
+        
+        const res = await HTTP.send('/src/api/messages/react.php', 'PUT', data);
+        if(res.ok){
+            socket.emit('react', data);
+        }
+    }
+});
+
+document.addEventListener('visibilitychange', () => {
+    if(document.hidden) isInTab = false;
+    else{
+        isInTab = true;
+        readChat(qid);
     }
 });
 
@@ -413,33 +494,37 @@ socket.on('message', (msg) => {
 
     let isPreviousFromDifferentUser = true;
     if(elLastMsg){
-        const isLastMsgFromYou = elLastMsg.classList.contains('wrap-you');
+        const isLastMsgFromYou = elLastMsg.classList.contains('you');
         if(isLastMsgFromYou && msg.sid != id){
             elLastMsg.querySelector('.pfp-link').classList.replace('visible', 'hidden');
         }
-        elLastMsg.classList.remove('section-gap');
-    
-        isPreviousFromDifferentUser = (msg.sid == id) != (elLastMsg.classList.contains('wrap-me'));
+
+        isPreviousFromDifferentUser = (msg.sid == id) != (elLastMsg.classList.contains('me'));
+
         if(!isPreviousFromDifferentUser) elLastMsg.classList.remove('last-msg');
     }
     
     elInnerField.innerHTML += HTML.message(
-        msg,
+        { ...msg, seen: false, sender: Fetch.selectUserById(msg.sid, chatters) },
         msg.sid == id,
-        {isPreviousFromDifferentUser, isNextFromDifferentUser: true},
-        !isGroup ? target : Fetch.selectUserById(msg.sid, otherUsers),
-        false,
-        {isLive: true}
+        {isPreviousFromDifferentUser, isNextFromDifferentUser: true}
     );
-
-    if(msg.sid != id) readChat(qid);
+    
+    if(msg.sid != id && isInTab && !isGroup) readChat(qid);
     scroll();
+});
+
+// React
+socket.on('react', (data) => {
+    const { mid, emoji, by } = data;
+
+    MsgReact(mid, emoji, by);
 });
 
 // Seen message
 socket.on('seen:pong', (data) => {
     if(data.by === qid){
-        elInnerField.querySelectorAll('.wrap-me').forEach(el => {
+        elInnerField.querySelectorAll('.wrap-msg.me').forEach(el => {
             el.classList.add('seen');
         });
     }
@@ -458,14 +543,16 @@ socket.on('typing:pong', async (data) => {
 
             if(isTyping){
                 elField.innerHTML += `
-                    <div class='wrap-you wrap-typing'>
+                    <div class='wrap-msg you wrap-typing'>
                         <div class='wrap-pfp'>
                             <a href='/profile/?q=${HTML.escapeHTML(target.id)}' class='pfp-link'>
                                 <img src='/src/assets/pfps/${HTML.escapeHTML(target.img)}' class='msg-pfp'>
                             </a>
                         </div>
                         <div class="msg you typing">
-                            <img class='asset' src="/src/assets/typing0.gif">
+                            <span class="asset"></span>
+                            <span class="asset"></span>
+                            <span class="asset"></span>
                         </div>
                     </div>
                 `;
@@ -485,12 +572,14 @@ socket.on('typing:pong', async (data) => {
 
                 if(!wrapTyping){
                     elField.innerHTML += `
-                        <div class='wrap-you wrap-typing'>
+                        <div class='wrap-msg you wrap-typing'>
                             <div class='wrap-pfp'>
                                 <img src='/src/assets/pfps/${HTML.escapeHTML(typer.img)}' class='msg-pfp img-${HTML.escapeHTML(typer.id)}'>
                             </div>
                             <div class="msg you typing">
-                                <img class='asset' src="/src/assets/typing0.gif">
+                                <span class="asset"></span>
+                                <span class="asset"></span>
+                                <span class="asset"></span>
                             </div>
                         </div>
                     `;

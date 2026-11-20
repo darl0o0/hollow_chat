@@ -3,8 +3,8 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . "/src/includes/main.php";
 ?>
 <a class="logo" href="/">
-    <img class="asset" src="/src/assets/logo/light_logo.png">
-    <img class="asset" src="/src/assets/logo/hollow_icon_light.png">
+    <span class="asset" style="--asset-url: url('/src/assets/logo/logo-text.svg')"></span>
+    <span class="asset" style="--asset-url: url('/src/assets/logo/logo-icon.svg')"></span>
 </a>
 <div class="panel">
     <div class="wrap-search">

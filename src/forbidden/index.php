@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Forbidden Page</title>
-    <link rel="shortcut icon" href="/src/assets/logo/hollow_icon_light.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/src/assets/logo/logo-icon.svg" type="image/x-icon">
     <script src="https://kit.fontawesome.com/b4672b084e.js" crossorigin="anonymous"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..600');

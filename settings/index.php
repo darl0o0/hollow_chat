@@ -83,7 +83,7 @@
             </div>
         </div>
         <div class="right-panel">
-            <img class="asset" src="/src/assets/logo/under_maintenance.png">
+            <span class="asset" style="--asset-url: url('/src/assets/logo/under-maintenance.svg')"></span>
             <h1>Coming soon...</h1>
         </div>
     </div>
@@ -91,7 +91,7 @@
         <div class="background"></div>
         <div class="container">
             <div class="logo">
-                <img class="asset" src="/src/assets/logo/light_logo.png">
+                <span class="asset" style="--asset-url: url('/src/assets/logo/logo-text.svg')"></span>
             </div>
             <div class="br"></div>
             <h1>Reset your password:</h1>
@@ -120,7 +120,7 @@
         <div class="background"></div>
         <div class="container">
             <div class="logo">
-                <img class="asset" src="/src/assets/logo/light_logo.png">
+                <span class="asset" style="--asset-url: url('/src/assets/logo/logo-text.svg')"></span>
             </div>
             <div class="br"></div>
             <h1>Delete your account:</h1>

@@ -462,7 +462,7 @@ export const HTML = {
 
         return `
             <${isLink ? 'a' : 'div'}
-            class='user-card ${type} ${subLabel.isLastMsg ? (subLabel.isRead ? 'seen' : 'unseen') : ''} u-${this.escapeHTML(id)}'
+            class='user-card ${type} ${subLabel.isLastMsg ? (subLabel.seen ? 'seen' : 'unseen') : ''} u-${this.escapeHTML(id)}'
             ${subLabel.isLastMsg ? ` data-last-msg="${this.escapeHTML(subLabel.text)}"` : ''} 
             user-id='${this.escapeHTML(id)}'
             ${isLink ? ` href='profile/?q=${this.escapeHTML(id)}'` : ''} >
@@ -531,57 +531,61 @@ export const HTML = {
         }
     },
 
-    message: function(msg, isMe, boundMsg = {}, sender, isSeen, options = {}){
-        const addGap = boundMsg.isNextFromDifferentUser ? ' section-gap' : '';
+    message: function(msg, isMe, boundMsg = {}, options = {}){
 
-        if(isMe){
-            return `
-                <div class='wrap-msg wrap-me mid-${this.escapeHTML(msg.id)}${isSeen ? ' seen' : ''}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
-                    <div class='others-wrap'>
-                        <div class='msg-actions interact-on-hover hidden'>
-                            <button class='msg-react'>
-                                <i class="fa-regular fa-face-grin"></i>
-                            </button>
-                            <button class='msg-reply'>
-                                <i class="fa-solid fa-reply"></i>
-                            </button>
-                            <button class='msg-more'>
-                                <i class="fa-solid fa-ellipsis"></i>
-                            </button>
-                        </div>
-                        <div class='seen-dot'></div>
-                    </div>
-                    <div class='msg me'>${this.escapeHTML(msg.msg)}</div>
-                </div>
-            `;
-        }
-        else{
-            const showPfp = (boundMsg.isNextFromDifferentUser || options.isLive) ? 'visible' : 'hidden';
+        const hasReaction = Boolean(msg.react?.emoji && msg.react.reactor);
+        const reaction = hasReaction ? msg.react : null;
 
-            return `
-                <div class='wrap-msg wrap-you mid-${this.escapeHTML(msg.id)}${addGap}${boundMsg.isPreviousFromDifferentUser ? ' first-msg' : ''}${boundMsg.isNextFromDifferentUser ? ' last-msg' : ''}'>
-                    <div class='wrap-pfp'>
-                        <a href='/profile/?q=${this.escapeHTML(msg.sid)}' class='pfp-link ${showPfp}'>
-                            <img src='/src/assets/pfps/${this.escapeHTML(sender.img ?? defaultProfilePic)}' class='msg-pfp'>
-                        </a>
-                    </div>
-                    <div class='msg you'>${this.escapeHTML(msg.msg)}</div>
-                    <div class='others-wrap'>
-                        <div class='msg-actions interact-on-hover hidden'>
-                            <button class='msg-react'>
-                                <i class="fa-regular fa-face-grin"></i>
-                            </button>
-                            <button class='msg-reply'>
-                                <i class="fa-solid fa-reply"></i>
-                            </button>
-                            <button class='msg-more'>
-                                <i class="fa-solid fa-ellipsis"></i>
-                            </button>
-                        </div>
-                    </div>
+        const classMid = `mid-${this.escapeHTML(msg.id)}`;
+        const classIsMe = isMe ? 'me' : 'you';
+        const classSeen = msg.seen ? 'seen' : '';
+        const classFirstMsg = boundMsg.isPreviousFromDifferentUser ? 'first-msg' : '';
+        const classLastMsg = (boundMsg.isNextFromDifferentUser || boundMsg.isNextFromDifferentUser == null) ? 'last-msg' : '';
+        const classHasReaction = hasReaction ? 'has-reaction' : '';
+        const classOnlyEmoji = msg.only_emoji ? 'only-emoji' : '';
+
+        const classWrapMsg = ['wrap-msg', classMid, classIsMe, classSeen, classFirstMsg, classLastMsg, classHasReaction, classOnlyEmoji].filter(Boolean).join(' ');
+
+        const htmlWrapPfp = `
+            <div class='wrap-pfp hidden'>
+                <a href='/profile/?q=${this.escapeHTML(msg.sid)}' class='pfp-link'>
+                    <img src='/src/assets/pfps/${this.escapeHTML(msg.sender.img ?? defaultProfilePic)}' class='msg-pfp'>
+                </a>
+            </div>
+        `;
+
+        const htmlReactionTag = `
+            <div class='wrap-reaction-tag'>
+                <div class='reaction-tag'>
+                    <img src='/src/assets/pfps/${options.reactor_img}'>
+                    <span>${reaction?.emoji}</span>
                 </div>
-            `;
-        }
+            </div>
+        `;
+
+        return `
+        <div class='${classWrapMsg}' mid='${this.escapeHTML(msg.id)}'>
+            <div class='wrap-msg-others'>
+                <div class='others-wrap'>
+                    <div class='msg-actions interact-on-hover hidden'>
+                        <button class='msg-action react'>
+                            <i class="fa-regular fa-face-grin"></i>
+                        </button>
+                        <button class='msg-action reply'>
+                            <i class="fa-solid fa-reply"></i>
+                        </button>
+                        <button class='msg-action more'>
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </button>
+                    </div>
+                    ${isMe ? '<div class="seen-dot"></div>' : ''}
+                </div>
+                <div class='msg'>${this.escapeHTML(msg.text)}</div>
+                ${!isMe ? htmlWrapPfp : ''}
+            </div>
+            ${hasReaction ? htmlReactionTag : ''}
+        </div>
+        `;
     },
 
     post: function(user, post){

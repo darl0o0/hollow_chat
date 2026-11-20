@@ -48,85 +48,9 @@ document.addEventListener('DOMContentLoaded', async function(){
     catch(error){
         console.error(error);
     }
-
-    try{
-        const getUsers = await HTTP.send('/src/api/users/', 'GET');
-        users = getUsers.response;
-    }
-    catch(error){
-        console.error(error);
-    }
-});
-
-elPanel.querySelector('.search').addEventListener('input', async (e) => {
-    const elWrapSearch = elPanel.querySelector('.wrap-search');
-    const elSearchDropdown = elWrapSearch.querySelector('.search-dropdown');
-    const query = e.target.value.trim();
-
-    if(query == ''){
-        if(elSearchDropdown) elSearchDropdown.remove();
-        return;
-    }
-
-    try{
-        const searchUsers = await Fetch.searchObjectFromList(query, users, 'username');
-        let bufferSearchUsers = '';
-
-        if(searchUsers){
-            searchUsers.forEach(user => {
-                bufferSearchUsers += HTML.userCard(
-                    'link',
-                    user.id,
-                    user.username,
-                    user.img,
-                    false,
-                    {text: user.bio}
-                );
-            });
-        }
-        else{
-            bufferSearchUsers = '<center>No users found.</center>';
-        }
-
-        if(elSearchDropdown){
-            elSearchDropdown.querySelector('.list').innerHTML = bufferSearchUsers;
-        }
-        else{
-            elWrapSearch.insertAdjacentHTML('beforeend', `
-                <div class="search-dropdown">
-                    <div class="list">
-                        ${bufferSearchUsers}
-                    </div>
-                </div>
-            `);
-        }
-    }
-    catch(error){
-        console.error(error);
-    }
-});
-
-elPanel.querySelector('.search').addEventListener('blur', () => {
-    const elWrapSearch = document.querySelector('.wrap-search');
-    const elSearchDropdown = elWrapSearch.querySelector('.search-dropdown');
-
-    setTimeout(() => {
-        if(elSearchDropdown) elSearchDropdown.classList.add('display-none');
-    }, 200);
 });
 
 document.addEventListener('click', (e) => {
-    const elWrapSearch = elPanel.querySelector('.wrap-search');
-    if(elWrapSearch){
-        const elSearchDropdown = elWrapSearch.querySelector('.search-dropdown');
-        const isSearchClicked = e.target.closest('.search');
-    
-        if(elSearchDropdown){
-            if(!isSearchClicked) elSearchDropdown.classList.add('display-none');
-            else elSearchDropdown.classList.remove('display-none');
-        }
-    }
-
     const elBtnLike = e.target.closest('.action.like');
     if(elBtnLike){
         elBtnLike.classList.toggle('liked');

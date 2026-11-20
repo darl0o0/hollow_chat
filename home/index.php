@@ -17,7 +17,7 @@
             <div class="home-list"></div>
         </div>
         <div class="right-panel">
-            <img class="asset" src="/src/assets/logo/under_maintenance.png">
+            <span class="asset" style="--asset-url: url('/src/assets/logo/under-maintenance.svg')"></span>
             <h1>Coming soon...</h1>
         </div>
     </div>

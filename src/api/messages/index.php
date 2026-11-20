@@ -55,12 +55,13 @@ try{
                 $data[] = [
                     'id' => $message['id'],
                     'sid' => $message['sid'],
-                    'msg' => $message['msg'],
-                    'isRead' => $message['isRead'],
-                    'user' => [
-                        'username' => $message['username'],
-                        'img' => $message['img']
-                    ]
+                    'text' => $message['text'],
+                    'seen' => filter_var((int)$message['seen'], FILTER_VALIDATE_BOOLEAN),
+                    'react' => [
+                        'emoji' => $message['react'],
+                        'reactor' => $message['reactor']
+                    ],
+                    'only_emoji' => $message['only_emoji']
                 ];
             }
         }
@@ -70,8 +71,10 @@ try{
         else{
             $data[] = [
                 'sid' => $message['sid'],
-                'msg' => $message['msg'],
-                'isRead' => $message['isRead']
+                'text' => $message['text'],
+                'seen' => $message['seen'],
+                'react' => $message['react'],
+                'reactor' => $message['reactor']
             ];
         }
 
@@ -97,7 +100,7 @@ try{
         $timestamp = time();
         $time_id = dechex($timestamp);
 
-        $mid = $common_id.$time_id;
+        $mid = $common_id.$time_id.bin2hex(random_bytes(1));
 
         $socketData = json_encode([
             'id' => $mid,
@@ -142,7 +145,7 @@ try{
         }
 
         // Insert message
-        $stmt_insert_msg = mysqli_prepare($con, "insert into messages (id, sid, rid, msg, isRead, created_at) values (?, ?, ?, ?, 0, ?)");
+        $stmt_insert_msg = mysqli_prepare($con, "insert into messages (id, sid, rid, msg, seen, created_at) values (?, ?, ?, ?, 0, ?)");
         mysqli_stmt_bind_param($stmt_insert_msg, "ssssi", $mid, $sid, $rid, $msg, $timestamp);
         mysqli_stmt_execute($stmt_insert_msg);
         mysqli_stmt_close($stmt_insert_msg);

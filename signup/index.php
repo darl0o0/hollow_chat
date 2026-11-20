@@ -100,7 +100,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     <div class="register-container signup-container">
         <div class="register-header">
             <div class="register-logo">
-                <img class="asset" src="/src/assets/logo/light_logo.png">
+                <span class="asset" style="--asset-url: url('/src/assets/logo/logo-text.svg')"></span>
             </div>
             <div class="brv"></div>
             <div class="wrap-title-link">
