@@ -28,7 +28,6 @@ let relevantUsers = [];
 let groupPresence = new Map();
 
 // Boolean
-let isMobile = window.innerWidth <= 550;
 let canCreateGroup = false;
 
 // Elements
@@ -36,35 +35,14 @@ const elDmContainer = document.querySelector('.dms-container');
 const elChatPreview = document.querySelector('.chat-preview');
 
 const elListInbox = elDmContainer.querySelector('.list');
-const elListSuggestions = document.querySelector('.group-modal .list');
-const elSelectedMembers = document.querySelector('.group-modal .selected-members');
+let elListSuggestions = null;
+let elSelectedMembers = null;
 
 // Promises
 let resolveInboxList;
 const inboxListReady = new Promise((resolve) => {
     resolveInboxList = resolve;
 });
-
-function isViewportMobile(argQid){
-    if(isMobile){
-        if(argQid){
-            document.querySelector('.main.inbox').classList.add('grid-template-profile');
-            elDmContainer.classList.add('display-none');
-            elChatPreview.classList.remove('display-none');
-        }
-        else{
-            document.querySelector('.main.inbox').classList.remove('grid-template-profile');
-            elChatPreview.classList.add('display-none');
-            elDmContainer.classList.remove('display-none');
-        }
-    }
-    else{
-        elDmContainer.classList.remove('display-none');
-        elChatPreview.classList.remove('display-none');
-    }
-}
-
-isViewportMobile(qid);
 
 elListInbox.skeleton('card');
 
@@ -176,10 +154,10 @@ document.addEventListener('DOMContentLoaded', async function(){
                 let lastMsg;
                 if(conversation.lastMsg){
                     lastMsg = conversation.lastMsg.sid == id ?
-                    `You: ${conversation.lastMsg.msg}` :
+                    `You: ${conversation.lastMsg.text}` :
                     (!conversation.isGroup ?
-                    conversation.lastMsg.msg :
-                    `${Fetch.selectUserById(conversation.lastMsg.sid, relevantUsers).username}: ${conversation.lastMsg.msg}`);
+                    conversation.lastMsg.text :
+                    `${Fetch.selectUserById(conversation.lastMsg.sid, relevantUsers).username}: ${conversation.lastMsg.text}`);
                 }
                 else{
                     lastMsg = 'Start chatting now...';
@@ -224,7 +202,6 @@ document.addEventListener('DOMContentLoaded', async function(){
         }
     
         elListInbox.innerHTML = bufferInbox;
-        elListSuggestions.innerHTML = bufferSuggestions;
 
         resolveInboxList();
     }
@@ -235,20 +212,10 @@ document.addEventListener('DOMContentLoaded', async function(){
     if(qid) document.querySelector(`.chat-card.u-${qid}`)?.classList.add('highlight');
 });
 
-window.addEventListener('resize', () => {
-    isMobile = window.innerWidth <= 550;
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        isViewportMobile(qid);
-    }, 50);
-});
-
 window.addEventListener('popstate', async (e) => {
     if(e.state){
         const userId = e.state.q;
         inboxPageState(true, userId);
-        isViewportMobile(userId);
-        // updateQid();
     }
     else{
         inboxPageState(false);
@@ -271,7 +238,7 @@ document.addEventListener('click', (e) => {
                 url.searchParams.set("q", userId);
                 window.history.pushState({q: userId}, 'Inbox', url);
                 inboxPageState(true, userId);
-                isViewportMobile(userId);
+                // isViewportMobile(userId);
             }
         break;
         case Boolean(elGroupUserCard):
@@ -385,65 +352,95 @@ elDmContainer.querySelector('.search').addEventListener('input', async (e) => {
     }
 });
 
-document.querySelector('.group-modal .search').addEventListener('input', async (e) => {
-    const query = e.target.value.trim();
-    if(query == ''){
-        if(suggestions.length == 0){
-            elListSuggestions.innerHTML = '<center>No conversations remaining.</center>';
-            return;
-        }
+document.querySelector('.new-message').addEventListener('click', async () => {
+    HTML.injectModal(`
+            <h1>
+                <i class="fa-solid fa-user-group"></i>
+                <span>Create group chat with:</span>
+            </h1>
+            <div class="selected-members"></div>
+            <div class="alert-placeholder"></div>
+            <div class="wrap-search">
+                <label for="search" class="search-icon">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </label>
+                <input type="text" name="q" class="input search" placeholder="Search conversation" autocomplete="off">
+            </div>
+            <div class="wrap-title">
+                <span class="title">Suggestions</span>
+                <div class="sep"></div>
+            </div>
+            <div class="list">${bufferSuggestions}</div>
+            <button class="btn primary-btn submit btn-disabled">Create group chat (Beta)</button>
+    `, {class: 'group-modal modal-form'});
 
-        elListSuggestions.innerHTML = bufferSuggestions;
-        return;
-    }
+    if(!elListSuggestions || !elSelectedMembers){
+        elListSuggestions = document.querySelector('.group-modal .list');
+        elSelectedMembers = document.querySelector('.group-modal .selected-members');
 
-    const searchSuggestions = await Fetch.searchObjectFromList(query, suggestions, 'username');
+        document.querySelector('.group-modal .search').addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            if(query == ''){
+                if(suggestions.length == 0){
+                    elListSuggestions.innerHTML = '<center>No conversations remaining.</center>';
+                    return;
+                }
 
-    if(!searchSuggestions){
-        elListSuggestions.innerHTML = '<center>No conversations found.</center>';
-        return;
-    }
-
-    try{
-        let bufferSearchSuggestions = '';
-
-        searchSuggestions.forEach(conversation => {
-            bufferSearchSuggestions += HTML.userCard(
-                '',
-                conversation.id,
-                conversation.username,
-                conversation.img,
-                false,
-                {text: 'Add to group chat'},
-                {hasPlus: true}
-            );
-        });
-        elListSuggestions.innerHTML = bufferSearchSuggestions;
-    }
-    catch(error){
-        console.error(error);
-    }
-});
-
-document.querySelector('.group-modal .submit').addEventListener('click', async function(){
-    if(canCreateGroup){
-        if(selectedMembers.length == 0){
-            UI.alert(false, "Please select at least one member.");
-            return;
-        }
-    
-        try{
-            const createGrp = await HTTP.send('/src/api/conversations/create-grp.php', 'POST', {
-                group_name: null,
-                members: selectedMembers.map(m => m.id)
-            });
-            if(createGrp.ok){
-                window.location.replace(`/inbox/?q=${createGrp.response.groupId}`);
+                elListSuggestions.innerHTML = bufferSuggestions;
+                return;
             }
-        }
-        catch(error){
-            console.error(error);
-        }
+
+            const searchSuggestions = await Fetch.searchObjectFromList(query, suggestions, 'username');
+
+            if(!searchSuggestions){
+                elListSuggestions.innerHTML = '<center>No conversations found.</center>';
+                return;
+            }
+
+            try{
+                let bufferSearchSuggestions = '';
+
+                searchSuggestions.forEach(conversation => {
+                    bufferSearchSuggestions += HTML.userCard(
+                        '',
+                        conversation.id,
+                        conversation.username,
+                        conversation.img,
+                        false,
+                        {text: 'Add to group chat'},
+                        {hasPlus: true}
+                    );
+                });
+                elListSuggestions.innerHTML = bufferSearchSuggestions;
+            }
+            catch(error){
+                console.error(error);
+            }
+        });
+
+        document.querySelector('.group-modal .submit').addEventListener('click', async function(){
+            if(canCreateGroup){
+                if(selectedMembers.length == 0){
+                    UI.alert(false, "Please select at least one member.");
+                    return;
+                }
+            
+                try{
+                    const createGrp = await HTTP.send('/src/api/conversations/', 'POST', {
+                        group_name: null,
+                        members: selectedMembers.map(m => m.id),
+                        action: 'add_group'
+                    });
+                    
+                    if(createGrp.ok){
+                        window.location.replace(`/inbox/?q=${createGrp.response.groupId}`);
+                    }
+                }
+                catch(error){
+                    console.error(error);
+                }
+            }
+        });
     }
 });
 
@@ -500,10 +497,10 @@ socket.on('message', async (data) => {
         const elSubLabel = elConversationCard.querySelector('.sub-label');
 
         const lastMsg = data.sid == id ?
-        `You: ${data.msg}` :
+        `You: ${data.text}` :
         (!data.isGroup ?
-            data.msg :
-            `${Fetch.selectUserById(data.sid, relevantUsers).username}: ${data.msg}`
+            data.text :
+            `${Fetch.selectUserById(data.sid, relevantUsers).username}: ${data.text}`
         );
 
         elSubLabel.innerHTML = HTML.escapeHTML(lastMsg);
@@ -559,7 +556,7 @@ socket.on('message', async (data) => {
             }
         }
 
-        const lastMsg = data.sid == id ? `You: ${data.msg}` : (!data.isGroup ? data.msg : `${Fetch.selectUserById(data.sid, relevantUsers).username}: ${data.msg}`);
+        const lastMsg = data.sid == id ? `You: ${data.text}` : (!data.isGroup ? data.text : `${Fetch.selectUserById(data.sid, relevantUsers).username}: ${data.text}`);
 
         listContainer.insertAdjacentHTML('afterbegin', HTML.userCard(
             'chat-card',

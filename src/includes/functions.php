@@ -118,6 +118,9 @@ function getEnvValue($key){
 // Profile picture processing
 function processAndSaveProfilePic($file){
     $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+    if(empty($file['tmp_name'])) return null;
+    
     $file_type = mime_content_type($file['tmp_name']);
 
     if(!in_array($file_type, $allowed_types)){

@@ -13,37 +13,33 @@ const qid = getParams.get('q') ? (getParams.get('q').length > 0 ? getParams.get(
 // Elements
 const elPreview = document.querySelector('.preview');
 
+let stat;
+
 // Helper functions
-async function defineState(){
-
-    if(!qid) return;
-
-    const res = await HTTP.send('/src/api/relationship/', 'GET', {qid}); // Should be query
-    const relationship = res?.response?.relationship;
-
+function defineState(relationship){
     switch(relationship){
         case false:
             return {
-                actionInput: 0,
-                profileActionContent: '<i class="fa fa-user-plus" aria-hidden="true"></i>Add Friend'
+                friendAction: 0,
+                btnActionContent: '<i class="fa fa-user-plus" aria-hidden="true"></i>Add Friend'
             }
             
-        case 'sent':
+        case 'outgoing':
             return {
-                actionInput: 1,
-                profileActionContent: '<i class="fa fa-user-times" aria-hidden="true"></i>Cancel Request'
+                friendAction: 1,
+                btnActionContent: '<i class="fa fa-user-times" aria-hidden="true"></i>Cancel Request'
             }
             
-        case 'pending':
+        case 'incoming':
             return {
-                actionInput: 2,
-                profileActionContent: '<i class="fa fa-check" aria-hidden="true"></i> Accept Request'
+                friendAction: 2,
+                btnActionContent: '<i class="fa fa-check" aria-hidden="true"></i> Accept Request'
             }
 
         case true:
             return {
-                actionInput: 1,
-                profileActionContent: '<i class="fa fa-user-times" aria-hidden="true"></i>Remove Friend'
+                friendAction: 1,
+                btnActionContent: '<i class="fa fa-user-times" aria-hidden="true"></i>Remove Friend'
             }
     }
 }
@@ -114,18 +110,16 @@ document.addEventListener('DOMContentLoaded', async function(){
             }
             else{
                 elPreview.insertAdjacentHTML('afterbegin', wrapProfile(false));
-                const stat = await defineState();
+
+                const getFriends = await HTTP.send('/src/api/friends/', 'GET', {q: qid, action: 'query'}); // Should be query
+                const relationship = getFriends.response;
+
+                stat = defineState(relationship);
 
                 profileActions = `
                     <div class="wrap-btn profile-actions">
                         <a href="/inbox/?q=${HTML.escapeHTML(qid)}" class="btn primary-btn"><i class="fa fa-comment" aria-hidden="true"></i>Message</a>
-                        <form
-                        method="post" 
-                        class="friend-action">
-                            <input type="hidden" name="qid" value="${HTML.escapeHTML(qid)}">
-                            <input type="hidden" name="action" value='${stat.actionInput}'>
-                            <button type="submit" class="btn secondary-btn profile-action-btn">${stat.profileActionContent}</button>
-                        </form>
+                        <button type="submit" class="btn secondary-btn friend-action">${stat.btnActionContent}</button>
                     </div>
                 `;
             }
@@ -145,33 +139,33 @@ document.addEventListener('DOMContentLoaded', async function(){
 });
 
 elPreview.addEventListener('submit', async (e) => {
-    const elFriendActionForm = e.target.closest('.friend-action');
-    const elLogoutForm = e.target.closest('.logout-form');
     e.preventDefault();
-
-    if(elFriendActionForm){
-        const formData = new FormData(e.target);
-        const data = Form.formToJson(formData);
-
-        await HTTP.send('/src/api/relationship/', 'POST', data);
-        const stat = await defineState();
-
-        elFriendActionForm.querySelector('[name="action"]').value = stat.actionInput;
-        elFriendActionForm.querySelector('.profile-action-btn').innerHTML = stat.profileActionContent
-    }
-
+    
+    const elLogoutForm = e.target.closest('.logout-form');
     if(elLogoutForm){
-        const logout = await HTTP.send('/src/api/account/logout.php', 'POST');
+        const logout = await HTTP.send('/src/api/me/', 'DELETE', { action: 'logout' });
         if(logout.ok){
             window.location.replace('/signin');
         }
     }
 });
 
-elPreview.addEventListener('click', (e) => {
-    const elShareProfile = e.target.closest('.share-profile');
+elPreview.addEventListener('click', async (e) => {
+    
+    const elBtnFriendAction = e.target.closest('.friend-action');
+    if(elBtnFriendAction){
+        const postFriends = await HTTP.send('/src/api/friends/', 'POST', { q: qid, action: stat.friendAction });
+
+        if(postFriends.ok){
+            const newRelationship = postFriends.response;
+            stat = defineState(newRelationship);
+            
+            elBtnFriendAction.innerHTML = stat.btnActionContent;
+        }
+    }
 
     // Copy profile link
+    const elShareProfile = e.target.closest('.share-profile');
     if(elShareProfile){
             const profileUrl = window.location.href;
 

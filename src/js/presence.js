@@ -15,16 +15,3 @@ document.addEventListener('DOMContentLoaded', async function(){
         socket.emit('register', id);
     }
 });
-[
-    [
-        [
-            [
-                [
-                    [
-                        
-                    ]
-                ]
-            ]
-        ]
-    ]
-]

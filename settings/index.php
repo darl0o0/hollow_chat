@@ -72,11 +72,10 @@
                 </div>
                 <div class="group group-theme">
                     <span>Theme:</span>
-                    <form>
+                    <form action="theme">
                         <div class="select">
                             <option value="light" class="option">Light mode</option>
                             <option value="dark" class="option">Dark mode</option>
-                            <input type="hidden" name="mode" class="seg-value">
                         </div>
                     </form>
                 </div>
@@ -85,71 +84,6 @@
         <div class="right-panel">
             <span class="asset" style="--asset-url: url('/src/assets/logo/under-maintenance.svg')"></span>
             <h1>Coming soon...</h1>
-        </div>
-    </div>
-    <div class="modal modal-reset modal-form hidden">
-        <div class="background"></div>
-        <div class="container">
-            <div class="logo">
-                <span class="asset" style="--asset-url: url('/src/assets/logo/logo-text.svg')"></span>
-            </div>
-            <div class="br"></div>
-            <h1>Reset your password:</h1>
-            <div class="alert-placeholder"></div>
-            <form method="post" autocomplete="off" class="reset-form">
-                <div class="wrap-password">
-                    <input type="password" name="old_pass" placeholder="Old password" class="input password required">
-                    <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
-                </div>
-                <div class="wrap-password">
-                    <input type="password" name="new_pass" placeholder="New password" class="input password required">
-                    <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
-                </div>
-                <div class="wrap-password">
-                    <input type="password" name="new_pass1" placeholder="Confirm new password" class="input password required">
-                    <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
-                </div>
-                <div class="wrap-btn">
-                    <button class="btn primary-btn submit" type="button">Apply</button>
-                    <button class="btn secondary-btn" type="button">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="modal modal-delete modal-form hidden">
-        <div class="background"></div>
-        <div class="container">
-            <div class="logo">
-                <span class="asset" style="--asset-url: url('/src/assets/logo/logo-text.svg')"></span>
-            </div>
-            <div class="br"></div>
-            <h1>Delete your account:</h1>
-            <div class="alert-placeholder"></div>
-            <form method="post" autocomplete="off" class="delete-form"
-            novalidate>
-                <input 
-                type="email" 
-                class="email input required" 
-                name="email" 
-                placeholder="Email" 
-                autocomplete="off">
-                <div class="wrap-password">
-                    <input 
-                    type="password" 
-                    name="password" 
-                    placeholder="Password" 
-                    class="password input required">
-                    <button type="button" class="s-h"><i class="fa fa-eye" aria-hidden="true"></i></button>
-                </div>
-                <div class="checkbox">
-                    <input type="checkbox" class="input agree required" name="agree" required>
-                    <span>I unserstand that my account will be permanently deleted</span>
-                </div>
-                <div class="wrap-btn">
-                    <button class="btn delete submit" type="button"><i class="fa-solid fa-trash"></i>Delete Account</button>
-                    <button class="btn secondary-btn modal-hide" type="button">Cancel</button>
-                </div>
-            </form>
         </div>
     </div>
 </body>

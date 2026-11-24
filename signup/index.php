@@ -62,10 +62,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
         if(count($row_user) > 0){
             respondError('Cannot use the provided credentials.', 400);
         }
-
-        if(empty($img)){
-            $img = null;
-        }
+        
         $id = bin2hex(random_bytes(8));
         $date = date('F Y');
         

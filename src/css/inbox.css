@@ -24,7 +24,7 @@ body[theme='dark']{
         background: var(--logo-panel-bg);
         border-right: var(--soft-border-dark);
         z-index: 1;
-        .grp-btn{
+        .new-message{
             background: none;
             font-size: 20px;
             font-weight: 600;
@@ -36,7 +36,7 @@ body[theme='dark']{
             transition: 0.1s;
             color: var(--body-color);
         }
-        .grp-btn:hover{
+        .new-message:hover{
             transform: scale(1.2);
         }
         .section.chat{
@@ -127,6 +127,7 @@ body[theme='dark']{
     transition: 0.1s;
     .container{
         width: 80%;
+        max-width: 440px;
         h1 i{
             margin-right: 6px;
         }
@@ -202,7 +203,7 @@ body[theme='dark']{
     }
 }
 @media (max-width: 550px){
-    *.grid-template-profile{
+    .main:has(.active-chat){
         grid-template-areas: 
         "header profile"
         "preview preview"
@@ -212,6 +213,12 @@ body[theme='dark']{
     .main .preview{
         .dms-container{
             flex-grow: 1;
+            border-right: none;
+        }
+        &:has(.active-chat){
+            .dms-container{
+                display: none;
+            }
         }
     }
     .wrap-search{

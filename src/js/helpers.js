@@ -21,33 +21,11 @@ export const UI = {
             alert.remove();
         }, (duration*1000 - 100));
     },
-
-    // Global elements
-    globalElements: function(){
-        if(document.querySelector('.modal-requests')) return;
-        let countNot = Number(document.querySelector('.notifications-action .count').textContent);
-        countNot = (!isNaN(countNot) && countNot > 0) ? `(${countNot})` : '';
-
-        const htmlNotificationsModal = `
-            <div class="modal modal-requests hidden">
-                <div class="background"></div>
-                <div class="container">
-                    <h1><i class="fa-solid fa-bell"></i>Notifications</h1>
-                    <div class="wrap-title">
-                        <span class="title">Friend requests <span class="not-count">${countNot}</span></span>
-                        <div class="sep"></div>
-                    </div>
-                    <div class="list"></div>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', htmlNotificationsModal);
-    },
     
     // Hide the on-screen modals
-    hidemodal: function(){
+    hideModals: function(){
         document.querySelectorAll('.modal').forEach(modal => {
-            modal.classList.add('hidden');
+            modal.remove();
         });
         document.querySelector('.main').classList.remove('filter-blur');
     }
@@ -240,7 +218,7 @@ export const Form = {
     },
 
     // Initialize a form
-    initForm: function(form, method, action, updatePasswordManager, redirect){
+    initForm: function(form, method, action, updatePasswordManager, redirect, options = {}){
         this.isFormEnabled(form, false);
 
         const isDistinct = form.classList.contains('distinct');
@@ -279,19 +257,19 @@ export const Form = {
                         elNextBtn.click();
                     }
                     else{
-                        this.submitForm(e, form, method, action, updatePasswordManager, redirect);
+                        this.submitForm(e, form, method, action, updatePasswordManager, redirect, options);
                     }
                 }
             });
         });
 
         elSubmitBtn.addEventListener('click', (e) => {
-            this.submitForm(e, form, method, action, updatePasswordManager, redirect);
+            this.submitForm(e, form, method, action, updatePasswordManager, redirect, options);
         });
     },
 
     // Submit a form
-    submitForm: async function(e, form, method, action, updatePasswordManager, redirect){
+    submitForm: async function(e, form, method, action, updatePasswordManager, redirect, options = {}){
         e.preventDefault();
 
         if(!this.getFormState(form)) return;
@@ -301,26 +279,35 @@ export const Form = {
         try{
             const elPrimaryInputs = form.querySelectorAll('.required');
             if(Array.from(elPrimaryInputs).some(i => i.value.trim().length == 0)){
-                throw new Error("All inputs are required.");
+                const err = new Error("All inputs are required.");
+                err.isFormFailure = true;
+                throw err;
+                
             }
 
             const elUsername = form.querySelector('.username');
             const username = elUsername?.value.trim();
             if(elUsername && username.includes(" ")){
-                throw new Error("Username cannot contain space.");
+                const err = new Error("Username cannot contain space.");
+                err.isFormFailure = true;
+                throw err;
             }
 
             const elEmail = form.querySelector('.email');
             const email = elEmail?.value.trim();
             if(elEmail && !Check.isValidEmail(email)){
-                throw new Error("Please enter a valid email.");
+                const err = new Error("Please enter a valid email.");
+                err.isFormFailure = true;
+                throw err;
             }
 
             const elPasswords = form.querySelectorAll('.password');
             if(elPasswords.length > 0){
                 const hasShortPassword = Array.from(elPasswords).some(i => i.value.trim().length < 8);
                 if(hasShortPassword){
-                    throw new Error("Please provide an 8 characters long password.");
+                    const err = new Error("Please provide an 8 characters long password.");
+                    err.isFormFailure = true;
+                    throw err;
                 }
 
                 const elMatchPasswords = form.querySelectorAll('.password.match');
@@ -329,15 +316,23 @@ export const Form = {
                     const firstValue = values[0];
                     const allMatch = values.every(val => val === firstValue);
                     if(!allMatch){
-                        throw new Error("Passwords do not match.");
+                        const err = new Error("Passwords do not match.");
+                        err.isFormFailure = true;
+                        throw err;
                     }
                 }
             }
 
             const formData = new FormData(form);
-            const hasFileInput = Boolean(form.querySelector('input[type="file"]'));
 
-            const override = (hasFileInput && method == 'POST') ? 'PUT' : false;
+            if(options?.attach_data){
+                for(const [key, value] of Object.entries(options.attach_data)){
+                    formData.set(key, value);
+                }
+            }
+
+            const hasFileInput = Boolean(form.querySelector('input[type="file"]'));
+            const override = (hasFileInput && method == 'POST') ? 'PATCH' : false;
 
             const data = hasFileInput ? formData : this.formToJson(formData);
             const res = await HTTP.send(action, method, data, override);
@@ -465,7 +460,7 @@ export const HTML = {
             class='user-card ${type} ${subLabel.isLastMsg ? (subLabel.seen ? 'seen' : 'unseen') : ''} u-${this.escapeHTML(id)}'
             ${subLabel.isLastMsg ? ` data-last-msg="${this.escapeHTML(subLabel.text)}"` : ''} 
             user-id='${this.escapeHTML(id)}'
-            ${isLink ? ` href='profile/?q=${this.escapeHTML(id)}'` : ''} >
+            ${isLink ? ` href='/profile/?q=${this.escapeHTML(id)}'` : ''} >
                 ${options.hasPlus ? `
                     <div class='select-indicator'>
                         <i class="fa-solid fa-plus"></i>
@@ -663,6 +658,21 @@ export const HTML = {
                 </div>
             </a>
         `;
+    },
+
+    injectModal: function(htmlModal, options = {}){
+        UI.hideModals();
+        const main = document.querySelector('.main');
+        main.classList.add('filter-blur');
+
+        main.insertAdjacentHTML('afterend', `
+            <div class="modal ${options.class}">
+                <div class="background"></div>
+                <div class="container">
+                    ${htmlModal}
+                </div>
+            </div>
+        `);
     }
 }
 

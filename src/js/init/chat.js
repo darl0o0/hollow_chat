@@ -78,7 +78,7 @@ function dataMessage(msg){
     return {
         sid: id,
         qid: to,
-        msg,
+        text: msg,
         isGroup,
         groupId: dataGroupId
     }
@@ -118,8 +118,6 @@ async function loadChat(target){
     
                 const previousMsg = messages[i - 1];
                 const isPreviousFromDifferentUser = !previousMsg || message.sid != previousMsg.sid;
-
-                console.log(message)
                 
                 bufferMessages += HTML.message(
                     { ...message, sender: Fetch.selectUserById(message.sid, chatters) },
@@ -302,6 +300,8 @@ function MsgReact(mid, emoji, by){
 }
 
 export async function inboxPageState(isActiveChat, chatId = null){
+    isTyping = false;
+    socket.emit('typing:ping', dataTyping(false));
     qid = Get.urlKey('q');
     document.querySelectorAll('.user-card.highlight').forEach(c => c.classList.remove('highlight'));
     elChatPreview.querySelector('.wrap-field-input')?.remove();
@@ -311,7 +311,8 @@ export async function inboxPageState(isActiveChat, chatId = null){
         elChatPreview.querySelector('.init-inbox')?.remove();
         document.querySelector(`.chat-card.u-${chatId}`)?.classList.add('highlight');
 
-        elChatPreview.classList.remove('flex-center');
+        // elChatPreview.classList.remove('flex-center');
+        elChatPreview.classList.add('active-chat');
         elChatPreview.insertAdjacentHTML('beforeend', htmlChatPageContent);
         initSendForm();
         
@@ -326,7 +327,8 @@ export async function inboxPageState(isActiveChat, chatId = null){
     else{
         document.querySelectorAll('.user-card.highlight').forEach(c => c.classList.remove('highlight'));
         elChatPreview.innerHTML = '';
-        elChatPreview.classList.add('flex-center');
+        // elChatPreview.classList.add('flex-center');
+        elChatPreview.classList.remove('active-chat');
         elChatPreview.insertAdjacentHTML('afterbegin', `
             <div class="init-inbox">
                 <span class="asset" style="--asset-url: url('/src/assets/logo/empty-inbox.svg')"></span>
@@ -374,7 +376,7 @@ document.addEventListener('click', async (e) => {
                 chatters: chatters.map(m => m.id)
             }
             
-            const res = await HTTP.send('/src/api/messages/react.php', 'PUT', data);
+            const res = await HTTP.send('/src/api/messages/', 'PATCH', { ...data, action: 'react' });
             if(res.ok){
                 socket.emit('react', data);
             }
@@ -433,7 +435,7 @@ document.addEventListener('dblclick', async (e) => {
             chatters: chatters.map(m => m.id) 
         }
         
-        const res = await HTTP.send('/src/api/messages/react.php', 'PUT', data);
+        const res = await HTTP.send('/src/api/messages/', 'PATCH', { ...data, action: 'react' });
         if(res.ok){
             socket.emit('react', data);
         }

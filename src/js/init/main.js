@@ -1,4 +1,4 @@
-import { UI, HTTP, Fetch, Form, Check, HTML, defaultProfilePic } from "../helpers.js";
+import { HTTP, HTML, defaultProfilePic } from "../helpers.js";
 export const socket = io('http://localhost:3000');
 // export const socket = io('https://send-address-vocal-sensors.trycloudflare.com');
 export let me = null;
@@ -19,6 +19,9 @@ let countNotifications = 0;
 // Timers
 let debounceTimer;
 
+// Requests
+let getFriends;
+
 // Pormises
 let resolveUserData;
 let rejectUserData;
@@ -33,14 +36,10 @@ function updateBadges(){
     document.title = countNotifications > 0 ? `(${countNotifications}) Hollow Chat` : "Hollow Chat";
 
     const inboxBadge = document.querySelector('.inbox-action .count');
-    const NotificationsBadge = document.querySelector('.notifications-action .count');
-    const elNotificationsCountLabel = document.querySelector('.modal-requests .not-count');
-    
     inboxBadge.textContent = countUnseen;
+    
+    const NotificationsBadge = document.querySelector('.notifications-action .count');
     NotificationsBadge.textContent = countRequests;
-
-    const notificationsCountLabel = (countRequests > 0) ? `(${countRequests})` : '';
-    elNotificationsCountLabel.textContent = notificationsCountLabel;
 
     document.querySelectorAll('.count').forEach(numOf => {
         const val = Number(numOf.textContent);
@@ -97,17 +96,24 @@ document.addEventListener('DOMContentLoaded', async function(){
 
     // Metadata
     countUnseen = Number(document.querySelector('meta[name="count-unread"]').content);
-
-    const getFriends = await HTTP.send('/src/api/friends/', 'GET');
-    const requests = getFriends.response.requests;
-    countRequests = requests.incoming?.length ?? 0;
     
     // Universal notifications list
-    UI.globalElements();
+    const getCountFriends = await HTTP.send('/src/api/friends/', 'GET', {action: 'count'});
+    countRequests = getCountFriends.response.count_incoming;
     updateBadges();
+});
+
+document.querySelector('.modal-show.notifications-action').addEventListener('click', async () => {
+    getFriends = await HTTP.send('/src/api/friends/', 'GET', {action: 'all'});
+    const requests = getFriends.response.requests;
+    
+    countRequests = requests.incoming?.length ?? 0;
+    updateBadges();
+    const labelCountRequests = (!isNaN(countRequests) && countRequests > 0) ? `(${countRequests})` : '';
+    
+    let bufferRequests = "";
     
     if(Array.isArray(requests.incoming)){
-        let bufferRequests = "";
         requests.incoming.forEach(u => {
             bufferRequests += HTML.userCard(
                 'link',
@@ -119,11 +125,19 @@ document.addEventListener('DOMContentLoaded', async function(){
                 {hasBtn: true, btnType: 'dilemma'}
             );
         });
-        document.querySelector('.modal-requests .list').innerHTML = bufferRequests;
     }
     else{
-        document.querySelector('.modal-requests .list').innerHTML = "<center>Nothing here.</center>";
+        bufferRequests = "<center>Nothing here.</center>";
     }
+
+    HTML.injectModal(`
+        <h1><i class="fa-solid fa-bell"></i>Notifications</h1>
+        <div class="wrap-title">
+            <span class="title">Friend requests<span class="not-count"> ${labelCountRequests}</span></span>
+            <div class="sep"></div>
+        </div>
+        <div class="list">${bufferRequests}</div>
+    `, {class: 'modal-requests'});
 });
 
 elPanel.querySelector('.search').addEventListener('input', async (e) => {
@@ -213,7 +227,7 @@ document.addEventListener('submit', async (e) => {
         const targetId = elActiveForm.dataset.id;
         const action = elFormAccept ? 2 : 1;
 
-        await HTTP.send('/src/api/relationship/', 'POST', {qid: targetId, action});
+        await HTTP.send('/src/api/friends/', 'POST', {q: targetId, action});
 
         const elCard = document.querySelector(`.modal-requests .u-${targetId}`);
         elCard.remove();

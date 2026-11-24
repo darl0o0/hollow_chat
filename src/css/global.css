@@ -386,9 +386,9 @@ body{
         width: min-content;
         height: min-content;
         width: 45%;
-        img{
+        .asset{
             width: 100%;
-            min-width: 140px;
+            height: 75px;
         }
     }
     .wrap-title-link{
@@ -441,7 +441,7 @@ body{
         padding: 10px 0;
         width: 100%;
         grid-area: header;
-        border-bottom: var(--dynamic-border);
+        border-bottom: var(--soft-border-dark);
         .asset:first-child{
             width: 100%;
             max-width: 150px;
@@ -462,6 +462,12 @@ body{
         padding: 10px 6px 2px 6px;
         grid-area: menu;
         height: 100%;
+        .search-icon{
+            left: 18px;
+        }
+        .search{
+            width: 95%;
+        }
         form{
             width: 100%;
         }
@@ -563,9 +569,7 @@ body{
     position: relative;
     .search-icon{
         position: absolute;
-        /* left: 5%; */
-        left: 0;
-        margin-left: 7%;
+        left: 15px;
         top: 50%;
         transform: translateY(-50%);
         background: none;
@@ -574,7 +578,6 @@ body{
         border: none;
     }
     .search{
-        width: 95%;
         padding: 10px 8px;
         padding-left: 40px;
         font-size: var(--primary-font-size);
@@ -946,6 +949,7 @@ body{
     height: 100%;
     top: 0;
     left: 0;
+    z-index: 10;
     .background{
         position: absolute;
         width: 100%;
@@ -955,7 +959,6 @@ body{
         background: #000;
         opacity: 0.5;
         transition: 0.1s;
-        z-index: 1;
     }
     .container::content{
         transition: 0.15s;
@@ -963,6 +966,8 @@ body{
     .container{
         padding: 20px 40px;
         border-radius: 25px;
+        width: 80%;
+        max-width: 380px;
         z-index: 1;
         transition: 0.15s;
         background: var(--body-bg);
@@ -970,8 +975,9 @@ body{
         border: var(--soft-border-dark);
         .logo{
             text-align: center;
-            img{
+            .asset{
                 width: 260px;
+                height: 100px;
                 margin-bottom: 10px;
             }
         }
@@ -1004,8 +1010,6 @@ body{
 }
 .modal.modal-requests{
     .container{
-        width: 80%;
-        max-width: 380px;
         padding: 20px 30px;
     }
     h1{
@@ -1256,7 +1260,7 @@ center{
     }
     .wrap-search{
         .search-icon{
-            margin-left: 5.2%;
+            margin-left: 0;
         }
     }
     .wrap-label{

@@ -21,7 +21,11 @@ body[theme="dark"]{
     --msg-me-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.2);
     --msg-you-box-shadow: 0 0 6px -1px rgba(0, 0, 0, 0.2);
 }
-
+.main:not(:has(.active-chat)){
+    .profile-header{
+        display: none;
+    }
+}
 .profile-header{
     display: flex;
     align-items: center;
@@ -78,6 +82,10 @@ body[theme="dark"]{
         }
     }
 }
+.chat-preview:not(.active-chat){
+    justify-content: center;
+    align-items: center;
+}
 
 /* CHAT FIELD AND MESSAGES */
 
@@ -93,7 +101,7 @@ body[theme="dark"]{
     overflow-y: auto;
     flex-direction: column;
     gap: 10px;
-    padding: 10px 8px;
+    padding: 10px 12px;
     .wrap-msg{
         display: flex;
         flex-direction: column;
@@ -290,13 +298,12 @@ body[theme="dark"]{
         display: flex;
         align-items: center;
         border-radius: 18px;
-        padding: 6px 12px;
-        gap: 3px;
+        padding: 6px 14px;
+        gap: 2px;
         span{
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            /* background: var(--body-color); */
             animation: typing-bounce 1.4s infinite ease-in-out both;
             &:nth-child(1){
                 animation-delay: -0.32s;
@@ -370,6 +377,9 @@ body[theme="dark"]{
     .mobile-header{
         display: flex;
     }
+    .chat-preview:not(.active-chat){
+        display: none;
+    }
     .field{
         .m{
             padding: 6px 12px;
@@ -381,9 +391,6 @@ body[theme="dark"]{
         }
         .r{
             border-bottom-left-radius: 3px;
-        }
-        .typing{
-            padding: 6px 8px;
         }
     }
     .send-form{
